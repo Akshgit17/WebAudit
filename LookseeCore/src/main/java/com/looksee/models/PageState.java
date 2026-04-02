@@ -2,9 +2,8 @@ package com.looksee.models;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.looksee.gcp.GoogleCloudStorage;
 import com.looksee.models.enums.BrowserType;
-import com.looksee.services.BrowserService;
+import com.looksee.utils.HtmlGeneralizer;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -22,7 +21,6 @@ import lombok.Setter;
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 import org.springframework.data.neo4j.core.schema.Relationship.Direction;
@@ -44,9 +42,6 @@ import org.springframework.data.neo4j.core.schema.Relationship.Direction;
 public class PageState extends LookseeObject {
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(PageState.class);
-
-	@Autowired
-	private GoogleCloudStorage googleCloudStorage;
 
 	private long auditRecordId;
 	private String src;
@@ -141,7 +136,7 @@ public class PageState extends LookseeObject {
 					Set<String> stylesheets,
 					Set<String> script_urls,
 					Set<String> icon_links
-	) throws IOException {
+	) {
 		assert screenshot_url != null;
 		assert src != null;
 		assert !src.isEmpty();
@@ -175,7 +170,7 @@ public class PageState extends LookseeObject {
 		setElementExtractionComplete(false);
 		setKeywords(new HashSet<>());
 		setAuditRecordId(audit_record_id);
-		setGeneralizedSrc(BrowserService.generalizeSrc(src));
+		setGeneralizedSrc(HtmlGeneralizer.generalizeSrc(src));
 		setKey(generateKey());
 	}
 
@@ -238,33 +233,29 @@ public class PageState extends LookseeObject {
 	 */
 	@Override
 	public PageState clone() {
-		try {
-			List<ElementState> elements = new ArrayList<ElementState>(getElements());
-			PageState page = new PageState(getViewportScreenshotUrl(),
-											getSrc(),
-											getScrollXOffset(),
-											getScrollYOffset(),
-											getViewportWidth(),
-											getViewportHeight(),
-											getBrowser(),
-											getFullPageScreenshotUrl(),
-											getFullPageWidth(),
-											getFullPageHeight(),
-											getUrl(),
-											getTitle(),
-											isSecured(),
-											getHttpStatus(),
-											getUrlAfterLoading(),
-											getAuditRecordId(),
-											getMetadata(),
-											getStylesheetUrls(),
-											getScriptUrls(),
-											getFaviconUrl());
-			page.setElements(elements);
-			return page;
-		} catch (IOException e) {
-			throw new RuntimeException("Failed to clone PageState", e);
-		}
+		List<ElementState> elements = new ArrayList<ElementState>(getElements());
+		PageState page = new PageState(getViewportScreenshotUrl(),
+										getSrc(),
+										getScrollXOffset(),
+										getScrollYOffset(),
+										getViewportWidth(),
+										getViewportHeight(),
+										getBrowser(),
+										getFullPageScreenshotUrl(),
+										getFullPageWidth(),
+										getFullPageHeight(),
+										getUrl(),
+										getTitle(),
+										isSecured(),
+										getHttpStatus(),
+										getUrlAfterLoading(),
+										getAuditRecordId(),
+										getMetadata(),
+										getStylesheetUrls(),
+										getScriptUrls(),
+										getFaviconUrl());
+		page.setElements(elements);
+		return page;
 	}
 
 	/**
@@ -366,22 +357,21 @@ public class PageState extends LookseeObject {
 	}
 
 	/**
-	 * Custom getter and setter for src
+	 * Gets the page source content.
 	 *
-	 * @return src
+	 * @return the page source. When using cloud storage, callers should use
+	 *         PageStateService to resolve the content from its storage URL.
 	 */
 	public String getSrc() {
-		return googleCloudStorage.getHtmlContent(src);
+		return src;
 	}
 
 	/**
-	 * Custom setter for src
+	 * Sets the page source content.
 	 *
-	 * @param src src
-	 * @throws IOException if the src is not found
+	 * @param src the page source or storage URL
 	 */
-	public void setSrc(String src) throws IOException {
-		String path_key = BrowserService.extractHost(this.getUrl()) + "/pages/" + getKey();
-		this.src = googleCloudStorage.uploadHtmlContent(src, path_key);
+	public void setSrc(String src) {
+		this.src = src;
 	}
 }

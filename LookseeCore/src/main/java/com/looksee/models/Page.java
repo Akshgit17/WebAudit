@@ -1,7 +1,7 @@
 package com.looksee.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.looksee.services.BrowserService;
+import com.looksee.utils.HtmlGeneralizer;
 import com.looksee.utils.HtmlUtils;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -83,7 +83,7 @@ public class Page extends LookseeObject {
 		setElements(elements);
 		setPageStates(new ArrayList<>());
 		setUrl(url);
-		setSrc( BrowserService.extractTemplate(HtmlUtils.cleanSrc(src)));
+		setSrc( HtmlGeneralizer.extractTemplate(HtmlUtils.cleanSrc(src)));
 		setTitle(title);
 		setPath(path);
 		setKey(generateKey());
@@ -274,7 +274,7 @@ public class Page extends LookseeObject {
 	 * @return a unique key string for this page
 	 */
 	public String generateKey() {
-		String src_template = BrowserService.extractTemplate(getSrc());
+		String src_template = HtmlGeneralizer.extractTemplate(getSrc());
 		return "pagestate::" + org.apache.commons.codec.digest.DigestUtils.sha256Hex(src_template);
 	}
 
