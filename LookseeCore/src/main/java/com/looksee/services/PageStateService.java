@@ -1,5 +1,6 @@
 package com.looksee.services;
 
+import com.looksee.gcp.GoogleCloudStorage;
 import com.looksee.models.ElementState;
 import com.looksee.models.PageState;
 import com.looksee.models.Screenshot;
@@ -10,7 +11,9 @@ import com.looksee.models.enums.ElementClassification;
 import com.looksee.models.repository.AuditRecordRepository;
 import com.looksee.models.repository.ElementStateRepository;
 import com.looksee.models.repository.PageStateRepository;
+import com.looksee.utils.HtmlGeneralizer;
 import io.github.resilience4j.retry.annotation.Retry;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -40,6 +43,9 @@ public class PageStateService {
 
 	@Autowired
 	private AuditRecordRepository audit_record_repo;
+
+	@Autowired(required = false)
+	private GoogleCloudStorage googleCloudStorage;
 
 	/**
 	 * Save a {@link PageState} object and its associated objects
@@ -603,7 +609,53 @@ public class PageStateService {
 	 */
 	public boolean isPageLandable(long pageId) {
 		assert pageId > 0;
-		
+
 		return page_state_repo.isPageLandable(pageId) != null;
+	}
+
+	/**
+	 * Resolves the page source content from cloud storage.
+	 * If GoogleCloudStorage is not configured, returns the raw src field.
+	 *
+	 * @param pageState the page state whose source to resolve
+	 * @return the HTML content
+	 *
+	 * precondition: pageState != null
+	 */
+	public String resolvePageSrc(PageState pageState) {
+		assert pageState != null;
+
+		String src = pageState.getSrc();
+		if (src == null || src.isEmpty()) {
+			return src;
+		}
+		if (googleCloudStorage != null) {
+			return googleCloudStorage.getHtmlContent(src);
+		}
+		return src;
+	}
+
+	/**
+	 * Uploads page source content to cloud storage and updates the page state's
+	 * src field with the storage URL.
+	 * If GoogleCloudStorage is not configured, sets the raw src directly.
+	 *
+	 * @param pageState the page state to update
+	 * @param src the HTML source content
+	 * @throws IOException if upload fails
+	 *
+	 * precondition: pageState != null
+	 * precondition: src != null
+	 */
+	public void uploadAndSetPageSrc(PageState pageState, String src) throws IOException {
+		assert pageState != null;
+		assert src != null;
+
+		if (googleCloudStorage != null && !src.isEmpty()) {
+			String pathKey = HtmlGeneralizer.extractHost(pageState.getUrl()) + "/pages/" + pageState.getKey();
+			pageState.setSrc(googleCloudStorage.uploadHtmlContent(src, pathKey));
+		} else {
+			pageState.setSrc(src);
+		}
 	}
 }

@@ -3,7 +3,7 @@ package com.looksee.models;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.looksee.models.enums.ElementClassification;
-import com.looksee.services.BrowserService;
+import com.looksee.utils.HtmlGeneralizer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -202,7 +202,7 @@ public class ElementState extends LookseeObject implements Comparable<ElementSta
 	 * @return the key
 	 */
 	public String generateKey() {
-		String generalized_html = BrowserService.generalizeSrc(getOuterHtml());
+		String generalized_html = HtmlGeneralizer.generalizeSrc(getOuterHtml());
 		
 		return "elementstate"+org.apache.commons.codec.digest.DigestUtils.sha256Hex(generalized_html);
 	}
