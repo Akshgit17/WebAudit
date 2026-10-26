@@ -222,7 +222,7 @@ Crawling is performed by `PageBuilder` and `WebAuditCore/webaudit-browser`:
 WebAudit models websites as an interconnected graph rather than flat relational tables:
 
 ```mermaid
-graph TD
+flowchart TD
     Account["Account<br/>(id, email, subscriptionToken)"]
     Domain["Domain<br/>(url, name)"]
     DomainAuditRecord["DomainAuditRecord<br/>(status, auditList)"]
@@ -237,19 +237,19 @@ graph TD
     Journey["Journey<br/>(status, candidateSteps)"]
     Step["Step<br/>(action, key)"]
 
-    Account -->|HAS_DOMAIN| Domain
-    Domain -->|HAS_AUDIT_RECORD| DomainAuditRecord
-    Domain -->|HAS_PAGE| Page
-    Domain -->|HAS_DOMAIN_MAP| DomainMap
-    DomainMap -->|CONTAINS_JOURNEY| Journey
-    Journey -->|CONTAINS_STEP| Step
-    DomainAuditRecord -->|HAS_PAGE_AUDIT_RECORD| PageAuditRecord
-    Page -->|HAS_STATE| PageState
-    PageState -->|HAS_ELEMENT| Element
-    Element -->|HAS_STATE| ElementState
-    PageAuditRecord -->|HAS_AUDIT| Audit
-    Audit -->|HAS_ISSUE| Issue
-    Issue -->|FOR_ELEMENT| ElementState
+    Account -->|"HAS_DOMAIN"| Domain
+    Domain -->|"HAS_AUDIT_RECORD"| DomainAuditRecord
+    Domain -->|"HAS_PAGE"| Page
+    Domain -->|"HAS_DOMAIN_MAP"| DomainMap
+    DomainMap -->|"CONTAINS_JOURNEY"| Journey
+    Journey -->|"CONTAINS_STEP"| Step
+    DomainAuditRecord -->|"HAS_PAGE_AUDIT_RECORD"| PageAuditRecord
+    Page -->|"HAS_STATE"| PageState
+    PageState -->|"HAS_ELEMENT"| Element
+    Element -->|"HAS_STATE"| ElementState
+    PageAuditRecord -->|"HAS_AUDIT"| Audit
+    Audit -->|"HAS_ISSUE"| Issue
+    Issue -->|"FOR_ELEMENT"| ElementState
 ```
 
 ---

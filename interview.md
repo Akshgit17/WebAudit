@@ -121,26 +121,32 @@ flowchart TD
         SEL["Selenium Chrome Grid Hub<br/>(Port 4444)"]
     end
 
-    UI -->|REST / OpenAPI| API
-    EXT -->|REST| API
-    API -->|Publish| T1
-    T1 -->|Subscribe| PB
-    PB -->|Remote WebDriver| SEL
-    PB -->|Write Graph| N4J
-    PB -->|Publish| T2
-    T2 -->|Subscribe| AM
-    AM -->|Dispatch| T3
-    T3 --> CA & VA & IA
-    CA & VA & IA -->|Write Findings| N4J
-    CA & VA & IA -->|Publish| T4
+    UI -->|"REST / OpenAPI"| API
+    EXT -->|"REST"| API
+    API -->|"Publish"| T1
+    T1 -->|"Subscribe"| PB
+    PB -->|"Remote WebDriver"| SEL
+    PB -->|"Write Graph"| N4J
+    PB -->|"Publish"| T2
+    T2 -->|"Subscribe"| AM
+    AM -->|"Dispatch"| T3
+    T3 --> CA
+    T3 --> VA
+    T3 --> IA
+    CA -->|"Write Findings"| N4J
+    VA -->|"Write Findings"| N4J
+    IA -->|"Write Findings"| N4J
+    CA -->|"Publish"| T4
+    VA -->|"Publish"| T4
+    IA -->|"Publish"| T4
     T2 --> JX
-    JX -->|Publish| T5
+    JX -->|"Publish"| T5
     T5 --> JE
-    JE -->|Verify Journey| T6
+    JE -->|"Verify Journey"| T6
     T6 --> N4J
     T4 --> AS
-    AS -->|Update Scores| N4J
-    API -->|Read Graph| N4J
+    AS -->|"Update Scores"| N4J
+    API -->|"Read Graph"| N4J
 ```
 
 ### Microservice Inventory
