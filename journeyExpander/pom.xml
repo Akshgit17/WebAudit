@@ -1,6 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+﻿<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   	<modelVersion>4.0.0</modelVersion>
-  	<groupId>com.looksee</groupId>
+  	<groupId>com.webaudit</groupId>
   	<artifactId>A11yJourneyExpander</artifactId>
   	<version>1.0.5</version>
 	<packaging>jar</packaging>
@@ -140,7 +140,7 @@
 
 		<!-- Alternative: Direct JAR from GitHub release (uncomment if Maven repo doesn't work) -->
 		<dependency>
-            <groupId>com.looksee</groupId>
+            <groupId>com.webaudit</groupId>
             <artifactId>A11yCore</artifactId>
             <version>${core.version}</version>
         </dependency>
@@ -184,7 +184,7 @@
 				<version>${springboot.version}</version>
 				<configuration>
 					<fork>true</fork>
-					<mainClass>com.looksee.journeyExpander.Application</mainClass>
+					<mainClass>com.webaudit.journeyExpander.Application</mainClass>
 				</configuration>
 				<executions>
 					<execution>

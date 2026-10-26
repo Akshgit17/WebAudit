@@ -1,0 +1,178 @@
+@import './theme/tokens.css';
+@import './theme/typography.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ===== BASE RESET ===== */
+html, body {
+    height: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #1f2937;
+    background-color: #f9fafb;
+}
+
+/* ===== BRAND COLORS ===== */
+.bg-primary-color {
+    background-color: #231f20;
+    color: white;
+}
+
+button.bg-primary-color:hover {
+    background-color: #3d3b3c;
+}
+
+.bg-secondary-color {
+    background-color: #FF0050;
+}
+
+.secondary-color {
+    color: #FF0050;
+}
+
+button.bg-secondary-color:hover {
+    background-color: #e6004a;
+}
+
+/* ===== SCORE INDICATORS ===== */
+.score-good {
+    color: #10b981;
+    fill: #10b981;
+}
+
+.score-warning {
+    color: #f59e0b;
+    fill: #f59e0b;
+}
+
+.score-critical {
+    color: #ef4444;
+    fill: #ef4444;
+}
+
+.delightful { color: #10b981; fill: #10b981; }
+.meh { color: #f59e0b; fill: #f59e0b; }
+.alert { color: #ef4444; fill: #ef4444; }
+.sadface { color: #ef4444; fill: #ef4444; }
+
+/* ===== BUTTONS ===== */
+.btn {
+    @apply px-4 py-2 rounded-lg text-center font-medium transition-all duration-200;
+}
+
+.btn-primary {
+    @apply bg-charcoal-950 text-white rounded-lg px-5 py-2.5 font-medium text-sm;
+    @apply hover:bg-charcoal-800 active:bg-charcoal-900;
+    @apply transition-colors duration-200;
+}
+
+.btn-accent {
+    @apply bg-brand-500 text-white rounded-lg px-5 py-2.5 font-medium text-sm;
+    @apply hover:bg-brand-600 active:bg-brand-700;
+    @apply transition-colors duration-200;
+}
+
+.btn-outline {
+    @apply border border-gray-300 bg-white text-gray-700 rounded-lg px-5 py-2.5 font-medium text-sm;
+    @apply hover:bg-gray-50 active:bg-gray-100;
+    @apply transition-colors duration-200;
+}
+
+.btn-ghost {
+    @apply text-gray-600 rounded-lg px-3 py-2 font-medium text-sm;
+    @apply hover:bg-gray-100 active:bg-gray-200;
+    @apply transition-colors duration-200;
+}
+
+/* ===== CARDS ===== */
+.card {
+    @apply bg-white rounded-xl border border-gray-200 shadow-sm;
+    @apply transition-shadow duration-200;
+}
+
+.card-hover:hover {
+    @apply shadow-md;
+}
+
+.card-interactive {
+    @apply bg-white rounded-xl border border-gray-200 shadow-sm cursor-pointer;
+    @apply hover:shadow-md hover:border-gray-300;
+    @apply transition-all duration-200;
+}
+
+/* ===== LAYOUT UTILITIES ===== */
+.section-bg {
+    background-color: #f9fafb;
+}
+
+.bg-light-gray {
+    background-color: #f9fafb;
+}
+
+.bg-light-gray-1 {
+    background-color: #f3f4f6;
+}
+
+/* ===== BADGE ===== */
+.badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-good {
+    @apply bg-emerald-50 text-emerald-700;
+}
+
+.badge-warning {
+    @apply bg-amber-50 text-amber-700;
+}
+
+.badge-critical {
+    @apply bg-red-50 text-red-700;
+}
+
+/* ===== SCROLLBAR STYLING ===== */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* ===== SKELETON LOADING ===== */
+.skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+}
+
+.shadow-elevated {
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}

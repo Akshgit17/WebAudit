@@ -1,22 +1,22 @@
-# syntax=docker/dockerfile:1.6
+﻿# syntax=docker/dockerfile:1.6
 # CrawlerAPI runs on Java 21 because it is the only service already on
 # Spring Boot 3.x. Once Wave 4 of the architecture plan migrates the rest
 # of the platform to SB 3, the base image can be unified to 17.
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 
-ARG LOOKSEE_CORE_VERSION
-RUN test -n "${LOOKSEE_CORE_VERSION}" || (echo "LOOKSEE_CORE_VERSION build-arg is required" >&2; exit 1)
+ARG WEBAUDIT_CORE_VERSION
+RUN test -n "${WEBAUDIT_CORE_VERSION}" || (echo "WEBAUDIT_CORE_VERSION build-arg is required" >&2; exit 1)
 
 WORKDIR /app
 COPY pom.xml .
 
-RUN curl -fsSL "https://github.com/deepthought42/LookseeCore/releases/download/v${LOOKSEE_CORE_VERSION}/looksee-core-${LOOKSEE_CORE_VERSION}.jar" \
-        -o "/tmp/core-${LOOKSEE_CORE_VERSION}.jar" \
+RUN curl -fsSL "https://github.com/deepthought42/WebAuditCore/releases/download/v${WEBAUDIT_CORE_VERSION}/WEBAUDIT-core-${WEBAUDIT_CORE_VERSION}.jar" \
+        -o "/tmp/core-${WEBAUDIT_CORE_VERSION}.jar" \
  && mvn -q install:install-file \
-        -Dfile="/tmp/core-${LOOKSEE_CORE_VERSION}.jar" \
-        -DgroupId=com.looksee \
+        -Dfile="/tmp/core-${WEBAUDIT_CORE_VERSION}.jar" \
+        -DgroupId=com.webaudit \
         -DartifactId=core \
-        -Dversion="${LOOKSEE_CORE_VERSION}" \
+        -Dversion="${WEBAUDIT_CORE_VERSION}" \
         -Dpackaging=jar
 
 COPY src ./src

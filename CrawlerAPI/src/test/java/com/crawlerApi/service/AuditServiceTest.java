@@ -10,13 +10,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.looksee.exceptions.AuditCreationException;
-import com.looksee.models.Account;
-import com.looksee.models.dto.AuditRecordDto;
-import com.looksee.models.enums.AuditLevel;
-import com.looksee.services.AccountService;
-import com.looksee.services.AuditRecordService;
-import com.looksee.services.DomainService;
+import com.webaudit.exceptions.AuditCreationException;
+import com.webaudit.models.Account;
+import com.webaudit.models.dto.AuditRecordDto;
+import com.webaudit.models.enums.AuditLevel;
+import com.webaudit.services.AccountService;
+import com.webaudit.services.AuditRecordService;
+import com.webaudit.services.DomainService;
 
 @ExtendWith(MockitoExtension.class)
 public class AuditServiceTest {

@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.6
+﻿# syntax=docker/dockerfile:1.6
 #
 # Shared local-development Dockerfile for all Java/Spring Boot services.
 #
@@ -9,7 +9,7 @@
 # ## Build args
 #
 # * SERVICE_DIR    - repo-relative service directory, e.g. `CrawlerAPI`,
-#                    `journeyExpander`, `look-see-front-end-broadcaster`.
+#                    `journeyExpander`, `webaudit-front-end-broadcaster`.
 #                    Required. The directory must contain a Maven pom.xml
 #                    and src/ tree.
 # * MAVEN_IMAGE    - Maven builder image. Defaults to Java 17
@@ -36,9 +36,9 @@
 #
 # ## Caching
 #
-# LookseeCore is built once into a shared BuildKit cache mount (id=looksee-m2);
+# WebAudit Core (WebAuditCore) is built once into a shared BuildKit cache mount (id=webaudit-m2);
 # subsequent service builds reuse the same `~/.m2/repository`. Net: first
-# Java service to build pays the LookseeCore cost (~5 min cold), the remaining
+# Java service to build pays the Core cost (~5 min cold), the remaining
 # 12 finish in <2 min each.
 
 ARG MAVEN_IMAGE=maven:3.9.6-eclipse-temurin-17
@@ -50,15 +50,15 @@ RUN test -n "${SERVICE_DIR}" || (echo "SERVICE_DIR build-arg is required" >&2 &&
 
 WORKDIR /workspace
 
-# Build LookseeCore (multi-module Maven reactor) into the shared m2 cache.
-COPY LookseeCore /workspace/LookseeCore
-RUN --mount=type=cache,target=/root/.m2,id=looksee-m2 \
-    cd /workspace/LookseeCore && mvn -B -q clean install -DskipTests
+# Build WebAudit Core (multi-module Maven reactor) into the shared m2 cache.
+COPY WebAuditCore /workspace/WebAuditCore
+RUN --mount=type=cache,target=/root/.m2,id=webaudit-m2 \
+    cd /workspace/WebAuditCore && mvn -B -q clean install -DskipTests
 
 # Build the service jar.
 COPY ${SERVICE_DIR}/pom.xml /workspace/service/pom.xml
 COPY ${SERVICE_DIR}/src    /workspace/service/src
-RUN --mount=type=cache,target=/root/.m2,id=looksee-m2 \
+RUN --mount=type=cache,target=/root/.m2,id=webaudit-m2 \
     cd /workspace/service && mvn -B -q clean package -DskipTests \
  && cp /workspace/service/target/*.jar /workspace/app.jar
 

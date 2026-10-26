@@ -1,24 +1,24 @@
-# Phase 4 — Per-Consumer Cutover to Remote Browsing Mode
+﻿# Phase 4 — Per-Consumer Cutover to Remote Browsing Mode
 
-> **Goal:** Every browser-using Look-see consumer runs with `looksee.browsing.mode=remote` in production. Each flip is preceded by any call-site refactor that's needed to route through `capturePage` or other mode-agnostic methods, staged via a staging-environment validation before prod, observable, and rollback-safe via a one-flag revert.
+> **Goal:** Every browser-using WebAudit consumer runs with `WebAudit.browsing.mode=remote` in production. Each flip is preceded by any call-site refactor that's needed to route through `capturePage` or other mode-agnostic methods, staged via a staging-environment validation before prod, observable, and rollback-safe via a one-flag revert.
 >
-> **Where to work:** the Look-see monorepo plus (for deployment) whatever infra repo owns the consumer manifests. Each sub-phase below describes its own feature branch.
+> **Where to work:** the WebAudit monorepo plus (for deployment) whatever infra repo owns the consumer manifests. Each sub-phase below describes its own feature branch.
 >
-> **Sibling references:** this doc mirrors [`phase-3-looksee-shim.md`](./phase-3-looksee-shim.md) and [`phase-3b-element-handle-ops.md`](./phase-3b-element-handle-ops.md) in structure. Phase 3 shipped the `RemoteBrowser` shim; phase 3b (plan doc merged, code pending) wires element-handle ops through it. Phase 4 is the actual rollout.
+> **Sibling references:** this doc mirrors [`phase-3-WebAudit-shim.md`](./phase-3-WebAudit-shim.md) and [`phase-3b-element-handle-ops.md`](./phase-3b-element-handle-ops.md) in structure. Phase 3 shipped the `RemoteBrowser` shim; phase 3b (plan doc merged, code pending) wires element-handle ops through it. Phase 4 is the actual rollout.
 
 ## Why this phase exists now
 
-Phase 3 (LookseeCore 0.6.0, merged) and phase 3b (plan merged, code pending) are invisible to production today — every running instance of `PageBuilder`, `element-enrichment`, `journeyExecutor` still opens a local Selenium driver on boot. The shim works, the tests pass, but nothing in prod drives a browser via `browser-service` yet. Phase 4 closes that loop: one consumer at a time, config flip + rollback plan + observability.
+Phase 3 (WebAuditCore 0.6.0, merged) and phase 3b (plan merged, code pending) are invisible to production today — every running instance of `PageBuilder`, `element-enrichment`, `journeyExecutor` still opens a local Selenium driver on boot. The shim works, the tests pass, but nothing in prod drives a browser via `browser-service` yet. Phase 4 closes that loop: one consumer at a time, config flip + rollback plan + observability.
 
-The monorepo survey (run during planning) found three browser-using consumers and ten that never touch `Browser` at all. The ten no-op consumers pick up every LookseeCore release automatically. The three active consumers are the target of this doc.
+The monorepo survey (run during planning) found three browser-using consumers and ten that never touch `Browser` at all. The ten no-op consumers pick up every WebAuditCore release automatically. The three active consumers are the target of this doc.
 
 ## Scope
 
 | In scope | Out of scope |
 |---|---|
-| LookseeCore 0.7.1: Micrometer instrumentation on `BrowsingClient` facade methods; structured warn logs on failure | Adding metrics beyond the facade (e.g. `RemoteBrowser`-level tracing) |
+| WebAuditCore 0.7.1: Micrometer instrumentation on `BrowsingClient` facade methods; structured warn logs on failure | Adding metrics beyond the facade (e.g. `RemoteBrowser`-level tracing) |
 | Per-consumer call-site refactors where required (PageBuilder 4a.2, journeyExecutor 4c.1) | Deep refactors beyond what the flip needs; the element-state branch in PageBuilder is specifically called out as phase-3b-dependent |
-| Deployment config plumbing: `LOOKSEE_BROWSING_*` env vars on Dockerfile + CI workflow per consumer | Spring profile (`application-prod.yml` / `application-staging.yml`) introduction — only if the plain env-var pattern runs into ergonomics issues |
+| Deployment config plumbing: `WebAudit_BROWSING_*` env vars on Dockerfile + CI workflow per consumer | Spring profile (`application-prod.yml` / `application-staging.yml`) introduction — only if the plain env-var pattern runs into ergonomics issues |
 | Per-sub-phase rollout cadence: staging 48h burn-in → prod flip → one-hour rollback SLA | Browser-service deployment itself — owned by `brandonkindred/browser-service` (see Prerequisites) |
 | Observability: dashboard + smoke-check before each flip | Feature-flag infra (`togglz`/`launchdarkly`/…); none in use today and not adopted here |
 | Rollback playbook per sub-phase | Multi-region / multi-tenant rollout (single-region assumption matches current deployment model) |
@@ -34,7 +34,7 @@ If something looks refactor-tempting beyond the per-sub-phase checklist — resi
 | Browser-service deployment | Hard external prerequisite. Phase 4 does not describe service-side work; it documents the handoff checklist only. |
 | Cutover mechanics | Env-var flip on the consumer's deployment manifest. No feature-flag library. Rollback = unset + redeploy. |
 | Observability | Dashboard + smoke-check live before every flip. 48h staging burn-in before prod. |
-| Version | Each sub-phase bumps LookseeCore patch (0.7.1 / 0.7.2 / 0.7.3) for instrumentation tweaks only. No 0.8.0 unless the facade API changes. |
+| Version | Each sub-phase bumps WebAuditCore patch (0.7.1 / 0.7.2 / 0.7.3) for instrumentation tweaks only. No 0.8.0 unless the facade API changes. |
 
 ## Consumer census
 
@@ -50,7 +50,7 @@ Source: monorepo grep sweep during planning. Compare against `phase-3b-element-h
 
 ### Bucket B — no-op consumers (10 services)
 
-`AuditManager`, `audit-service`, `CrawlerAPI`, `contentAudit`, `informationArchitectureAudit`, `visualDesignAudit`, `journeyExpander`, `journeyErrors`, `journey-map-cleanup`, `look-see-front-end-broadcaster` — none call `BrowserService.getConnection` / `capturePage` / `BrowserConnectionHelper.getConnection`. Nothing to cut over; they transparently consume LookseeCore 0.7.x. Before each phase-4 release, re-run the grep sweep and confirm none of these grew a browser call site without notice.
+`AuditManager`, `audit-service`, `CrawlerAPI`, `contentAudit`, `informationArchitectureAudit`, `visualDesignAudit`, `journeyExpander`, `journeyErrors`, `journey-map-cleanup`, `webaudit-front-end-broadcaster` — none call `BrowserService.getConnection` / `capturePage` / `BrowserConnectionHelper.getConnection`. Nothing to cut over; they transparently consume WebAuditCore 0.7.x. Before each phase-4 release, re-run the grep sweep and confirm none of these grew a browser call site without notice.
 
 ## Prerequisites
 
@@ -68,11 +68,11 @@ Source: monorepo grep sweep during planning. Compare against `phase-3b-element-h
 
 2. **Phase-3b code merged.** The shim's element-handle ops must be real, not `UnsupportedOperationException`. 4a recommendation (see §14.2) is to wait on phase-3b code rather than defer PageBuilder's element-state branch.
 
-3. **LookseeCore release published.** 0.7.0 (phase 3b) on Maven Central; 0.7.1 (facade instrumentation from Step 4a.1) published before 4a.5.
+3. **WebAuditCore release published.** 0.7.0 (phase 3b) on Maven Central; 0.7.1 (facade instrumentation from Step 4a.1) published before 4a.5.
 
 ### Consumer-side prereqs
 
-- Consumer Dockerfile accepts `LOOKSEE_BROWSING_*` env vars. Confirm by re-reading each `Dockerfile` before the sub-phase starts; most don't take env-var-driven config today.
+- Consumer Dockerfile accepts `WebAudit_BROWSING_*` env vars. Confirm by re-reading each `Dockerfile` before the sub-phase starts; most don't take env-var-driven config today.
 - Consumer's GitHub Actions workflow (or equivalent) injects env vars on deploy. Same review.
 - Sentry / Cloud Logging pipelines catch failures (existing; verify unchanged).
 
@@ -96,29 +96,29 @@ Source: monorepo grep sweep during planning. Compare against `phase-3b-element-h
 ## Step 0 — Baseline + grep sanity (run once before each sub-phase)
 
 ```bash
-cd /path/to/Look-see
+cd /path/to/WebAudit
 git checkout main && git pull --ff-only
 
-# Confirm LookseeCore is at expected version.
-grep "<looksee.version>" LookseeCore/pom.xml
+# Confirm WebAuditCore is at expected version.
+grep "<WebAudit.version>" WebAuditCore/pom.xml
 
 # Re-run the phase-3b consumer census — consumer hits only, so filter out
-# all of LookseeCore/ (same pattern phase-3b Sweep A uses).
+# all of WebAuditCore/ (same pattern phase-3b Sweep A uses).
 grep -rn "browserService\\.getConnection\\|browser_service\\.getConnection" --include="*.java" \
-  | grep -v '^LookseeCore/'
+  | grep -v '^WebAuditCore/'
 # Expected: exactly three lines — the three entries in the Bucket A table
 # above (PageBuilder:245, element-enrichment:113, journeyExecutor:214). Any
 # new consumer that grew a getConnection call since the last sub-phase is a
 # new finding — either bring it into the phase-4 scope or defer it.
 #
-# Note: a plain `grep -rn ...` without the `^LookseeCore/` filter also matches
-# one LookseeCore-internal site — BrowserUtils.java:1374 — which is part of
+# Note: a plain `grep -rn ...` without the `^WebAuditCore/` filter also matches
+# one WebAuditCore-internal site — BrowserUtils.java:1374 — which is part of
 # the phase-3b §14.9 enumeration, not a consumer. That hit must NOT appear in
 # Sweep A; if it does, the filter is off and this sweep is producing false
 # positives.
 
 # Confirm no-op bucket is still no-op (add-only regression check).
-for svc in AuditManager audit-service CrawlerAPI contentAudit informationArchitectureAudit visualDesignAudit journeyExpander journeyErrors journey-map-cleanup look-see-front-end-broadcaster; do
+for svc in AuditManager audit-service CrawlerAPI contentAudit informationArchitectureAudit visualDesignAudit journeyExpander journeyErrors journey-map-cleanup webaudit-front-end-broadcaster; do
   echo "=== $svc ==="
   grep -rn "getConnection\\|capturePage\\|new Browser(" "$svc/src/main" 2>/dev/null || echo "  (clean)"
 done
@@ -134,14 +134,14 @@ PageBuilder is first because (a) its flow is the simplest (single-page capture +
 
 ```bash
 git checkout -b phase-4a/page-builder-cutover
-cd LookseeCore && mvn -q verify   # 0.7.0 green baseline
+cd WebAuditCore && mvn -q verify   # 0.7.0 green baseline
 ```
 
-Run the Step 0 grep sweep. Expect the PageBuilder hit at `PageBuilder/src/main/java/com/looksee/pageBuilder/AuditController.java:245`.
+Run the Step 0 grep sweep. Expect the PageBuilder hit at `PageBuilder/src/main/java/com/webaudit/pageBuilder/AuditController.java:245`.
 
-### 4a.1 — LookseeCore 0.7.1: instrument the facade
+### 4a.1 — WebAuditCore 0.7.1: instrument the facade
 
-**File:** `LookseeCore/looksee-browsing-client/src/main/java/com/looksee/browsing/client/BrowsingClient.java`
+**File:** `WebAuditCore/webaudit-browsing-client/src/main/java/com/webaudit/browsing/client/BrowsingClient.java`
 
 Inject an optional `MeterRegistry`; use `io.micrometer.core.instrument.Timer` per facade method. Rough shape:
 
@@ -170,13 +170,13 @@ private <T> T recordCall(String operation, SupplierWithException<T> body) {
 
 Wrap every public facade method. The `meterRegistry == null` guard means consumers without a `MeterRegistry` bean don't break on the 0.7.1 upgrade — see §14.4.
 
-**The `consumer` tag is applied per-consumer, not by the facade.** Each consumer's Spring config adds a `MeterFilter.commonTags("consumer", "<name>")` bean — e.g. PageBuilder sets `consumer=page-builder`. This keeps the facade generic (LookseeCore doesn't need to know who's calling) and makes the metric contract tag set match §Observability prereqs and the dashboard queries in 4a.4 exactly.
+**The `consumer` tag is applied per-consumer, not by the facade.** Each consumer's Spring config adds a `MeterFilter.commonTags("consumer", "<name>")` bean — e.g. PageBuilder sets `consumer=page-builder`. This keeps the facade generic (WebAuditCore doesn't need to know who's calling) and makes the metric contract tag set match §Observability prereqs and the dashboard queries in 4a.4 exactly.
 
 **Commit:** `feat(browsing-client): instrument facade methods with Micrometer timers`
 
 ### 4a.2 — PageBuilder call-site migration
 
-**File:** `PageBuilder/src/main/java/com/looksee/pageBuilder/AuditController.java`
+**File:** `PageBuilder/src/main/java/com/webaudit/pageBuilder/AuditController.java`
 
 Before (lines ~244–263):
 
@@ -226,16 +226,16 @@ The page-capture path now uses the one-shot, which works identically in local an
 - `PageBuilder/src/main/resources/application.yml` — add explicit defaults so ops engineers can see what's tunable:
 
   ```yaml
-  looksee:
+  WebAudit:
     browsing:
-      mode: local       # overridden by LOOKSEE_BROWSING_MODE env var
+      mode: local       # overridden by WebAudit_BROWSING_MODE env var
       service-url: ""   # required when mode=remote
       connect-timeout: 5s
       read-timeout: 120s
   ```
 
 - `PageBuilder/Dockerfile` — add `ENV` stanzas or rely on runtime env injection (document which). Spring Boot reads env automatically via Relaxed Binding, so no Dockerfile change is strictly needed if the deployment platform injects env vars.
-- `PageBuilder/.github/workflows/*.yml` (whichever handles deploy) — extend deploy step to pass `LOOKSEE_BROWSING_*` env vars from GitHub Actions secrets / variables.
+- `PageBuilder/.github/workflows/*.yml` (whichever handles deploy) — extend deploy step to pass `WebAudit_BROWSING_*` env vars from GitHub Actions secrets / variables.
 
 Default value is `local`, so this commit alone does **not** flip anything. It only makes the flip possible.
 
@@ -255,7 +255,7 @@ Two infra artifacts, documented here but shipped in whatever infra repo owns obs
 
    ```java
    @Component
-   @ConditionalOnProperty(name = "looksee.browsing.smoke-check.enabled", havingValue = "true")
+   @ConditionalOnProperty(name = "WebAudit.browsing.smoke-check.enabled", havingValue = "true")
    public class CapturePageSmokeCheck {
        @Scheduled(fixedRate = 60_000)
        public void probe() { /* browserService.capturePage(https://example.com, CHROME, -1L) + counter */ }
@@ -271,8 +271,8 @@ Both must be live before 4a.5 flips staging. No code commit here — the artifac
 Config-only. Set in the staging deployment manifest:
 
 ```
-LOOKSEE_BROWSING_MODE=remote
-LOOKSEE_BROWSING_SERVICE_URL=https://browser-service-staging.internal/v1
+WebAudit_BROWSING_MODE=remote
+WebAudit_BROWSING_SERVICE_URL=https://browser-service-staging.internal/v1
 ```
 
 Redeploy. Smoke-check should flip to hitting the staging browser-service; dashboard should show `outcome=success` within five minutes.
@@ -297,7 +297,7 @@ Observe for 1 hour; if error rate <1% and p95 is within spec, declare 4a stable.
 
 Any of: error rate >5% for >2 minutes, p95 >3× baseline, any Sentry new-regression, browser-service returning 5xx.
 
-1. Unset `LOOKSEE_BROWSING_MODE` (or set to `local`) in the consumer deployment manifest.
+1. Unset `WebAudit_BROWSING_MODE` (or set to `local`) in the consumer deployment manifest.
 2. Redeploy. Rolling-deploy completes in ≤10 minutes.
 3. Confirm via smoke-check + dashboard that traffic reverted.
 4. File an incident report with the specific failure mode. Do not re-flip until root cause is understood and fixed in either browser-service or the consumer.
@@ -310,7 +310,7 @@ Any of: error rate >5% for >2 minutes, p95 >3× baseline, any Sentry new-regress
 - 4a stable in prod for 7 days (no regression in error rate or latency).
 - Smoke-check still green.
 
-Re-run Step 0 grep sanity. Expected: `element-enrichment/src/main/java/com/looksee/pageBuilder/AuditController.java:113` hit unchanged since planning.
+Re-run Step 0 grep sanity. Expected: `element-enrichment/src/main/java/com/webaudit/pageBuilder/AuditController.java:113` hit unchanged since planning.
 
 ### 4b.1 — Deployment config
 
@@ -338,7 +338,7 @@ Re-run Step 0 sweep. Expected: `journeyExecutor/.../AuditController.java:214` hi
 
 ### 4c.1 — Call-site migration
 
-One refactor: migrate `buildPage(browser, ...)` at `journeyExecutor/src/main/java/com/looksee/journeyExecutor/AuditController.java:234` to `capturePage(...)` (same pattern as 4a.2). The `getDriver().getCurrentUrl()` at line 562 is already replaced by `browser.getCurrentUrl()` as part of phase-3b Step 7.4.
+One refactor: migrate `buildPage(browser, ...)` at `journeyExecutor/src/main/java/com/webaudit/journeyExecutor/AuditController.java:234` to `capturePage(...)` (same pattern as 4a.2). The `getDriver().getCurrentUrl()` at line 562 is already replaced by `browser.getCurrentUrl()` as part of phase-3b Step 7.4.
 
 **Commit:** `refactor(journey-executor): migrate buildPage call site to capturePage`
 
@@ -348,7 +348,7 @@ Same as 4b. 48h staging burn-in → prod flip.
 
 ### 4c final gate
 
-After 4c prod-stable for 7 days, every browser-using consumer is remote. Declare phase 4 complete. Note in the next LookseeCore release CHANGELOG.
+After 4c prod-stable for 7 days, every browser-using consumer is remote. Declare phase 4 complete. Note in the next WebAuditCore release CHANGELOG.
 
 ## Step 5 — Verification + definition of done
 
@@ -361,10 +361,10 @@ Per sub-phase:
 - [ ] Cost alert armed.
 
 Overall (after 4c):
-- [ ] `PageBuilder`, `element-enrichment`, `journeyExecutor` all running `LOOKSEE_BROWSING_MODE=remote` in prod.
+- [ ] `PageBuilder`, `element-enrichment`, `journeyExecutor` all running `WebAudit_BROWSING_MODE=remote` in prod.
 - [ ] Bucket B (10 services) confirmed unchanged — grep sweep still clean.
-- [ ] LookseeCore default `looksee.browsing.mode` remains `local` so a newly-onboarded consumer still works out of the box.
-- [ ] All three consumers' `application.yml` has an explicit `looksee.browsing.mode` block (easier for future ops to find than tribal knowledge).
+- [ ] WebAuditCore default `WebAudit.browsing.mode` remains `local` so a newly-onboarded consumer still works out of the box.
+- [ ] All three consumers' `application.yml` has an explicit `WebAudit.browsing.mode` block (easier for future ops to find than tribal knowledge).
 
 ## Push and open PRs
 
@@ -389,7 +389,7 @@ The flag flips themselves (4a.5, 4a.6, 4b.2, 4c.2) are config-only and happen in
 
 3. **No feature-flag infra.** Grep shows no `togglz`/`launchdarkly`/`unleash`/`split.io`. Rollout is binary per-consumer. The 48h staging burn-in + observable prod flip is the best we have; adopt a feature-flag library only if phase 4 reveals a case for it.
 
-4. **Micrometer registry not present in every consumer.** `LookseeCore` pins Micrometer 1.10.13 but no `MeterRegistry` bean is auto-wired in consumers by default. The 4a.1 instrumentation uses `@Autowired(required = false)` + `meterRegistry != null` guard so consumers without a registry compile and run unchanged on 0.7.1. Consumers that want the dashboard must add a `MeterRegistry` bean themselves (one-liner).
+4. **Micrometer registry not present in every consumer.** `WebAuditCore` pins Micrometer 1.10.13 but no `MeterRegistry` bean is auto-wired in consumers by default. The 4a.1 instrumentation uses `@Autowired(required = false)` + `meterRegistry != null` guard so consumers without a registry compile and run unchanged on 0.7.1. Consumers that want the dashboard must add a `MeterRegistry` bean themselves (one-liner).
 
 5. **Spring profile structure missing.** Consumers use the `test` profile in CI; there's no `staging` / `prod`. Phase 4 uses env-var flipping, which works without profiles. Consider adopting `application-staging.yml` / `application-prod.yml` only if the flat env-var pattern runs into ergonomics issues. Not a blocker.
 
@@ -399,6 +399,6 @@ The flag flips themselves (4a.5, 4a.6, 4b.2, 4c.2) are config-only and happen in
 
 8. **Cost observability.** browser-service spins up real browsers; cutover multiplies instance-hours. Set a Cloud Billing budget alert per sub-phase with a realistic ceiling (staging: $50/week, prod: 2× the pre-flip local Selenium cost). Arm before each prod flip, not after.
 
-9. **Call-site migration pattern is repeatable.** 4a.2 and 4c.1 do the same basic refactor: `getConnection` + `buildPageState|buildPage` → `capturePage`. If future consumers want remote mode, they follow the same template. Document it as a short note in `LookseeCore/CHANGELOG.md` under 0.7.1 so future migrators find it.
+9. **Call-site migration pattern is repeatable.** 4a.2 and 4c.1 do the same basic refactor: `getConnection` + `buildPageState|buildPage` → `capturePage`. If future consumers want remote mode, they follow the same template. Document it as a short note in `WebAuditCore/CHANGELOG.md` under 0.7.1 so future migrators find it.
 
-10. **Post-phase-4 cleanup candidates.** Once every browser-using consumer is on remote, `LookseeCore/looksee-browser/` is only compiled for the library's default-local mode. Phase 5 (already flagged in phase-3 doc §14) can start retiring it once the last consumer is remote-stable for 30 days.
+10. **Post-phase-4 cleanup candidates.** Once every browser-using consumer is on remote, `WebAuditCore/webaudit-browser/` is only compiled for the library's default-local mode. Phase 5 (already flagged in phase-3 doc §14) can start retiring it once the last consumer is remote-stable for 30 days.

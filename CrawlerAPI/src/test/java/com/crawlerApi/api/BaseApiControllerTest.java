@@ -14,9 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import com.looksee.exceptions.UnknownAccountException;
-import com.looksee.models.Account;
-import com.looksee.services.AccountService;
+import com.webaudit.exceptions.UnknownAccountException;
+import com.webaudit.models.Account;
+import com.webaudit.services.AccountService;
 
 @ExtendWith(MockitoExtension.class)
 class BaseApiControllerTest {

@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.looksee.audits.performance.PerformanceInsight;
-import com.looksee.exceptions.UnknownAccountException;
-import com.looksee.models.Account;
-import com.looksee.models.PageState;
-import com.looksee.models.SimplePage;
-import com.looksee.services.AccountService;
-import com.looksee.services.PageStateService;
+import com.webaudit.audits.performance.PerformanceInsight;
+import com.webaudit.exceptions.UnknownAccountException;
+import com.webaudit.models.Account;
+import com.webaudit.models.PageState;
+import com.webaudit.models.SimplePage;
+import com.webaudit.services.AccountService;
+import com.webaudit.services.PageStateService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

@@ -17,10 +17,10 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.looksee.browser.Browser;
-import com.looksee.models.enums.TemplateType;
-import com.looksee.services.BrowserService;
-import com.looksee.utils.ImageUtils;
+import com.webaudit.browser.Browser;
+import com.webaudit.models.enums.TemplateType;
+import com.webaudit.services.BrowserService;
+import com.webaudit.utils.ImageUtils;
 
 //@RunWith(SpringRunner.class)
 //@SpringBootTest(classes = EntryPoint.class)

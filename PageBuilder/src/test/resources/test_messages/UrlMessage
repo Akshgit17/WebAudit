@@ -1,4 +1,4 @@
-####################################
+﻿####################################
 # Test page audit and journey paths
 ###################################
 {
@@ -6,7 +6,7 @@
 	"accountId": 0,
 	"domainAuditRecordId": 4237,
 	"pageAuditId": -1,
-	"url": "look-see.com"
+	"url": "webaudit.io"
 }
 
 ####################################
@@ -17,7 +17,7 @@
 	"accountId": 5,
 	"domainAuditRecordId": 11,
 	"pageAuditId": -1,
-	"url": "https://look-see.com"
+	"url": "https://webaudit.io"
 }
 
 

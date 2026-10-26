@@ -1,6 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+﻿<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   	<modelVersion>4.0.0</modelVersion>
-  	<groupId>com.looksee</groupId>
+  	<groupId>com.webaudit</groupId>
   	<artifactId>A11yJourneyDeadLetters</artifactId>
   	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
@@ -44,7 +44,7 @@
 	           <scope>import</scope>
 	       </dependency>
 	      <!-- Testcontainers BOM for the redelivery integration test (#87).
-	           Aligned with the version pinned in LookseeCore parent pom. -->
+	           Aligned with the version pinned in WebAuditCore parent pom. -->
 	      <dependency>
 	        <groupId>org.testcontainers</groupId>
 	        <artifactId>testcontainers-bom</artifactId>
@@ -57,12 +57,12 @@
 
 	  <dependencies>
 	    <dependency>
-	        <groupId>com.looksee</groupId>
+	        <groupId>com.webaudit</groupId>
 	        <artifactId>A11yCore</artifactId>
 	        <version>${core.version}</version>
 	    </dependency>
 	    <dependency>
-	        <groupId>com.looksee</groupId>
+	        <groupId>com.webaudit</groupId>
 	        <artifactId>A11yMessaging</artifactId>
 	        <version>1.1.0</version>
 	    </dependency>
@@ -416,7 +416,7 @@
 	               `<excludedGroups>` in plugin `<configuration>` wins over
 	               `-DexcludedGroups=`, so the opt-in command would otherwise
 	               be a no-op. Surefire pinned to 2.22.2 for JUnit 5 tag
-	               support consistent with LookseeCore parent pom. -->
+	               support consistent with WebAuditCore parent pom. -->
 	          <excludedGroups>${excludedGroups}</excludedGroups>
 	        </configuration>
 	      </plugin>
@@ -442,7 +442,7 @@
 	          <version>${springboot.version}</version>
 	          <configuration>
 	             <fork>true</fork>
-	             <mainClass>com.looksee.journeyErrors.Application</mainClass>
+	             <mainClass>com.webaudit.journeyErrors.Application</mainClass>
 	          </configuration>
 	          <executions>
 	            <execution>

@@ -1,4 +1,4 @@
-# Look-see Audit Service
+﻿# WebAudit Audit Service
 
 A Spring Boot service that processes audit progress events and publishes live audit updates for page and domain audits.
 
@@ -7,27 +7,27 @@ A Spring Boot service that processes audit progress events and publishes live au
 - Processes audit-related broker messages and converts them into user-facing progress updates.
 - Supports both page and domain audit progress calculations.
 - Broadcasts updates via `MessageBroadcaster` (for example, Pusher-backed real-time delivery).
-- Uses Looksee core domain models/services for audit state, journeys, and scoring.
+- Uses WebAudit core domain models/services for audit state, journeys, and scoring.
 
 ## Tech Stack
 
 - Java 17
 - Spring Boot 2.6.x
 - Maven
-- Looksee Core (`com.looksee:core`)
+- WebAudit Core (`com.webaudit:core`)
 
 ## Prerequisites
 
 - Java 17+
 - Maven 3.9+
-- Access to the private `com.looksee:core` package (or a locally installed core JAR)
+- Access to the private `com.webaudit:core` package (or a locally installed core JAR)
 
 ## Build and Run
 
-### 1) Install Looksee Core locally (if not pulling from GitHub Packages)
+### 1) Install WebAudit Core locally (if not pulling from GitHub Packages)
 
 ```bash
-mvn install:install-file -Dfile=libs/core-0.3.13.jar -DgroupId=com.looksee -DartifactId=core -Dversion=0.3.13 -Dpackaging=jar
+mvn install:install-file -Dfile=libs/core-0.3.13.jar -DgroupId=com.webaudit -DartifactId=core -Dversion=0.3.13 -Dpackaging=jar
 ```
 
 ### 2) Configure GitHub Packages auth (if needed)
@@ -119,6 +119,3 @@ See `src/main/resources/application.properties` for runtime configuration. Key a
 
 Contributions are welcome. Please follow Conventional Commits as documented in `CONTRIBUTING.md`.
 
-## License
-
-See `LICENSE`.

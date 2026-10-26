@@ -1,8 +1,8 @@
-# Phase 4a.6 — PageBuilder Prod Cutover
+﻿# Phase 4a.6 — PageBuilder Prod Cutover
 
-> **Goal:** Flip the PageBuilder prod Cloud Run revision to `looksee.browsing.mode=remote` against the prod browser-service, observe for 1 hour, then hold for 7 days of calm before unblocking 4b. One operational tfvar edit + a Terraform apply against the prod environment. No code change.
+> **Goal:** Flip the PageBuilder prod Cloud Run revision to `WebAudit.browsing.mode=remote` against the prod browser-service, observe for 1 hour, then hold for 7 days of calm before unblocking 4b. One operational tfvar edit + a Terraform apply against the prod environment. No code change.
 >
-> **Scope:** Prod tfvars only. Code/config (PageBuilder application.yml + LookseeIaC module wiring + tfvars + cloud_run module's `plain_environment_variables`) all shipped in 4a.5 and are inert in prod today because `looksee_browsing_mode` defaults to `"local"` and `page_builder_smoke_check_enabled` defaults to `false`.
+> **Scope:** Prod tfvars only. Code/config (PageBuilder application.yml + WebAuditIaC module wiring + tfvars + cloud_run module's `plain_environment_variables`) all shipped in 4a.5 and are inert in prod today because `WebAudit_browsing_mode` defaults to `"local"` and `page_builder_smoke_check_enabled` defaults to `false`.
 >
 > **Sibling references:** [`phase-4-consumer-cutover.md`](./phase-4-consumer-cutover.md) §4a.6 is the umbrella spec; [`phase-4a5-pagebuilder-staging-cutover.md`](./phase-4a5-pagebuilder-staging-cutover.md) is the staging predecessor whose code shipped in PR #60. This is the operational follow-up.
 
@@ -10,8 +10,8 @@
 
 By the time this plan executes, three things must already be true:
 
-1. **LookseeCore 0.8.2 on `main`** (✓ as of PR #58 merge) — instrumentation + smoke-check bean.
-2. **Phase 4a.5 code shipped** (✓ as of PR #60 merge) — PageBuilder env-var bindings + LookseeIaC tfvars + cloud_run module's `plain_environment_variables` parameter.
+1. **WebAuditCore 0.8.2 on `main`** (✓ as of PR #58 merge) — instrumentation + smoke-check bean.
+2. **Phase 4a.5 code shipped** (✓ as of PR #60 merge) — PageBuilder env-var bindings + WebAuditIaC tfvars + cloud_run module's `plain_environment_variables` parameter.
 3. **Phase 4a.5 staging burn-in passed** — 48 consecutive hours green against the criteria in the 4a.5 plan doc. **This is the gate; do not execute 4a.6 until 4a.5 burn-in is signed off.**
 
 Once those are in place, prod cutover is a config flip. Phase 4a.6 is intentionally minimal — the umbrella doc treats the prod flip as a deployment event with explicit human gates (oncall, rollback dry-run, cost alert), not a code change.
@@ -20,7 +20,7 @@ Once those are in place, prod cutover is a config flip. Phase 4a.6 is intentiona
 
 | In scope | Out of scope |
 |---|---|
-| Prod tfvars: set `looksee_browsing_mode=remote`, `looksee_browsing_service_url=<prod>`, `page_builder_smoke_check_enabled=true` | Any code or config change in PageBuilder, LookseeCore, or LookseeIaC modules (all shipped in 4a.5) |
+| Prod tfvars: set `WebAudit_browsing_mode=remote`, `WebAudit_browsing_service_url=<prod>`, `page_builder_smoke_check_enabled=true` | Any code or config change in PageBuilder, WebAuditCore, or WebAuditIaC modules (all shipped in 4a.5) |
 | 1-hour observation procedure with explicit pass/fail thresholds | Multi-region rollout; current deployment is single-region (assumption matches 4a.5) |
 | Pre-flight gates: oncall on pager, rollback dry-run within 7 days, cost alert armed | Browser-service prod deployment itself (owned upstream) |
 | Rollback playbook (one-edit revert; same shape as 4a.5 staging rollback) | Phase 4b/4c work — gated on 7-day calm window after 4a.6 stable |
@@ -30,7 +30,7 @@ Once those are in place, prod cutover is a config flip. Phase 4a.6 is intentiona
 
 | Area | Decision |
 |---|---|
-| Knob | Reuse `looksee_browsing_mode` shipped in 4a.5. One variable, every consumer. Same rollback shape across staging and prod. |
+| Knob | Reuse `WebAudit_browsing_mode` shipped in 4a.5. One variable, every consumer. Same rollback shape across staging and prod. |
 | Smoke-check in prod | Enable via `page_builder_smoke_check_enabled=true`. The watchdog is the fastest signal during the 1-hour observation; cost is bounded (60s interval, single capture/min, gated on `mode=remote` + `BrowserService` availability). |
 | Smoke-check target URL in prod | Same default (`https://example.com`) — measures the BrowsingClient round-trip, not the page. No reason to differ from staging. |
 | Observation window | 1 hour per umbrella §4a.6. After 1 hour green, declare 4a stable. No additional staging-style 48-hour requirement; staging already covered the long-tail soak. |
@@ -44,7 +44,7 @@ Once those are in place, prod cutover is a config flip. Phase 4a.6 is intentiona
 
 - [ ] **4a.5 staging burn-in signed off.** 48 consecutive hours green against the 4a.5 plan doc's pass criteria. No rollback during the window. p95 within 2× local baseline. Error rate <1%. Smoke-check failure rate <1%. No new Sentry regressions tagged `service:page-builder`.
 - [ ] **Oncall scheduled.** A named oncall responder is on pager during the rolling deploy and the 1-hour observation window.
-- [ ] **Rollback dry-run within last 7 days.** Run the rollback procedure end-to-end against staging: edit staging tfvar `looksee_browsing_mode=local`, `terraform apply`, observe Cloud Run revision rollout, confirm metrics show local Selenium back in path. Restore the staging flip after the dry-run completes. Document the dry-run timestamp in the tracking issue.
+- [ ] **Rollback dry-run within last 7 days.** Run the rollback procedure end-to-end against staging: edit staging tfvar `WebAudit_browsing_mode=local`, `terraform apply`, observe Cloud Run revision rollout, confirm metrics show local Selenium back in path. Restore the staging flip after the dry-run completes. Document the dry-run timestamp in the tracking issue.
 - [ ] **Cost alert armed.** Per umbrella §14.8 — cost alert on browser-service request volume + Cloud Run egress. The alert exists; this gate is "verify it's still firing on test events" (not "set it up").
 - [ ] **Browser-service prod reachable.** Curl `https://browser-service-prod.internal/v1/health` (or equivalent endpoint) returns 200 from the page-builder Cloud Run service account's network. If this fails, the cutover would produce 100% smoke-check failures on the first probe.
 - [ ] **Dashboard rendering prod consumer tag.** Panels driven off `browser_service_calls_seconds_count{consumer="page-builder"}` and `browser_service_smoke_checks_total{consumer="page-builder"}` (the timer + counter exported series per umbrella §Observability prereqs) render data from the prod environment. Same dashboard as staging; just confirm prod-tagged metrics show up.
@@ -53,13 +53,13 @@ If any prerequisite is not GO, **do not flip**. Each gate exists because of an i
 
 ## Execution plan — 1 commit
 
-### Commit (LookseeIaC, **prod tfvars only**) — `chore(prod): flip page-builder to remote browsing`
+### Commit (WebAuditIaC, **prod tfvars only**) — `chore(prod): flip page-builder to remote browsing`
 
-Edit the prod tfvars override location (whatever the LookseeIaC repo uses for prod-specific values — Terraform workspace tfvars file, CI-injected vars, or wrapper repo). Add:
+Edit the prod tfvars override location (whatever the WebAuditIaC repo uses for prod-specific values — Terraform workspace tfvars file, CI-injected vars, or wrapper repo). Add:
 
 ```hcl
-looksee_browsing_mode                 = "remote"
-looksee_browsing_service_url          = "https://browser-service-prod.internal/v1"
+WebAudit_browsing_mode                 = "remote"
+WebAudit_browsing_service_url          = "https://browser-service-prod.internal/v1"
 page_builder_smoke_check_enabled      = true
 ```
 
@@ -97,14 +97,14 @@ If all pass: declare 4a stable. Start the 7-day calm window.
 
 1. Edit prod tfvars **— set both at once**:
    ```hcl
-   looksee_browsing_mode            = "local"
+   WebAudit_browsing_mode            = "local"
    page_builder_smoke_check_enabled = false
    ```
    Both are required: `CapturePageSmokeCheck.prepare()` throws `IllegalStateException` on startup if `smoke-check.enabled=true` while `mode!=remote` (the mode-gate added in 4a.4 to prevent false-green metrics from a local-mode probe). Flipping mode without disabling the watchdog will crash-loop the next Cloud Run revision and turn rollback into an outage.
 2. `terraform apply` against prod. Cloud Run rolling redeploy completes in ≤10 minutes; concurrent requests drain on the old revision.
 3. Confirm via dashboard: `rate(browser_service_calls_seconds_count{consumer="page-builder"}[1m])` drops to zero (no remote traffic), local Selenium driver loads on next page-builder request. (Bare `browser_service_calls` is not a real series — see umbrella §Observability prereqs.)
 4. Page browser-service oncall if the trigger was browser-service-shaped (5xx, latency).
-5. File an incident note with the specific failure mode + dashboard screenshots covering the 5 minutes pre-rollback. Do not re-flip until root cause is understood and fixed in either browser-service, LookseeCore, or PageBuilder.
+5. File an incident note with the specific failure mode + dashboard screenshots covering the 5 minutes pre-rollback. Do not re-flip until root cause is understood and fixed in either browser-service, WebAuditCore, or PageBuilder.
 6. Re-flipping prod requires another 48-hour staging burn-in with the fix applied, then re-running this phase from the prerequisite gates.
 
 ## 7-day calm window — what it means
@@ -118,7 +118,7 @@ If anything anomalous happens during the 7 days (rollback fires, oncall page, p9
 
 ## Critical files
 
-- `LookseeIaC/<prod tfvars override>` — three value overrides (single commit, this phase)
+- `WebAuditIaC/<prod tfvars override>` — three value overrides (single commit, this phase)
 
 That's it. All other files were touched in 4a.5 and need no change.
 
@@ -130,7 +130,7 @@ Reuse the phase-4a.5 tracking issue if it's still open with sub-tasks for stagin
 
 - [x] Prerequisite gates all checked (see above).
 - [x] PR merged + applied to prod.
-- [x] Cloud Run page-builder prod revision running with `LOOKSEE_BROWSING_MODE=remote`.
+- [x] Cloud Run page-builder prod revision running with `WebAudit_BROWSING_MODE=remote`.
 - [x] 60 consecutive minutes green against pass criteria.
 - [x] No rollback executed.
 - [x] 7-day calm window elapses without anomaly.

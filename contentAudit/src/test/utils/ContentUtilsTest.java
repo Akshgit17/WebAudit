@@ -14,7 +14,7 @@ public class ContentUtilsTest {
 	@Test
 	public void testExtractArticle() throws IOException {
 		//marketing page url
-		String url = "https://www.look-see.com";
+		String url = "https://www.WebAudit.com";
 		
 		//CRUX library to extract article data
 		//String all_page_text = Jsoup.connect(url).get().text();

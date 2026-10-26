@@ -1,14 +1,14 @@
-# Phase 3d — Unblock `getDomElementStates` for Remote Mode
+﻿# Phase 3d — Unblock `getDomElementStates` for Remote Mode
 
 > **Goal:** `BrowserService.getDomElementStates(PageState, xpaths, Browser, long)` — the branch PageBuilder calls when audit-record element data is missing — runs to completion against a `RemoteBrowser`. This closes the last blocker for phase 4a.2 (PageBuilder `buildPageState` → `capturePage` migration) and lets the single-session flow finally re-land.
 >
-> **Where to work:** locally in the Look-see monorepo against LookseeCore. Suggest a feature branch: `git checkout -b phase-3d/unblock-getdomelementstates`.
+> **Where to work:** locally in the WebAudit monorepo against WebAuditCore. Suggest a feature branch: `git checkout -b phase-3d/unblock-getdomelementstates`.
 >
-> **Sibling references:** this doc mirrors [`phase-3-looksee-shim.md`](./phase-3-looksee-shim.md), [`phase-3b-element-handle-ops.md`](./phase-3b-element-handle-ops.md), [`phase-3c-internal-remote-compat.md`](./phase-3c-internal-remote-compat.md), [`phase-4-consumer-cutover.md`](./phase-4-consumer-cutover.md) in structure. The scope was enumerated in phase-3b §14.9 as the inherit list and narrowed in phase-3c §14.3 as the phase-3d triggers-on-demand set.
+> **Sibling references:** this doc mirrors [`phase-3-WebAudit-shim.md`](./phase-3-WebAudit-shim.md), [`phase-3b-element-handle-ops.md`](./phase-3b-element-handle-ops.md), [`phase-3c-internal-remote-compat.md`](./phase-3c-internal-remote-compat.md), [`phase-4-consumer-cutover.md`](./phase-4-consumer-cutover.md) in structure. The scope was enumerated in phase-3b §14.9 as the inherit list and narrowed in phase-3c §14.3 as the phase-3d triggers-on-demand set.
 
 ## Why this phase exists now
 
-Phase 3c (LookseeCore 0.7.1, merged in PR #42) migrated `PageStateAdapter` and `BrowserUtils` off `browser.getDriver()`. That made `PageStateAdapter.toPageState(Browser, …)` remote-safe, which means `browser_service.buildPageState(url, browser, …)` (the first call in PageBuilder's audit flow) works end-to-end in remote mode.
+Phase 3c (WebAuditCore 0.7.1, merged in PR #42) migrated `PageStateAdapter` and `BrowserUtils` off `browser.getDriver()`. That made `PageStateAdapter.toPageState(Browser, …)` remote-safe, which means `browser_service.buildPageState(url, browser, …)` (the first call in PageBuilder's audit flow) works end-to-end in remote mode.
 
 **But** the second call in PageBuilder's flow — `browser_service.getDomElementStates(pageState, xpaths, browser, auditRecordId)` — still has two remote-incompatible sites:
 
@@ -28,7 +28,7 @@ Until this phase ships, PageBuilder's 4a.2 re-migration (reverted in PR #36 for 
 | Derive tag name from the iteration xpath (not from `WebElement.getTagName()`) in the two sites that consume it | Add `tag_name` to the browser-service OpenAPI contract — that's a server-repo change, out of this repo's reach |
 | Extend `RemoteWebElement.getTagName()` so it's no longer a flat throw — reads the cached `attributes` map for a `"tag_name"` key if present, otherwise throws with a clearer message pointing at the workaround | Implementing a server-side `tag_name` attribute synthesis — that would ship in browser-service |
 | Tests: a new `BrowserServiceGetDomElementStatesRemoteModeTest` + existing remote-mode test coverage update | Full test coverage of the `enrichElementStates` and form-extraction paths — those stay phase 3e / 3f candidates |
-| LookseeCore 0.7.1 → **0.7.2** patch bump + 13 consumer pom pins | Any change to local-mode behavior of `BrowserService` / `Browser` / `RemoteBrowser` |
+| WebAuditCore 0.7.1 → **0.7.2** patch bump + 13 consumer pom pins | Any change to local-mode behavior of `BrowserService` / `Browser` / `RemoteBrowser` |
 
 If something looks refactor-tempting inside `BrowserService` beyond lines 454, 471, and 547, resist. Phase 3d is deliberately tight; the rest of §14.9 becomes phase 3e if a consumer ever needs it.
 
@@ -49,16 +49,16 @@ mvn -v            # 3.9+
 git status        # clean working tree on main
 ```
 
-- Phase 3c code merged (LookseeCore 0.7.1 on `main`) — confirmed.
+- Phase 3c code merged (WebAuditCore 0.7.1 on `main`) — confirmed.
 - `getDomElementStates` at line 439 still matches the pre-planning enumeration (3 reach-throughs at lines 454, 471, 547). Re-verify with Step 0 grep.
 
 ## Step 0 — Branch + sanity
 
 ```bash
-cd /path/to/Look-see
+cd /path/to/WebAudit
 git checkout -b phase-3d/unblock-getdomelementstates
 
-cd LookseeCore && mvn -q verify   # 0.7.1 green baseline (161 looksee-core tests, 31 browsing-client tests)
+cd WebAuditCore && mvn -q verify   # 0.7.1 green baseline (161 webaudit-core tests, 31 browsing-client tests)
 ```
 
 Confirm the §14.9 subset this phase scopes is still exactly these three sites:
@@ -66,14 +66,14 @@ Confirm the §14.9 subset this phase scopes is still exactly these three sites:
 ```bash
 # Expect: exactly 3 hits (lines 454, 471, 547 in the current BrowserService.java)
 grep -n "browser\\.getDriver()\\.getCurrentUrl\\|web_element\\.getTagName" \
-  LookseeCore/looksee-core/src/main/java/com/looksee/services/BrowserService.java | head
+  WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/BrowserService.java | head
 ```
 
 If the grep returns more or fewer hits than expected, update §14 in the same commit that addresses the divergence.
 
 ## Step 1 — Migrate `BrowserService.java:454`
 
-**File:** `LookseeCore/looksee-core/src/main/java/com/looksee/services/BrowserService.java`
+**File:** `WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/BrowserService.java`
 
 Single-line swap at line 454:
 
@@ -91,7 +91,7 @@ Same pattern as phase 3c's `BrowserUtils` fix. Local-mode byte-identical; remote
 
 ## Step 2 — Replace `web_element.getTagName()` with xpath-derived tag
 
-**File:** `LookseeCore/looksee-core/src/main/java/com/looksee/services/BrowserService.java`
+**File:** `WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/BrowserService.java`
 
 Add a private static helper near the other BrowserService xpath helpers:
 
@@ -146,13 +146,13 @@ if( !is_displayed
 // execution — both options preserve local-mode semantics.
 ```
 
-Local mode: `web_element.getTagName()` previously returned the tag as reported by Selenium. For xpaths produced by Look-see's own xpath generator (`BrowserService.extractAllUniqueElementXpaths` and `generateXpath`), the xpath's final segment is always `tag[...]` or `tag`, so `extractTagFromXpath` returns the same value Selenium would. The helper handles wildcards (`*[...]`) and namespaced tags (`svg:rect`) defensively. Add a unit test (Step 4) to lock the parity.
+Local mode: `web_element.getTagName()` previously returned the tag as reported by Selenium. For xpaths produced by WebAudit's own xpath generator (`BrowserService.extractAllUniqueElementXpaths` and `generateXpath`), the xpath's final segment is always `tag[...]` or `tag`, so `extractTagFromXpath` returns the same value Selenium would. The helper handles wildcards (`*[...]`) and namespaced tags (`svg:rect`) defensively. Add a unit test (Step 4) to lock the parity.
 
 **Commit:** `refactor(core): derive tag from xpath instead of WebElement.getTagName() in getDomElementStates`
 
 ## Step 3 — Extend `RemoteWebElement.getTagName()`
 
-**File:** `LookseeCore/looksee-core/src/main/java/com/looksee/services/browser/RemoteWebElement.java`
+**File:** `WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/browser/RemoteWebElement.java`
 
 Currently throws `UnsupportedOperationException(PHASE_3C + " (getTagName)")`. Change to:
 
@@ -181,9 +181,9 @@ All other phase-3c unsupported methods stay as-is.
 
 ### 4.1 `BrowserServiceExtractTagFromXpathTest` — new
 
-`LookseeCore/looksee-core/src/test/java/com/looksee/services/BrowserServiceExtractTagFromXpathTest.java`
+`WebAuditCore/webaudit-core/src/test/java/com/webaudit/services/BrowserServiceExtractTagFromXpathTest.java`
 
-One test per xpath shape — parity with what Look-see's xpath generator emits:
+One test per xpath shape — parity with what WebAudit's xpath generator emits:
 
 ```java
 @Test void simpleTag()                { assertEquals("div",  extract("//div")); }
@@ -233,32 +233,32 @@ Same pattern as phase 3c version bump. `A11yParent` + 13 consumer poms + CHANGEL
 ### Still deferred (phase 3e)
 - `BrowserService.enrichElementStates` (lines 1953, 1997, 2003, 2510) — needs a new `Browser.findElements` or equivalent.
 - `BrowserService` form extraction (lines 3291, 3292, 3306, 3385, 3401).
-- `com.looksee.browsing.table.Table` helper.
+- `com.webaudit.browsing.table.Table` helper.
 - Remaining `RemoteWebElement` unsupported WebElement methods (click, submit, sendKeys, clear, isSelected, isEnabled, getText, findElement(s), getCssValue, getScreenshotAs).
 ```
 
-**Commit:** `chore: bump LookseeCore to 0.7.2 + CHANGELOG + consumer pins`
+**Commit:** `chore: bump WebAuditCore to 0.7.2 + CHANGELOG + consumer pins`
 
 ## Step 6 — Verification
 
 1. **Clean build:**
    ```bash
-   cd LookseeCore && mvn -q clean verify
+   cd WebAuditCore && mvn -q clean verify
    ```
-   Expect: `BUILD SUCCESS`. Test counts: looksee-core ≥ 170 (was 161 in 0.7.1; +~10 for the two new test classes + extended RemoteWebElementTest), browsing-client unchanged at 31.
+   Expect: `BUILD SUCCESS`. Test counts: webaudit-core ≥ 170 (was 161 in 0.7.1; +~10 for the two new test classes + extended RemoteWebElementTest), browsing-client unchanged at 31.
 
 2. **Scope-preservation check:**
    ```bash
-   git diff --stat main..HEAD -- LookseeCore/looksee-browser/
+   git diff --stat main..HEAD -- WebAuditCore/webaudit-browser/
    # Expect: empty. No new Browser methods needed for this phase.
-   git diff --stat main..HEAD -- LookseeCore/looksee-browsing-client/
+   git diff --stat main..HEAD -- WebAuditCore/webaudit-browsing-client/
    # Expect: only the pom version bump.
    ```
 
 3. **Post-3d sweep:**
    ```bash
    grep -n "browser\\.getDriver()\\.getCurrentUrl\\|web_element\\.getTagName" \
-     LookseeCore/looksee-core/src/main/java/com/looksee/services/BrowserService.java | \
+     WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/BrowserService.java | \
      grep -v "// line [0-9]" | wc -l
    ```
    Expect: 0 in `getDomElementStates` / `isImageElement`. Other call sites (enrichElementStates / form extraction) still have them by design — see §14 below.
@@ -284,12 +284,12 @@ PR body links to this doc + phase-3b §14.9 + phase-3c §14.3. Explicit note: de
 
 ## 14. Open items flagged for reviewer
 
-1. **Xpath-derived tag assumes Look-see's xpath format.** `extractTagFromXpath` reads the last `/`-separated segment and strips `[index]` / `[@attr=...]`. That matches every xpath I could find in Look-see's xpath generator and the xpaths stored in `ElementState.getXpath()`. If a consumer stores an xpath from a different generator (e.g. XPath 2.0 functions), this could misparse. Low risk today; flag in PR review if anyone surfaces it.
+1. **Xpath-derived tag assumes WebAudit's xpath format.** `extractTagFromXpath` reads the last `/`-separated segment and strips `[index]` / `[@attr=...]`. That matches every xpath I could find in WebAudit's xpath generator and the xpaths stored in `ElementState.getXpath()`. If a consumer stores an xpath from a different generator (e.g. XPath 2.0 functions), this could misparse. Low risk today; flag in PR review if anyone surfaces it.
 
 2. **Phase 3e inherit list.** Everything in phase-3b §14.9 that this phase does **not** address:
    - `BrowserService.enrichElementStates` (used by `element-enrichment`): lines 1953, 1997, 2003, 2510 — needs `Browser.findElements` + `Browser.waitForElement` + a remote-safe `CssUtils.loadCssProperties` path.
    - `BrowserService` form extraction (lines 3291, 3292, 3306, 3385, 3401): needs `Browser.findElements` on the document.
-   - `com.looksee.browsing.table.Table` (lines 44, 51, 52): `element.findElements` on a passed-in WebElement. Needs `RemoteWebElement.findElements` backed by either (a) a new `/v1/sessions/{id}/element/find-children` endpoint or (b) xpath composition (parent xpath + child xpath in a single `/element/find` call).
+   - `com.webaudit.browsing.table.Table` (lines 44, 51, 52): `element.findElements` on a passed-in WebElement. Needs `RemoteWebElement.findElements` backed by either (a) a new `/v1/sessions/{id}/element/find-children` endpoint or (b) xpath composition (parent xpath + child xpath in a single `/element/find` call).
    - `RemoteWebElement` unsupported methods: click, submit, sendKeys, clear, isSelected, isEnabled, getText, findElement(s), getCssValue, getScreenshotAs. `getTagName` moves out of the list in this phase.
 
 3. **`tag_name` in the OpenAPI contract.** We're not adding it in this phase — purely a client-side change. If a future phase wants `RemoteWebElement.getTagName` to be authoritative instead of xpath-derived, it requires a browser-service engine update to synthesize `attributes.tag_name` on the `/element/find` response. Flag for the browser-service repo's roadmap; this phase is compatible with either outcome.

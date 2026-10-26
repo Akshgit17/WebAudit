@@ -18,17 +18,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.looksee.audit.informationArchitecture.AuditController;
-import com.looksee.audit.informationArchitecture.audits.*;
-import com.looksee.gcp.PubSubAuditUpdatePublisherImpl;
-import com.looksee.mapper.Body;
-import com.looksee.models.PageState;
-import com.looksee.models.audit.Audit;
-import com.looksee.models.audit.AuditRecord;
-import com.looksee.models.enums.AuditName;
-import com.looksee.services.AuditRecordService;
-import com.looksee.services.IdempotencyService;
-import com.looksee.services.PageStateService;
+import com.webaudit.audit.informationArchitecture.AuditController;
+import com.webaudit.audit.informationArchitecture.audits.*;
+import com.webaudit.gcp.PubSubAuditUpdatePublisherImpl;
+import com.webaudit.mapper.Body;
+import com.webaudit.models.PageState;
+import com.webaudit.models.audit.Audit;
+import com.webaudit.models.audit.AuditRecord;
+import com.webaudit.models.enums.AuditName;
+import com.webaudit.services.AuditRecordService;
+import com.webaudit.services.IdempotencyService;
+import com.webaudit.services.PageStateService;
 
 public class AuditControllerTest {
 

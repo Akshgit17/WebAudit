@@ -1,14 +1,14 @@
-# Phase 3e — Unblock `enrichElementState` for Remote Mode
+﻿# Phase 3e — Unblock `enrichElementState` for Remote Mode
 
 > **Goal:** `BrowserService.enrichElementState(Browser, WebElement, ElementState, BufferedImage, String)` — the helper called by **both** `enrichElementStates` (element-enrichment) and the 6-arg `getDomElementStates` (PageBuilder + journeyExecutor) — runs to completion against a `RemoteBrowser`. This unblocks **phase 4b** (element-enrichment cutover) and **phase 4c** (journeyExecutor cutover).
 >
-> **Where to work:** locally in the Look-see monorepo against LookseeCore. Suggest a feature branch: `git checkout -b phase-3e/unblock-enrichelementstate`.
+> **Where to work:** locally in the WebAudit monorepo against WebAuditCore. Suggest a feature branch: `git checkout -b phase-3e/unblock-enrichelementstate`.
 >
-> **Sibling references:** mirrors [`phase-3-looksee-shim.md`](./phase-3-looksee-shim.md), [`phase-3b-element-handle-ops.md`](./phase-3b-element-handle-ops.md), [`phase-3c-internal-remote-compat.md`](./phase-3c-internal-remote-compat.md), [`phase-3d-unblock-getdomelementstates.md`](./phase-3d-unblock-getdomelementstates.md), [`phase-4-consumer-cutover.md`](./phase-4-consumer-cutover.md). Scoped from phase-3b §14.9 + phase-3d §14.
+> **Sibling references:** mirrors [`phase-3-WebAudit-shim.md`](./phase-3-WebAudit-shim.md), [`phase-3b-element-handle-ops.md`](./phase-3b-element-handle-ops.md), [`phase-3c-internal-remote-compat.md`](./phase-3c-internal-remote-compat.md), [`phase-3d-unblock-getdomelementstates.md`](./phase-3d-unblock-getdomelementstates.md), [`phase-4-consumer-cutover.md`](./phase-4-consumer-cutover.md). Scoped from phase-3b §14.9 + phase-3d §14.
 
 ## Why this phase exists now
 
-Phase 3d (LookseeCore 0.7.2, merged in PR #46) made the 4-arg `getDomElementStates` and `isImageElement` remote-safe, fully unblocking PageBuilder's page-state path. But the **6-arg `getDomElementStates`** (used by journeyExecutor's `buildPage` at `journeyExecutor/.../AuditController.java:493`) and **`enrichElementStates`** (used by element-enrichment's `AuditController.java:118`) both ultimately call the `enrichElementState` helper — which has three remote-incompatible call sites still in main:
+Phase 3d (WebAuditCore 0.7.2, merged in PR #46) made the 4-arg `getDomElementStates` and `isImageElement` remote-safe, fully unblocking PageBuilder's page-state path. But the **6-arg `getDomElementStates`** (used by journeyExecutor's `buildPage` at `journeyExecutor/.../AuditController.java:493`) and **`enrichElementStates`** (used by element-enrichment's `AuditController.java:118`) both ultimately call the `enrichElementState` helper — which has three remote-incompatible call sites still in main:
 
 | Site | Call | Fix |
 |---|---|---|
@@ -28,10 +28,10 @@ After this phase:
 | `BrowserService.java:1942` swap to `browser.findElement(xpath)` | All `BrowserService` form-extraction reach-throughs (lines 3339, 3340, 3354, 3433, 3449) |
 | New `Browser.waitForElementClickable(WebElement, Duration)` with local default + RemoteBrowser polling override | Adding a server-side `/wait/clickable` endpoint — keep the polling client-side to avoid a contract change |
 | New `Browser.getComputedCssProperties(WebElement)` with local default + RemoteBrowser implementation via `BrowsingClient.executeScript` | A new `/element/css` endpoint — use the existing `/execute` endpoint instead |
-| Extend `BrowsingClient` facade with `executeScript(String sessionId, String script, List<Object> args)` (phase-3b §14.3 deferred this; the deferral expires here) | Wrapping `ExecuteApi` for arbitrary consumer use — the new facade method is internal to LookseeCore for now |
+| Extend `BrowsingClient` facade with `executeScript(String sessionId, String script, List<Object> args)` (phase-3b §14.3 deferred this; the deferral expires here) | Wrapping `ExecuteApi` for arbitrary consumer use — the new facade method is internal to WebAuditCore for now |
 | Migrate `BrowserService.enrichElementState`'s three call sites + the sibling at line 2499 | Refactoring `CssUtils` itself; we keep its existing `(WebElement, WebDriver)` signature for local callers and route through the new `Browser` method |
 | Tests: extend `BrowsingClientTest` for `executeScript`, new `RemoteBrowserExecuteTest`, extended `RemoteBrowserElementOpsTest` for `waitForElementClickable` + `getComputedCssProperties` | Live integration test against a running browser-service (manual verification only) |
-| LookseeCore 0.7.2 → **0.8.0** minor bump (new `Browser` methods are an additive API surface) + 13 consumer pom pins | Any change that breaks local-mode behavior |
+| WebAuditCore 0.7.2 → **0.8.0** minor bump (new `Browser` methods are an additive API surface) + 13 consumer pom pins | Any change that breaks local-mode behavior |
 
 If something looks refactor-tempting inside `enrichElementState` beyond the four call-site swaps, resist. Phase 3e is wider than 3c/3d (touches three modules instead of one) but still scoped tight — phase 3f handles whatever 4b/4c surfaces.
 
@@ -54,21 +54,21 @@ mvn -v            # 3.9+
 git status        # clean working tree on main
 ```
 
-- Phase 3d code merged (LookseeCore 0.7.2 on `main`) — confirmed.
+- Phase 3d code merged (WebAuditCore 0.7.2 on `main`) — confirmed.
 - Re-confirm `enrichElementState`'s reach-throughs by line count via Step 0 grep.
 - Re-confirm the OpenAPI spec's `/execute` endpoint accepts an element-handle reference in `args` (or document the inline-xpath fallback).
 
 ## Step 0 — Branch + sanity
 
 ```bash
-cd /path/to/Look-see
+cd /path/to/WebAudit
 git checkout -b phase-3e/unblock-enrichelementstate
 
-cd LookseeCore && mvn -q verify   # 0.7.2 green baseline (175 looksee-core tests, 31 browsing-client tests)
+cd WebAuditCore && mvn -q verify   # 0.7.2 green baseline (175 webaudit-core tests, 31 browsing-client tests)
 
 # Expect exactly 4 in-scope hits:
 grep -nE "browser\\.getDriver\\(\\)\\.findElement|new WebDriverWait\\(browser|loadCssProperties.*browser" \
-  LookseeCore/looksee-core/src/main/java/com/looksee/services/BrowserService.java | head -10
+  WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/BrowserService.java | head -10
 ```
 
 Expected output:
@@ -79,7 +79,7 @@ Expected output:
 Confirm the OpenAPI spec's `ExecuteRequest` schema accepts element references in `args`:
 
 ```bash
-grep -A 12 "ExecuteRequest:" LookseeCore/looksee-browsing-client/src/main/resources/openapi.yaml
+grep -A 12 "ExecuteRequest:" WebAuditCore/webaudit-browsing-client/src/main/resources/openapi.yaml
 ```
 
 If `args` is `array(items: {})` (any), the server may or may not handle element handles — Step 4's verification confirms this against the spec's documented behavior.
@@ -103,7 +103,7 @@ Remote-mode: `RemoteBrowser.findElement` returns a `RemoteWebElement` (phase 3b)
 
 ## Step 2 — Add `Browser.waitForElementClickable`
 
-**File:** `LookseeCore/looksee-browser/src/main/java/com/looksee/browser/Browser.java`
+**File:** `WebAuditCore/webaudit-browser/src/main/java/com/webaudit/browser/Browser.java`
 
 ```java
 import java.time.Duration;
@@ -112,7 +112,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * Waits up to {@code timeout} for {@code element} to become clickable. Local
- * mode uses Selenium's {@link WebDriverWait}; {@link com.looksee.services.browser.RemoteBrowser}
+ * mode uses Selenium's {@link WebDriverWait}; {@link com.webaudit.services.browser.RemoteBrowser}
  * overrides this to poll {@code client.findElement} for the element's
  * displayed state, since the OpenAPI contract has no dedicated wait endpoint.
  */
@@ -123,7 +123,7 @@ public void waitForElementClickable(WebElement element, Duration timeout) {
 }
 ```
 
-**File:** `LookseeCore/looksee-core/src/main/java/com/looksee/services/browser/RemoteBrowser.java`
+**File:** `WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/browser/RemoteBrowser.java`
 
 Override:
 
@@ -168,7 +168,7 @@ browser.waitForElementClickable(web_element, java.time.Duration.ofSeconds(10));
 
 ### 3.1 Extend `BrowsingClient` facade
 
-**File:** `LookseeCore/looksee-browsing-client/src/main/java/com/looksee/browsing/client/BrowsingClient.java`
+**File:** `WebAuditCore/webaudit-browsing-client/src/main/java/com/webaudit/browsing/client/BrowsingClient.java`
 
 Add a new `OpsApi`/`MiscApi` field (whichever the generated code uses for `/execute`) and a wrapper. Phase-3b §14.3 deliberately deferred this; the deferral expires here.
 
@@ -184,25 +184,25 @@ public Object executeScript(String sessionId, String script, java.util.List<Obje
 
 ### 3.2 Add the `Browser` method
 
-**File:** `LookseeCore/looksee-browser/src/main/java/com/looksee/browser/Browser.java`
+**File:** `WebAuditCore/webaudit-browser/src/main/java/com/webaudit/browser/Browser.java`
 
 ```java
 /**
  * Returns the computed CSS properties for {@code element} as a name → value map.
- * Local mode delegates to {@link com.looksee.browser.utils.CssUtils#loadCssProperties};
- * {@link com.looksee.services.browser.RemoteBrowser} overrides this to run
+ * Local mode delegates to {@link com.webaudit.browser.utils.CssUtils#loadCssProperties};
+ * {@link com.webaudit.services.browser.RemoteBrowser} overrides this to run
  * {@code window.getComputedStyle(...)} server-side via the
  * {@code POST /v1/sessions/{id}/execute} endpoint.
  */
 public java.util.Map<String, String> getComputedCssProperties(WebElement element) {
     assert element != null;
-    return com.looksee.browser.utils.CssUtils.loadCssProperties(element, driver);
+    return com.webaudit.browser.utils.CssUtils.loadCssProperties(element, driver);
 }
 ```
 
 ### 3.3 Override on `RemoteBrowser`
 
-**File:** `LookseeCore/looksee-core/src/main/java/com/looksee/services/browser/RemoteBrowser.java`
+**File:** `WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/browser/RemoteBrowser.java`
 
 ```java
 @Override
@@ -254,13 +254,13 @@ Drive `enrichElementState` against a mocked local `Browser` to confirm local-mod
 
 ### 4.4 Full mvn clean verify
 
-Expect ≥ 180 looksee-core tests (was 175 in 0.7.2), ≥ 33 browsing-client tests (was 31).
+Expect ≥ 180 webaudit-core tests (was 175 in 0.7.2), ≥ 33 browsing-client tests (was 31).
 
 **Commit:** `test(core): cover waitForElementClickable + getComputedCssProperties + executeScript`
 
 ## Step 5 — Version bump 0.7.2 → 0.8.0
 
-Same pattern as prior phases. `A11yParent` 0.7.2 → 0.8.0; `<looksee.version>` property; `LOOKSEE_CORE_VERSION`. CHANGELOG entry under `## [0.8.0]`:
+Same pattern as prior phases. `A11yParent` 0.7.2 → 0.8.0; `<WebAudit.version>` property; `WEBAUDIT_CORE_VERSION`. CHANGELOG entry under `## [0.8.0]`:
 
 ```
 ### Added
@@ -277,27 +277,27 @@ Same pattern as prior phases. `A11yParent` 0.7.2 → 0.8.0; `<looksee.version>` 
 
 ### Still deferred (phase 3f)
 - BrowserService form extraction (lines 3339, 3340, 3354, 3433, 3449)
-- com.looksee.browsing.table.Table helper
+- com.webaudit.browsing.table.Table helper
 - Remaining RemoteWebElement unsupported WebElement methods (click, submit, sendKeys, clear, isSelected, isEnabled, getText, findElement(s), getCssValue, getScreenshotAs)
 ```
 
 13 consumer pom pins. Same `mvn versions:set` + sed pattern as 3c/3d.
 
-**Commit:** `chore: bump LookseeCore to 0.8.0 + CHANGELOG + consumer pins`
+**Commit:** `chore: bump WebAuditCore to 0.8.0 + CHANGELOG + consumer pins`
 
 ## Step 6 — Verification
 
-1. `mvn clean verify` from LookseeCore root — `BUILD SUCCESS` across all 11 modules. Test counts: looksee-core ≥ 180, browsing-client ≥ 33.
+1. `mvn clean verify` from WebAuditCore root — `BUILD SUCCESS` across all 11 modules. Test counts: webaudit-core ≥ 180, browsing-client ≥ 33.
 
 2. **Scope-preservation check:**
    ```bash
-   git diff --stat main..HEAD -- LookseeCore/looksee-browser/
+   git diff --stat main..HEAD -- WebAuditCore/webaudit-browser/
    # Expect: only Browser.java (+2 methods) and pom version bump.
    ```
 
 3. **Post-3e sweep on enrichElementState path:**
    ```bash
-   sed -n '1914,2050p' LookseeCore/looksee-core/src/main/java/com/looksee/services/BrowserService.java | \
+   sed -n '1914,2050p' WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/BrowserService.java | \
      grep -nE "browser\\.getDriver|new WebDriverWait\\(browser|loadCssProperties.*browser"
    ```
    Expect: empty.
@@ -311,8 +311,8 @@ Same pattern as prior phases. `A11yParent` 0.7.2 → 0.8.0; `<looksee.version>` 
 - [ ] `BrowsingClient.executeScript` wires the `/execute` endpoint.
 - [ ] `enrichElementState` (and the sibling helper at line 2499) have zero `browser.getDriver()` calls.
 - [ ] All four `enrichElementState` reach-throughs (lines 1942, 1986, 1992, 2499) migrated.
-- [ ] `mvn clean verify` green; test counts up by ≥ 5 in looksee-core, ≥ 2 in browsing-client.
-- [ ] LookseeCore 0.8.0 across all poms + 13 consumer pom pins.
+- [ ] `mvn clean verify` green; test counts up by ≥ 5 in webaudit-core, ≥ 2 in browsing-client.
+- [ ] WebAuditCore 0.8.0 across all poms + 13 consumer pom pins.
 - [ ] PR opened with title **"Phase 3e: unblock enrichElementState for remote mode"**.
 
 ## Push and open PR
@@ -331,6 +331,6 @@ Same pattern as prior phases. `A11yParent` 0.7.2 → 0.8.0; `<looksee.version>` 
 
 5. **Phase 3f inherit list.** Form extraction (5 sites), `Table` helper (3 sites), remaining `RemoteWebElement` unsupported WebElement methods (10 methods). Triggered when a phase-4 cutover surfaces them — same trigger logic as 3d/3e.
 
-6. **`/execute` endpoint security posture.** This is the first time we're sending arbitrary JS to browser-service from LookseeCore. The script is hard-coded inside `RemoteBrowser`, not user-controlled, so the surface is internal. But once the facade method exists, future LookseeCore code could pass user-controlled strings through it — which would be a script-injection risk. Add a doc note on `BrowsingClient.executeScript` warning that `script` must be a literal, not an interpolation. Phase-3f optional follow-up: enforce via a lint rule or a `@SafeScript` marker.
+6. **`/execute` endpoint security posture.** This is the first time we're sending arbitrary JS to browser-service from WebAuditCore. The script is hard-coded inside `RemoteBrowser`, not user-controlled, so the surface is internal. But once the facade method exists, future WebAuditCore code could pass user-controlled strings through it — which would be a script-injection risk. Add a doc note on `BrowsingClient.executeScript` warning that `script` must be a literal, not an interpolation. Phase-3f optional follow-up: enforce via a lint rule or a `@SafeScript` marker.
 
 7. **0.8.0 version sizing.** The original phase-4 plan reserved 0.8.0 for "the Browser facade API change" — consistent with this phase's Browser additions. If the user prefers patch-only versioning until phase 4 actually ships, this can be 0.7.3 instead; flagging the choice for review.

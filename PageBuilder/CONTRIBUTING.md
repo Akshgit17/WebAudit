@@ -1,4 +1,4 @@
-# Contributing to PageBuilder
+﻿# Contributing to PageBuilder
 
 Thank you for your interest in contributing! This document outlines the workflow and conventions used in this project.
 
@@ -7,7 +7,7 @@ Thank you for your interest in contributing! This document outlines the workflow
 - Java 17 (Temurin recommended)
 - Maven 3.8+
 - Docker (for integration/build testing)
-- The LookseeCore JAR installed locally (see `scripts/download-core.sh`)
+- The WebAuditCore JAR installed locally (see `scripts/download-core.sh`)
 
 ## Development Workflow
 
@@ -20,9 +20,9 @@ Thank you for your interest in contributing! This document outlines the workflow
    ```bash
    bash scripts/download-core.sh
    mvn install:install-file \
-     -Dfile=libs/core-$(sed -n 's:.*<looksee-core.version>\(.*\)</looksee-core.version>.*:\1:p' pom.xml | head -n1).jar \
-     -DgroupId=com.looksee -DartifactId=core \
-     -Dversion=$(sed -n 's:.*<looksee-core.version>\(.*\)</looksee-core.version>.*:\1:p' pom.xml | head -n1) \
+     -Dfile=libs/core-$(sed -n 's:.*<webaudit-core.version>\(.*\)</webaudit-core.version>.*:\1:p' pom.xml | head -n1).jar \
+     -DgroupId=com.webaudit -DartifactId=core \
+     -Dversion=$(sed -n 's:.*<webaudit-core.version>\(.*\)</webaudit-core.version>.*:\1:p' pom.xml | head -n1) \
      -Dpackaging=jar
    ```
 4. **Make your changes** and add or update tests as needed.

@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.looksee.exceptions.DomainNotOwnedByAccountException;
-import com.looksee.exceptions.UnknownAccountException;
-import com.looksee.models.Test;
-import com.looksee.models.TestRecord;
-import com.looksee.models.repository.TestRecordRepository;
+import com.webaudit.exceptions.DomainNotOwnedByAccountException;
+import com.webaudit.exceptions.UnknownAccountException;
+import com.webaudit.models.Test;
+import com.webaudit.models.TestRecord;
+import com.webaudit.models.repository.TestRecordRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

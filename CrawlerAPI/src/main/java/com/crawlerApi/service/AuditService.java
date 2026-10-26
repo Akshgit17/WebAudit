@@ -11,23 +11,23 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.looksee.exceptions.AuditCreationException;
-import com.looksee.gcp.PubSubUrlMessagePublisherImpl;
-import com.looksee.models.Account;
-import com.looksee.models.Domain;
-import com.looksee.models.audit.AuditRecord;
-import com.looksee.models.audit.DomainAuditRecord;
-import com.looksee.models.audit.PageAuditRecord;
-import com.looksee.models.dto.AuditRecordDto;
-import com.looksee.models.enums.AuditLevel;
-import com.looksee.models.enums.AuditName;
-import com.looksee.browser.enums.BrowserType;
-import com.looksee.models.enums.ExecutionStatus;
-import com.looksee.models.message.AuditStartMessage;
-import com.looksee.services.AccountService;
-import com.looksee.services.AuditRecordService;
-import com.looksee.services.DomainService;
-import com.looksee.utils.BrowserUtils;
+import com.webaudit.exceptions.AuditCreationException;
+import com.webaudit.gcp.PubSubUrlMessagePublisherImpl;
+import com.webaudit.models.Account;
+import com.webaudit.models.Domain;
+import com.webaudit.models.audit.AuditRecord;
+import com.webaudit.models.audit.DomainAuditRecord;
+import com.webaudit.models.audit.PageAuditRecord;
+import com.webaudit.models.dto.AuditRecordDto;
+import com.webaudit.models.enums.AuditLevel;
+import com.webaudit.models.enums.AuditName;
+import com.webaudit.browser.enums.BrowserType;
+import com.webaudit.models.enums.ExecutionStatus;
+import com.webaudit.models.message.AuditStartMessage;
+import com.webaudit.services.AccountService;
+import com.webaudit.services.AuditRecordService;
+import com.webaudit.services.DomainService;
+import com.webaudit.utils.BrowserUtils;
 
 @Service
 public class AuditService {

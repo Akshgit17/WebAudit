@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.looksee.audit.informationArchitecture.audits.LinksAudit;
+import com.webaudit.audit.informationArchitecture.audits.LinksAudit;
 
 public class LinksAuditTest {
 

@@ -1,4 +1,4 @@
-# Phase 1a — Engine Upgrade
+﻿# Phase 1a — Engine Upgrade
 
 > **Goal:** `brandonkindred/browser-service` builds and all tests pass as a **standalone Maven project** on **Java 21** with **Selenium 4** and **Appium Java Client 9**. No new features. No REST API layer yet — that's phase 1b.
 >
@@ -6,11 +6,11 @@
 >
 > **Repo layout note:** this doc was originally written assuming the engine lived under `engine/` in the new repo. After phase 0 the `engine/` directory was flattened — everything lives at the repo root now. All path references below (e.g. `src/main/java/...`, `pom.xml`, `target/site/jacoco/`) are relative to the repo root. Ignore any stray `engine/` prefix that may still appear in quoted shell snippets.
 >
-> **Reference (read-only):** the old engine in Look-see's `LookseeCore/looksee-browser/` still exists on `claude/extract-browsing-service-MgOw3` if you need to diff anything.
+> **Reference (read-only):** the old engine in WebAudit's `WebAuditCore/webaudit-browser/` still exists on `claude/extract-browsing-service-MgOw3` if you need to diff anything.
 
 ## Why this phase exists first
 
-When the subtree split moved `looksee-browser/` into the new repo, the module came without its parent. Its current `pom.xml` still references `<parent>com.looksee:A11yParent</parent>`, which doesn't resolve. The engine can't compile right now. Fixing that also gives us a clean moment to take the Selenium 3 → 4 and Appium 7 → 9 hit without mixing it with net-new API code.
+When the subtree split moved `webaudit-browser/` into the new repo, the module came without its parent. Its current `pom.xml` still references `<parent>com.webaudit:A11yParent</parent>`, which doesn't resolve. The engine can't compile right now. Fixing that also gives us a clean moment to take the Selenium 3 → 4 and Appium 7 → 9 hit without mixing it with net-new API code.
 
 ## Scope
 
@@ -46,7 +46,7 @@ Confirm the engine is currently broken the expected way:
 
 ```powershell
 mvn -q compile
-# Expected: failure resolving parent com.looksee:A11yParent:0.5.0
+# Expected: failure resolving parent com.webaudit:A11yParent:0.5.0
 ```
 
 ## Step 1 — Replace `pom.xml`
@@ -79,12 +79,7 @@ Replace the file wholesale with the version below. Summary of changes:
     <description>Selenium/Appium-based browser automation engine powering the Browser Service.</description>
     <url>https://github.com/brandonkindred/browser-service</url>
 
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>https://opensource.org/licenses/MIT</url>
-        </license>
-    </licenses>
+    
 
     <properties>
         <java.version>21</java.version>
@@ -324,7 +319,7 @@ Selenium 4 is largely source-compatible but has three known breaks that affect t
 
 Selenium 4 removed the `(WebDriver, long)` constructor in favor of `(WebDriver, Duration)`.
 
-**File:** `src/main/java/com/looksee/browser/Browser.java`
+**File:** `src/main/java/com/webaudit/browser/Browser.java`
 
 ```diff
 +import java.time.Duration;
@@ -338,13 +333,13 @@ Selenium 4 removed the `(WebDriver, long)` constructor in favor of `(WebDriver, 
  }
 ```
 
-Also check `src/main/java/com/looksee/browser/MobileDevice.java` for the same pattern — the `waitForPageToLoad()` method needs identical treatment.
+Also check `src/main/java/com/webaudit/browser/MobileDevice.java` for the same pattern — the `waitForPageToLoad()` method needs identical treatment.
 
 ### 2.2 BrowserStack — legacy capability keys no longer accepted
 
 `BrowserFactory.createBrowserStackDriver()` passes flat `browserstack.*` capability keys. Selenium 4 enforces W3C, and BrowserStack expects all vendor prefs nested under `bstack:options`.
 
-**File:** `src/main/java/com/looksee/browser/BrowserFactory.java`
+**File:** `src/main/java/com/webaudit/browser/BrowserFactory.java`
 
 Replace the body of `createBrowserStackDriver()` (lines ~151–198 in the current file) with:
 
@@ -388,7 +383,7 @@ private static WebDriver createBrowserStackDriver(String browserType, URL hubUrl
     // Browser-specific options (Chrome only today)
     if ("chrome".equalsIgnoreCase(browserType)) {
         ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("user-agent=LookseeBot");
+        chromeOptions.addArguments("user-agent=WebAuditBot");
         chromeOptions.addArguments("window-size=1920,1080");
         chromeOptions.addArguments("--remote-allow-origins=*");
         caps = caps.merge(chromeOptions);
@@ -428,7 +423,7 @@ Not required, but cheap and matches Chrome's pattern. Skip if it tempts further 
 ### 2.4 Commit
 
 ```powershell
-git add src/main/java/com/looksee/browser/Browser.java src/main/java/com/looksee/browser/MobileDevice.java src/main/java/com/looksee/browser/BrowserFactory.java
+git add src/main/java/com/webaudit/browser/Browser.java src/main/java/com/webaudit/browser/MobileDevice.java src/main/java/com/webaudit/browser/BrowserFactory.java
 git commit -m "refactor(engine): adapt Browser, MobileDevice, BrowserFactory to Selenium 4 APIs"
 ```
 
@@ -436,7 +431,7 @@ git commit -m "refactor(engine): adapt Browser, MobileDevice, BrowserFactory to 
 
 Appium Java Client 8+ deprecated the `DesiredCapabilities`-based constructors in favor of typed `*Options` classes (`UiAutomator2Options`, `XCUITestOptions`). Version 9 removed the old constructors outright.
 
-**File:** `src/main/java/com/looksee/browser/MobileFactory.java`
+**File:** `src/main/java/com/webaudit/browser/MobileFactory.java`
 
 Rewrite `openWithAndroid()`:
 
@@ -509,7 +504,7 @@ private static WebDriver createBrowserStackMobileDriver(String platformType, URL
 Commit:
 
 ```powershell
-git add src/main/java/com/looksee/browser/MobileFactory.java
+git add src/main/java/com/webaudit/browser/MobileFactory.java
 git commit -m "refactor(engine): adapt MobileFactory to Appium 9 typed Options"
 ```
 
@@ -580,7 +575,7 @@ Then open a PR against `main` with title **"Phase 1a: engine upgrade to Java 21 
 - [ ] Java 21 is the source/target.
 - [ ] `mvn -q clean verify` passes from a cold `~/.m2` cache.
 - [ ] Test count is at or near the pre-upgrade total.
-- [ ] No references to `com.looksee:A11yParent` anywhere.
+- [ ] No references to `com.webaudit:A11yParent` anywhere.
 - [ ] PR merged into `main`.
 
 ## What phase 1b will cover
@@ -597,10 +592,10 @@ Phases 1c (Docker/local-dev) and 1d (GitHub Actions CI) follow.
 
 ## Things I noticed while planning — flag if any matter to you
 
-1. **Package names.** Everything is still under `com.looksee.browser.*`. It's tied to Look-see's historical namespace but the service is now a standalone product. Renaming to `io.browserservice.*` would be more honest — but a rename ripples through every file and every test. **Recommendation: leave it for now.** Revisit post-1b if it bothers you. The `groupId` in the pom is `io.browserservice` already, so the public Maven coordinates are clean even if the Java packages lag.
+1. **Package names.** Everything is still under `com.webaudit.browser.*`. It's tied to WebAudit's historical namespace but the service is now a standalone product. Renaming to `io.browserservice.*` would be more honest — but a rename ripples through every file and every test. **Recommendation: leave it for now.** Revisit post-1b if it bothers you. The `groupId` in the pom is `io.browserservice` already, so the public Maven coordinates are clean even if the Java packages lag.
 
 2. **`io.browserservice` groupId.** I picked that as a placeholder. If you want a different coordinate (e.g. `com.brandonkindred.browserservice`, or something tied to a domain you own), change the `<groupId>` in step 1 before committing.
 
 3. **AShot.** The library is essentially unmaintained. It still works under Selenium 4 for viewport-pasting, but long-term we should either replace it with Chrome CDP's `Page.captureScreenshot` (full-page native, Chrome only) or drop the `full_page_ashot` screenshot strategy. **Not a 1a concern.** Note in phase 1b backlog.
 
-4. **Selenium Grid version compatibility.** Existing Look-see services talk to a Selenium 3 Grid (via LookseeIaC). Selenium 4 clients can talk to a Selenium 4 Grid only — the wire protocols diverged. Once browser-service is deployed and LookseeCore is migrated to call it over HTTP, Grid upgrade isn't a problem (the service handles the Selenium 4 side). But if any legacy caller still drives Selenium 3 directly, the Grid upgrade needs coordination. **Not a 1a concern** since phase 1a doesn't touch deployment; flagging for phase 2.
+4. **Selenium Grid version compatibility.** Existing WebAudit services talk to a Selenium 3 Grid (via WebAuditIaC). Selenium 4 clients can talk to a Selenium 4 Grid only — the wire protocols diverged. Once browser-service is deployed and WebAuditCore is migrated to call it over HTTP, Grid upgrade isn't a problem (the service handles the Selenium 4 side). But if any legacy caller still drives Selenium 3 directly, the Grid upgrade needs coordination. **Not a 1a concern** since phase 1a doesn't touch deployment; flagging for phase 2.

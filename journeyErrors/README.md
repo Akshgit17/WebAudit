@@ -1,4 +1,4 @@
-# Journey Errors (Dead-Letter Handler)
+﻿# Journey Errors (Dead-Letter Handler)
 
 Spring Boot microservice that handles failed journey candidate messages. When a journey candidate fails processing in the normal pipeline, this service receives the dead-letter message and marks the journey status as `ERROR`.
 
@@ -82,7 +82,7 @@ Receives a Pub/Sub dead-letter message containing a failed journey candidate.
 | `server.port` | `8080` | HTTP server port |
 | `management.server.port` | `80` | Management endpoint port |
 | `management.health.pubsub.enabled` | `false` | Pub/Sub health check |
-| `logging.file` | `look-see.log` | Log file path |
+| `logging.file` | `WebAudit.log` | Log file path |
 
 ### application.yml (Resilience4j Retry Policies)
 
@@ -103,13 +103,13 @@ Receives a Pub/Sub dead-letter message containing a failed journey candidate.
 - Java 17+
 - Maven 3.x
 - Neo4j instance
-- LookseeCore installed locally (`cd LookseeCore && mvn clean install -DskipTests`)
+- WebAuditCore installed locally (`cd WebAuditCore && mvn clean install -DskipTests`)
 
 ## Build & Run
 
 ```bash
 # Install core dependency
-cd ../LookseeCore && mvn clean install -DskipTests && cd ../journeyErrors
+cd ../WebAuditCore && mvn clean install -DskipTests && cd ../journeyErrors
 
 # Build
 mvn clean package -DskipTests
@@ -146,13 +146,10 @@ This service follows Design by Contract (DbC) principles. Assertions guard non-n
 
 ## Deployment (GCP Cloud Run)
 
-The service is deployed via Terraform as a Cloud Run service with a Pub/Sub dead-letter subscription on the `journey_candidate` topic. See `LookseeIaC/GCP/modules.tf` for the full deployment configuration.
+The service is deployed via Terraform as a Cloud Run service with a Pub/Sub dead-letter subscription on the `journey_candidate` topic. See `WebAuditIaC/GCP/modules.tf` for the full deployment configuration.
 
 ```bash
 docker build --no-cache -t gcr.io/<PROJECT_ID>/journey-errors:<version> .
 docker push gcr.io/<PROJECT_ID>/journey-errors:<version>
 ```
 
-## License
-
-Licensed under the MIT License. See [LICENSE.md](LICENSE.md) for details.

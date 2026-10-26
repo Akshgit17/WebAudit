@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import com.looksee.models.enums.AuditLevel;
+import com.webaudit.models.enums.AuditLevel;
 
 class AuditStartRequestTest {
 

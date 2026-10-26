@@ -17,12 +17,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
-import com.looksee.browser.Browser;
-import com.looksee.browser.helpers.BrowserConnectionHelper;
-import com.looksee.browser.enums.BrowserEnvironment;
-import com.looksee.browser.enums.BrowserType;
-import com.looksee.services.BrowserService;
-import com.looksee.browser.utils.HtmlUtils;
+import com.webaudit.browser.Browser;
+import com.webaudit.browser.helpers.BrowserConnectionHelper;
+import com.webaudit.browser.enums.BrowserEnvironment;
+import com.webaudit.browser.enums.BrowserType;
+import com.webaudit.services.BrowserService;
+import com.webaudit.browser.utils.HtmlUtils;
 
 
 /**
@@ -51,7 +51,7 @@ public class BrowserTest {
 		System.out.println("testing 123");
 		try{
 			Browser browser = BrowserConnectionHelper.getConnection(BrowserType.FIREFOX, BrowserEnvironment.DISCOVERY);
-			browser.navigateTo("https://look-see.com");
+			browser.navigateTo("https://WebAudit.com");
 			WebElement element = browser.getDriver().findElement(By.xpath("//li//a[contains(@href,'features.html')]/../../.."));
 			Map<String, String> attributes = browser.extractAttributes(element);
 
@@ -119,7 +119,7 @@ public class BrowserTest {
 	
 	@Test
 	public void verifyCleanUrl() throws MalformedURLException {
-		String url1 = "https://look-see.com";
+		String url1 = "https://WebAudit.com";
 		URL url = new URL(url1);
 		
 		System.err.println("url :: "+url.getHost());

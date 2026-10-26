@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.webaudit</groupId>
+		<artifactId>A11yParent</artifactId>
+		<version>1.1.0</version>
+	</parent>
+
+	<artifactId>A11yMessaging</artifactId>
+	<name>A11y Core Messaging</name>
+	<description>Pusher real-time broadcasting and messaging configuration</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.webaudit</groupId>
+			<artifactId>A11yModels</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.pusher</groupId>
+			<artifactId>pusher-http-java</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-autoconfigure</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-messaging</artifactId>
+		</dependency>
+
+		<!-- Observability (Wave 2) -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-context</artifactId>
+		</dependency>
+
+		<!--
+		    Needed at compile time so TracingPubSubPublisher and the
+		    auto-configuration can reference PubSubTemplate. Marked
+		    `optional` so services that don't use Pub/Sub (e.g. tests in
+		    other WebAudit-* modules) don't inherit it transitively.
+		-->
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

@@ -1,4 +1,4 @@
-# Journey Map Cleanup
+﻿# Journey Map Cleanup
 
 Spring Boot microservice that cleans up stale journey candidates in domain maps to prevent orphaned data from accumulating.
 
@@ -71,7 +71,7 @@ Receives a Pub/Sub push message (scheduled trigger) to initiate cleanup.
 | `server.port` | `8080` | HTTP server port |
 | `management.server.port` | `80` | Management endpoint port |
 | `management.health.pubsub.enabled` | `false` | Pub/Sub health check |
-| `logging.file` | `look-see.log` | Log file path |
+| `logging.file` | `WebAudit.log` | Log file path |
 
 ### application.yml (Resilience4j Retry Policies)
 
@@ -93,13 +93,13 @@ Receives a Pub/Sub push message (scheduled trigger) to initiate cleanup.
 - Java 17+
 - Maven 3.x
 - Neo4j instance
-- LookseeCore installed locally (`cd LookseeCore && mvn clean install -DskipTests`)
+- WebAuditCore installed locally (`cd WebAuditCore && mvn clean install -DskipTests`)
 
 ## Build & Run
 
 ```bash
 # Install core dependency
-cd ../LookseeCore && mvn clean install -DskipTests && cd ../journey-map-cleanup
+cd ../WebAuditCore && mvn clean install -DskipTests && cd ../journey-map-cleanup
 
 # Build
 mvn clean package -DskipTests
@@ -136,7 +136,7 @@ A single GitHub Actions workflow (`docker-ci.yml`) handles both testing and rele
 
 - **Triggers:** Push to `main` or pull requests to `main`
 - **Jobs:**
-  1. `test` -- Builds LookseeCore, runs Maven tests
+  1. `test` -- Builds WebAuditCore, runs Maven tests
   2. `bump-version` -- Semantic version bump via Node.js semantic-release
   3. `build-and-release` -- Docker build and push to Docker Hub (`deepthought42/journey-map-cleanup`)
   4. `github-release` -- Creates GitHub Release with CHANGELOG
@@ -147,13 +147,10 @@ This service follows Design by Contract (DbC) principles. Assertions are enabled
 
 ## Deployment (GCP Cloud Run)
 
-The service is deployed via Terraform as a Cloud Run service with a Pub/Sub push subscription to the `journey_completion_cleanup` topic. See `LookseeIaC/GCP/modules.tf` for the full deployment configuration.
+The service is deployed via Terraform as a Cloud Run service with a Pub/Sub push subscription to the `journey_completion_cleanup` topic. See `WebAuditIaC/GCP/modules.tf` for the full deployment configuration.
 
 ```bash
 docker build --no-cache -t gcr.io/<PROJECT_ID>/journey-map-cleanup:<version> .
 docker push gcr.io/<PROJECT_ID>/journey-map-cleanup:<version>
 ```
 
-## License
-
-This project is licensed under the terms specified in the [LICENSE](LICENSE) file.

@@ -1,10 +1,10 @@
-# Element Enrichment
+﻿# Element Enrichment
 
 Spring Boot microservice that enriches page element states with visual and semantic metadata using headless browser inspection.
 
 ## Overview
 
-The **Element Enrichment** service is part of the Look-see audit pipeline. After PageBuilder creates a page state with its DOM elements, this service loads the page in a headless Chrome browser and enriches each element with computed visual properties (such as background colors) that cannot be determined from static HTML alone.
+The **Element Enrichment** service is part of the WebAudit audit pipeline. After PageBuilder creates a page state with its DOM elements, this service loads the page in a headless Chrome browser and enriches each element with computed visual properties (such as background colors) that cannot be determined from static HTML alone.
 
 **Role in the platform:**
 
@@ -98,13 +98,13 @@ Environment-specific settings (Pub/Sub topics, Neo4j credentials, Selenium URLs)
 - Maven 3.x
 - Neo4j instance
 - Selenium Chrome instance
-- LookseeCore installed locally (`cd LookseeCore && mvn clean install -DskipTests`)
+- WebAuditCore installed locally (`cd WebAuditCore && mvn clean install -DskipTests`)
 
 ## Build & Run
 
 ```bash
 # Install core dependency
-cd ../LookseeCore && mvn clean install -DskipTests && cd ../element-enrichment
+cd ../WebAuditCore && mvn clean install -DskipTests && cd ../element-enrichment
 
 # Build
 mvn clean package -DskipTests
@@ -141,13 +141,10 @@ This service follows Design by Contract (DbC) principles. Assertions are enabled
 
 ## Deployment (GCP Cloud Run)
 
-The service is deployed via Terraform as a Cloud Run service with a Pub/Sub push subscription to the `page_created` topic. See `LookseeIaC/GCP/modules.tf` for the full deployment configuration.
+The service is deployed via Terraform as a Cloud Run service with a Pub/Sub push subscription to the `page_created` topic. See `WebAuditIaC/GCP/modules.tf` for the full deployment configuration.
 
 ```bash
 docker build --no-cache -t gcr.io/<PROJECT_ID>/element-enrichment:<version> .
 docker push gcr.io/<PROJECT_ID>/element-enrichment:<version>
 ```
 
-## License
-
-Licensed under the MIT License. See [LICENSE.md](LICENSE.md) for details.

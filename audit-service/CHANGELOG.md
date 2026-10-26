@@ -1,4 +1,4 @@
-## [1.0.33](https://github.com/deepthought42/audit-service/compare/v1.0.32...v1.0.33) (2026-02-21)
+﻿## [1.0.33](https://github.com/deepthought42/audit-service/compare/v1.0.32...v1.0.33) (2026-02-21)
 
 
 ### Bug Fixes
@@ -155,7 +155,7 @@
 
 ### Bug Fixes
 
-* changed location of looksee core auto config in properties ([f44e1aa](https://github.com/deepthought42/audit-service/commit/f44e1aaeae391f06d6094d082dc84a7d29899b49))
+* changed location of WebAudit core auto config in properties ([f44e1aa](https://github.com/deepthought42/audit-service/commit/f44e1aaeae391f06d6094d082dc84a7d29899b49))
 
 ## [1.0.11](https://github.com/deepthought42/audit-service/compare/v1.0.10...v1.0.11) (2025-07-17)
 

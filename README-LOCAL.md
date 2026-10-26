@@ -1,130 +1,137 @@
-# Local Deployment
+﻿# WebAudit — Local Deployment Guide
 
-Run the full Look-see audit pipeline on your laptop with one command.
+Run the full WebAudit automated auditing pipeline on your local workstation with one command.
 
 ## Prerequisites
 
-- Docker 24+ with Compose v2 (BuildKit is required and is the default)
-- ~8 GB free RAM
-- ~10 GB free disk for images and the Maven cache
+- **Docker 24+** with Compose v2 (BuildKit is required and enabled by default)
+- **RAM**: ~8 GB free RAM recommended
+- **Disk**: ~10 GB free disk space for container images and local Maven dependencies
 
-## Quick start
+## Quick Start
 
 ```bash
 cp .env.local.example .env
 docker compose up --build
 ```
 
-The first build resolves Maven dependencies and compiles `LookseeCore` plus 13 services; expect 10-20 minutes on first run. Subsequent runs hit the BuildKit cache (`id=looksee-m2`) and start in seconds.
+The first build resolves Maven dependencies and compiles the shared core library plus 13 services; expect 10–20 minutes on first run. Subsequent runs leverage the BuildKit cache mount (`id=webaudit-m2`) and start in seconds.
 
-Once everything is healthy:
+Once all containers report healthy:
 
 | Service | URL | Notes |
 |---|---|---|
-| Angular UI | http://localhost:4200 | Local stack, Auth0 bypassed |
-| CrawlerAPI | http://localhost:9080 | REST API; `/actuator/health` returns `UP` |
-| Neo4j browser | http://localhost:7474 | login: `neo4j` / `change-me` (see security note) |
-| Pub/Sub emulator | http://localhost:8085 | REST API for the GCP emulator |
+| WebAudit UI (React 18) | http://localhost:4200 | Local web dashboard (Auth0 bypassed) |
+| CrawlerAPI | http://localhost:9080 | REST API; `/actuator/health` returns `{"status":"UP"}` |
+| Neo4j Browser | http://localhost:7474 | Cypher console; credentials: `neo4j` / `change-me` |
+| Pub/Sub Emulator | http://localhost:8085 | REST endpoint for Google Cloud Pub/Sub emulator |
 
-The other 11 Java services run on the internal docker network only; they communicate via Pub/Sub and Neo4j.
+The remaining 11 backend worker services communicate internally across the Docker network (`webaudit-net`) via Pub/Sub topics and Neo4j graph storage.
 
-### Security note
+---
 
-The stack ships with a placeholder Neo4j password (`change-me`), an
-anonymous-principal Spring profile that bypasses Auth0, and a permissive
-CORS policy. These defaults are safe only for a loopback-only `docker
-compose up`. **Rotate `NEO4J_PASSWORD` in `.env` (and re-run `docker
-compose up -d --build`) before exposing this stack to any non-loopback
-network**, and treat the `local` Spring profile as a development-only
-construct - never set `SPRING_PROFILES_ACTIVE=local` on a host reachable
-from outside your laptop.
+### Security Note
 
-## What the stack contains
+The local stack ships with a development Neo4j password (`change-me`), an anonymous-principal Spring profile that bypasses Auth0, and a permissive CORS policy. These defaults are designed strictly for loopback local testing (`localhost` / `127.0.0.1`).
+
+> [!WARNING]
+> Rotate `NEO4J_PASSWORD` in `.env` before exposing any port to non-loopback interfaces. Never activate `SPRING_PROFILES_ACTIVE=local` in internet-facing environments.
+
+---
+
+## Architecture of the Local Stack
 
 ```
 docker compose up --build
-├── neo4j                    (Neo4j 5.20 community)
-├── neo4j-bootstrap          (one-shot: applies create-indexes-and-constraints.cql)
-├── pubsub-emulator          (gcloud beta emulators pubsub start)
-├── pubsub-bootstrap         (one-shot: creates topics + subscriptions)
-├── crawlerapi               (Java 21, port 9080)
-├── pagebuilder
-├── auditmanager
-├── contentaudit
-├── visualdesignaudit
-├── informationarchitectureaudit
-├── journeyexecutor
-├── journeyexpander
-├── auditservice
-├── elementenrichment
-├── journeymapcleanup
-├── journeyerrors
-├── broadcaster
-└── ui                       (Angular 17, port 4200)
+├── neo4j                    (Neo4j 5.20 Community Edition graph database)
+├── neo4j-bootstrap          (Applies schema indexes and uniqueness constraints)
+├── pubsub-emulator          (Google Cloud Pub/Sub emulator: port 8085)
+├── pubsub-bootstrap         (Initializes topics and push subscriptions)
+├── crawlerapi               (Public REST API: Java 21 / Spring Boot 3, port 9080)
+├── pagebuilder              (Headless Chrome / Selenium DOM extraction worker)
+├── auditmanager             (Page audit lifecycle and worker orchestrator)
+├── contentaudit             (Alt text, readability, and paragraph analysis)
+├── visualdesignaudit        (Color contrast AA/AAA, typography, and spacing)
+├── informationarchitectureaudit (Headings, semantic structure, forms, tables, links)
+├── journeyexecutor          (Selenium headless browser journey runner)
+├── journeyexpander          (Interactive element discovery & state expander)
+├── auditservice             (Audit progress aggregator)
+├── elementenrichment        (Visual and semantic element metadata enrichment)
+├── journeymapcleanup        (Stale candidate journey cleaner)
+├── journeyerrors            (Dead-letter queue / journey failure handler)
+├── broadcaster              (Real-time event broadcaster)
+└── ui                       (React 18 / Vite dashboard, port 4200)
 ```
 
-## How Auth0 is bypassed
+---
 
-The CrawlerAPI's `SecurityConfig` is annotated `@Profile("!local")`, so under the `local` profile it is replaced by `LocalSecurityConfig` which permits all requests. Set `SPRING_PROFILES_ACTIVE=local` in `.env` (the default in `.env.local.example`). To use a real Auth0 tenant instead:
+## Authentication Configuration
 
-```env
-SPRING_PROFILES_ACTIVE=
-AUTH0_DOMAIN=your-tenant.us.auth0.com
-AUTH0_CLIENT_ID=...
-AUTH0_AUDIENCE=https://api.your-domain.com
-```
+In local mode, `CrawlerAPI` activates `LocalSecurityConfig`, bypassing Auth0 authentication so you can test immediately without credentials.
 
-Then rebuild just CrawlerAPI and the UI:
+To connect a real Auth0 tenant instead:
+
+1. In `.env`, clear the local profile:
+   ```env
+   SPRING_PROFILES_ACTIVE=
+   AUTH0_DOMAIN=your-tenant.us.auth0.com
+   AUTH0_CLIENT_ID=...
+   AUTH0_AUDIENCE=https://api.your-domain.com
+   ```
+2. Rebuild CrawlerAPI and UI:
+   ```bash
+   docker compose up -d --no-deps --build crawlerapi ui
+   ```
+
+---
+
+## Verifying the Stack
 
 ```bash
-docker compose up -d --no-deps --build crawlerapi ui
-```
-
-## Verifying the stack
-
-```bash
-# Containers up
+# Check container status
 docker compose ps
 
-# CrawlerAPI health
+# Verify CrawlerAPI health check
 curl -s http://localhost:9080/actuator/health
-# -> {"status":"UP"}
+# Expected: {"status":"UP"}
 
-# Pub/Sub topics
-curl -s http://localhost:8085/v1/projects/looksee-local/topics
+# Verify Pub/Sub topics in emulator
+curl -s http://localhost:8085/v1/projects/webaudit-local/topics
 
-# Neo4j indexes (from inside the neo4j container)
+# Inspect Neo4j indexes
 docker compose exec neo4j cypher-shell -u neo4j -p change-me 'SHOW INDEXES'
 
-# UI
+# Access the UI
 open http://localhost:4200
 ```
 
-## Common operations
+---
+
+## Common Operations
 
 ```bash
-# View logs for one service
+# View real-time logs for a specific service
 docker compose logs -f crawlerapi
 
-# Rebuild a single service after a code change
+# Rebuild a single service after making code changes
 docker compose up -d --no-deps --build crawlerapi
 
-# Reset all state (drops Neo4j data and Pub/Sub topics)
+# Reset all persistent state (drops Neo4j database and emulator topics)
 docker compose down -v
 
-# Open a shell in CrawlerAPI
+# Open a shell inside a container
 docker compose exec crawlerapi sh
 ```
 
-## Architecture notes
+---
 
-- **LookseeCore** is built from source inside each service Dockerfile via a shared BuildKit cache mount (`id=looksee-m2`). The first service build populates the cache; subsequent services reuse it, so total build time grows by Maven download time only once.
-- **Spring Cloud GCP** picks up `PUBSUB_EMULATOR_HOST` automatically and routes all Pub/Sub traffic to the emulator container — no GCP project or service-account JSON is needed.
-- **Health checks** use Spring Actuator `/actuator/health` on each Java service. Compose waits for `crawlerapi: service_healthy` before starting the UI.
-- **The 11 internal services** intentionally do not publish host ports. To debug one, drop a `docker-compose.override.yml` with a `ports:` entry; Compose merges it automatically.
+## Local Development Notes
 
-## Limitations
+- **Shared Core Library**: WebAudit Core (`WebAuditCore`) is built once inside the shared BuildKit cache mount (`id=webaudit-m2`). Subsequent services reuse the cached `.m2` repository artifacts.
+- **Pub/Sub Routing**: Spring Cloud GCP connects automatically to `PUBSUB_EMULATOR_HOST=pubsub-emulator:8085`. No Google Cloud credentials or cloud project are required locally.
+- **Selenium Chrome**: Headless browser automation runs inside the `selenium-chrome` container (`standalone-chrome:125.0`) exposed at `http://selenium-chrome:4444/wd/hub`.
+- **Health Checks**: Containers use Spring Boot Actuator (`/actuator/health`). Compose waits for `crawlerapi` to be healthy before bringing up the UI.
 
-- The Pusher real-time broadcast is a no-op locally (Pusher keys are empty). The UI still loads; live audit progress just isn't pushed.
-- Stripe, Segment, and GCP Vision/NLP integrations are not wired locally. Code paths that touch them will log warnings and short-circuit.
-- The broadcaster's upstream Dockerfile expects pre-baked GCP credentials and a Gmail credentials JSON; the shared local Dockerfile (`scripts/local/Dockerfile.java-service.local`) skips both. Email notifications from the broadcaster will be disabled locally.
+### Known Local Environment Limitations
+- **Pusher Broadcast**: Real-time push updates are no-op when Pusher credentials are blank in `.env`. The UI remains fully functional via direct REST polling.
+- **Third-Party Integrations**: Stripe, Segment, and GCP Cloud Vision/NLP APIs are disabled locally unless valid credentials are supplied.

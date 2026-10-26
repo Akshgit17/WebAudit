@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import com.looksee.audit.informationArchitecture.audits.TitleAndHeaderAudit;
+import com.webaudit.audit.informationArchitecture.audits.TitleAndHeaderAudit;
 
 public class TitleAndHeaderAuditTest {
 

@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.looksee.exceptions.UnknownAccountException;
-import com.looksee.models.TestUser;
-import com.looksee.models.repository.TestUserRepository;
+import com.webaudit.exceptions.UnknownAccountException;
+import com.webaudit.models.TestUser;
+import com.webaudit.models.repository.TestUserRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

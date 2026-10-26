@@ -10,8 +10,8 @@ import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.looksee.audit.informationArchitecture.audits.VisualPresentationAudit;
-import com.looksee.models.audit.GenericIssue;
+import com.webaudit.audit.informationArchitecture.audits.VisualPresentationAudit;
+import com.webaudit.models.audit.GenericIssue;
 
 public class VisualPresentationAuditTest {
 

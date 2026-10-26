@@ -1,0 +1,303 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.webaudit</groupId>
+	<artifactId>A11yParent</artifactId>
+	<version>1.1.0</version>
+	<packaging>pom</packaging>
+	<name>WebAudit Core Parent</name>
+	<description>Parent POM for the modularized WebAudit Core library</description>
+
+	<modules>
+		<module>webaudit-models</module>
+		<module>webaudit-persistence</module>
+		<module>webaudit-browser</module>
+		<module>webaudit-messaging</module>
+		<module>webaudit-gcp</module>
+		<module>webaudit-nlp</module>
+		<module>webaudit-utils</module>
+		<module>webaudit-llm</module>
+		<module>webaudit-browsing-client</module>
+		<module>webaudit-core</module>
+	</modules>
+
+	<properties>
+		<selenium-version>3.141.59</selenium-version>
+		<appium-version>7.6.0</appium-version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>17</java.version>
+		<springboot.version>2.6.13</springboot.version>
+		<lombok.version>1.18.30</lombok.version>
+		<spring-cloud-gcp.version>3.9.5</spring-cloud-gcp.version>
+		<WebAudit.version>1.1.0</WebAudit.version>
+		<!-- Observability stack (Wave 2 of architecture review) -->
+		<micrometer.version>1.10.13</micrometer.version>
+		<opentelemetry.version>1.32.0</opentelemetry.version>
+		<opentelemetry-instrumentation.version>1.32.0-alpha</opentelemetry-instrumentation.version>
+		<logstash-encoder.version>7.4</logstash-encoder.version>
+		<!-- Test infra (Testcontainers + Awaitility) for migration & idempotency
+		     integration tests added in #87. Skipped automatically when Docker
+		     is unavailable via @Testcontainers(disabledWithoutDocker = true). -->
+		<testcontainers.version>1.19.8</testcontainers.version>
+		<awaitility.version>4.2.0</awaitility.version>
+		<!-- Surefire tag filter. Default-skip the requires-docker tag so
+		     plain `mvn test` runs without Docker. Override on the CLI to
+		     opt in: `-DexcludedGroups=` (clear) plus
+		     `-Dgroups=requires-docker` (run only those tests). -->
+		<excludedGroups>requires-docker</excludedGroups>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${springboot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>2021.0.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>spring-cloud-gcp-dependencies</artifactId>
+				<version>${spring-cloud-gcp.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>libraries-bom</artifactId>
+				<version>26.63.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- Internal module versions -->
+			<dependency>
+				<groupId>com.webaudit</groupId>
+				<artifactId>A11yModels</artifactId>
+				<version>${WebAudit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.webaudit</groupId>
+				<artifactId>A11yPersistence</artifactId>
+				<version>${WebAudit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.webaudit</groupId>
+				<artifactId>A11yBrowser</artifactId>
+				<version>${WebAudit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.webaudit</groupId>
+				<artifactId>A11yBrowsingClient</artifactId>
+				<version>${WebAudit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.webaudit</groupId>
+				<artifactId>A11yMessaging</artifactId>
+				<version>${WebAudit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.webaudit</groupId>
+				<artifactId>A11yGcp</artifactId>
+				<version>${WebAudit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.webaudit</groupId>
+				<artifactId>A11yNlp</artifactId>
+				<version>${WebAudit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.webaudit</groupId>
+				<artifactId>A11yUtils</artifactId>
+				<version>${WebAudit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.webaudit</groupId>
+				<artifactId>A11yLlm</artifactId>
+				<version>${WebAudit.version}</version>
+			</dependency>
+
+			<!-- ============================================================
+			     Observability stack (Wave 2 of architecture review)
+			     ============================================================ -->
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-core</artifactId>
+				<version>${micrometer.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-registry-stackdriver</artifactId>
+				<version>${micrometer.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-registry-prometheus</artifactId>
+				<version>${micrometer.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry</groupId>
+				<artifactId>opentelemetry-api</artifactId>
+				<version>${opentelemetry.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry</groupId>
+				<artifactId>opentelemetry-sdk</artifactId>
+				<version>${opentelemetry.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry</groupId>
+				<artifactId>opentelemetry-context</artifactId>
+				<version>${opentelemetry.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry</groupId>
+				<artifactId>opentelemetry-exporter-otlp</artifactId>
+				<version>${opentelemetry.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry.instrumentation</groupId>
+				<artifactId>opentelemetry-logback-mdc-1.0</artifactId>
+				<version>${opentelemetry-instrumentation.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.logstash.logback</groupId>
+				<artifactId>logstash-logback-encoder</artifactId>
+				<version>${logstash-encoder.version}</version>
+			</dependency>
+
+			<!-- ============================================================
+			     Test infra: Testcontainers BOM unifies all testcontainers-*
+			     artifact versions across the monorepo.
+			     ============================================================ -->
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers-bom</artifactId>
+				<version>${testcontainers.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.awaitility</groupId>
+				<artifactId>awaitility</artifactId>
+				<version>${awaitility.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${lombok.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>5.8.2</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>4.5.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.13.0</version>
+					<configuration>
+						<source>${java.version}</source>
+						<target>${java.version}</target>
+						<encoding>UTF-8</encoding>
+						<annotationProcessorPaths>
+							<path>
+								<groupId>org.projectlombok</groupId>
+								<artifactId>lombok</artifactId>
+								<version>${lombok.version}</version>
+							</path>
+						</annotationProcessorPaths>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.22.2</version>
+					<configuration>
+						<includes>
+							<include>**/*Test.java</include>
+							<include>**/*Tests.java</include>
+						</includes>
+						<excludes>
+							<exclude>**/Abstract*.java</exclude>
+						</excludes>
+						<!-- JUnit 5 tag-based filter. Tests tagged
+						     "requires-docker" are excluded by default so
+						     plain `mvn test` works without Docker. The value
+						     is sourced from the `excludedGroups` POM property
+						     (default `requires-docker`); override on the CLI
+						     to opt in:
+						         mvn test -DexcludedGroups= -Dgroups=requires-docker
+						     The property indirection is required because a
+						     hardcoded `<excludedGroups>` in plugin
+						     `<configuration>` wins over `-DexcludedGroups=`,
+						     so the opt-in command would otherwise be a no-op. -->
+						<excludedGroups>${excludedGroups}</excludedGroups>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.11</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>report</id>
+							<phase>test</phase>
+							<goals>
+								<goal>report</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>3.2.1</version>
+					<executions>
+						<execution>
+							<id>attach-sources</id>
+							<goals>
+								<goal>jar-no-fork</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>

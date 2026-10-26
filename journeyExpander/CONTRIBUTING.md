@@ -1,4 +1,4 @@
-# Contribution Guidelines
+﻿# Contribution Guidelines
 
 ## Commit Message Format
 We follow [Conventional Commits](https://www.conventionalcommits.org/).
@@ -30,7 +30,7 @@ docs: update README with architecture and testing sections
 
 1. **Clone** the repository.
 2. **Ensure** Java 17+ and Maven 3.8+ are installed.
-3. **Build**: `mvn clean package` (automatically downloads `com.looksee:core` via `scripts/download-core.sh`).
+3. **Build**: `mvn clean package` (automatically downloads `com.webaudit:core` via `scripts/download-core.sh`).
 4. **Run tests**: `mvn test`.
 
 ## Design by Contract

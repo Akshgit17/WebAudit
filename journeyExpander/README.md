@@ -1,4 +1,4 @@
-# journeyExpander
+﻿# journeyExpander
 
 `journeyExpander` receives verified journeys and expands them into candidate journeys by appending valid next interactions discovered on the journey's resulting page.
 
@@ -34,7 +34,7 @@ POST /  (Pub/Sub push)
 | `Application` | Spring Boot entry point |
 | `AuditController` | REST endpoint handling journey expansion logic |
 
-### External dependencies (from `com.looksee:core`)
+### External dependencies (from `com.webaudit:core`)
 
 - **Services**: `DomainService`, `JourneyService`, `DomainMapService`, `AuditRecordService`, `PageStateService`, `StepService`
 - **Models**: `Journey`, `Step` (`SimpleStep`, `LandingStep`), `PageState`, `ElementState`, `Domain`, `DomainMap`
@@ -145,9 +145,6 @@ The multi-stage Dockerfile uses Maven 3.9.6 + Eclipse Temurin 17 for building an
 
 ## Development
 - Commit style follows Conventional Commits (see `CONTRIBUTING.md`).
-- `scripts/download-core.sh` runs during Maven `validate` to fetch the `com.looksee:core` artifact used by this service.
+- `scripts/download-core.sh` runs during Maven `validate` to fetch the `com.webaudit:core` artifact used by this service.
 - `scripts/update-version.sh` is used by semantic-release to bump the version in `pom.xml`.
 
-## License
-
-Apache License 2.0 — see `LICENSE`.

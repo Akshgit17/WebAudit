@@ -1,6 +1,6 @@
-# Phase 4b — element-enrichment Cutover
+﻿# Phase 4b — element-enrichment Cutover
 
-> **Goal:** Run element-enrichment with `looksee.browsing.mode=remote` against browser-service, staged through staging burn-in → prod flip with the same observability and rollback plan as phase 4a. No call-site refactor required: element-enrichment uses only page-level ops (`navigateTo`, `close`) and element-handle ops (`removeDriftChat`, `enrichElementStates`), all of which became remote-compatible after phase-3b shipped.
+> **Goal:** Run element-enrichment with `WebAudit.browsing.mode=remote` against browser-service, staged through staging burn-in → prod flip with the same observability and rollback plan as phase 4a. No call-site refactor required: element-enrichment uses only page-level ops (`navigateTo`, `close`) and element-handle ops (`removeDriftChat`, `enrichElementStates`), all of which became remote-compatible after phase-3b shipped.
 >
 > **Sibling references:** [`phase-4-consumer-cutover.md`](./phase-4-consumer-cutover.md) §4b is the umbrella spec. Phase-4a counterparts: [`phase-4a5-pagebuilder-staging-cutover.md`](./phase-4a5-pagebuilder-staging-cutover.md) and [`phase-4a6-pagebuilder-prod-cutover.md`](./phase-4a6-pagebuilder-prod-cutover.md). This plan mirrors their structure since the cutover shape is identical.
 
@@ -9,8 +9,8 @@
 The umbrella doc identified three browser-using consumers requiring cutover: PageBuilder (phase 4a, in flight), **element-enrichment (phase 4b, this plan)**, and journeyExecutor (phase 4c, pending). Phase 4a will close out when the prod flip + 7-day calm window completes; 4b should be ready to execute the moment that gate clears.
 
 Element-enrichment's browser usage is narrower than PageBuilder's:
-- `element-enrichment/src/main/java/com/looksee/pageBuilder/AuditController.java:115` calls `browser.removeDriftChat()`.
-- `element-enrichment/src/main/java/com/looksee/pageBuilder/AuditController.java:118` calls `browser_service.enrichElementStates(element_states, page_state, browser, url.getHost())`.
+- `element-enrichment/src/main/java/com/webaudit/pageBuilder/AuditController.java:115` calls `browser.removeDriftChat()`.
+- `element-enrichment/src/main/java/com/webaudit/pageBuilder/AuditController.java:118` calls `browser_service.enrichElementStates(element_states, page_state, browser, url.getHost())`.
 
 Both are already remote-compatible after phase-3b (PR #38 merged), so 4b is **deployment-only** — no Java change, no call-site refactor.
 
@@ -18,8 +18,8 @@ Both are already remote-compatible after phase-3b (PR #38 merged), so 4b is **de
 
 | In scope | Out of scope |
 |---|---|
-| element-enrichment `application.yml`: bind `LOOKSEE_BROWSING_*` env vars (mirrors PageBuilder's 4a.3 single-file change) | Any Java change in element-enrichment, LookseeCore, or LookseeIaC modules |
-| Deployment-config wiring for element-enrichment (LookseeIaC Cloud Run module + tfvars), reusing the shared `looksee_browsing_mode` knob and the `plain_environment_variables` parameter from 4a.5 | journeyExecutor work — that's phase 4c, blocked on 4b stable for 7 days |
+| element-enrichment `application.yml`: bind `WebAudit_BROWSING_*` env vars (mirrors PageBuilder's 4a.3 single-file change) | Any Java change in element-enrichment, WebAuditCore, or WebAuditIaC modules |
+| Deployment-config wiring for element-enrichment (WebAuditIaC Cloud Run module + tfvars), reusing the shared `WebAudit_browsing_mode` knob and the `plain_environment_variables` parameter from 4a.5 | journeyExecutor work — that's phase 4c, blocked on 4b stable for 7 days |
 | 48-hour staging burn-in observation procedure (mirrors 4a.5) | Adding new metrics — instrumentation already covers `consumer=element-enrichment` via per-consumer `MeterFilter.commonTags` |
 | 1-hour prod observation + 7-day calm window before 4c (mirrors 4a.6) | Browser-service deployment / prod readiness — owned upstream |
 | Rollback playbook (one-edit revert, identical shape to 4a.5/4a.6) | Per-consumer cost alert authoring — already-armed prereq from umbrella §14.8 |
@@ -28,9 +28,9 @@ Both are already remote-compatible after phase-3b (PR #38 merged), so 4b is **de
 
 | Area | Decision |
 |---|---|
-| Mode knob | **Per-consumer pin, not an inheritance overlay.** Add `element_enrichment_browsing_mode` (string, default `"local"`). The cloud_run module reads `var.element_enrichment_browsing_mode` **directly** (no `coalesce` against the global). Default `"local"` keeps Commit 2 inert in every environment — including staging where 4a.5 already set `looksee_browsing_mode="remote"` — preserving the staged-flip gate that the shared-knob design would have bypassed. The shared `looksee_browsing_mode` remains in tfvars but is read only by consumers that haven't yet adopted a per-consumer override (today, only page-builder pre-retrofit). Coarse "flip everything" via the global only affects unadopted consumers; surgical pinning is the everyday path. (Earlier drafts of this plan documented `coalesce(per_consumer, global)` for inheritance, but with default `"local"` the per-consumer var is never null so coalesce never falls through — Codex flagged the same misleading framing on the 4c plan in PR #65; corrected here for consistency.) |
+| Mode knob | **Per-consumer pin, not an inheritance overlay.** Add `element_enrichment_browsing_mode` (string, default `"local"`). The cloud_run module reads `var.element_enrichment_browsing_mode` **directly** (no `coalesce` against the global). Default `"local"` keeps Commit 2 inert in every environment — including staging where 4a.5 already set `WebAudit_browsing_mode="remote"` — preserving the staged-flip gate that the shared-knob design would have bypassed. The shared `WebAudit_browsing_mode` remains in tfvars but is read only by consumers that haven't yet adopted a per-consumer override (today, only page-builder pre-retrofit). Coarse "flip everything" via the global only affects unadopted consumers; surgical pinning is the everyday path. (Earlier drafts of this plan documented `coalesce(per_consumer, global)` for inheritance, but with default `"local"` the per-consumer var is never null so coalesce never falls through — Codex flagged the same misleading framing on the 4c plan in PR #65; corrected here for consistency.) |
 | Smoke-check enable | Per-consumer `element_enrichment_smoke_check_enabled` tfvar (default false). Independent burn-in observation per consumer, identical to the `page_builder_smoke_check_enabled` pattern. |
-| Smoke-check target URL / interval / browser | Reuse the existing shared tfvars (`looksee_browsing_smoke_check_target_url`, `_interval`). Keep the surface flat — these aren't consumer-specific. |
+| Smoke-check target URL / interval / browser | Reuse the existing shared tfvars (`WebAudit_browsing_smoke_check_target_url`, `_interval`). Keep the surface flat — these aren't consumer-specific. |
 | Burn-in window | 48 hours staging (umbrella §4b.2 inherits §4a.5). 1 hour prod observation + 7-day calm before 4c. |
 | Call-site migration | None. Both element-enrichment call sites (`AuditController.java:115`, `:118`) are already remote-safe after phase-3b. |
 
@@ -41,10 +41,10 @@ Both are already remote-compatible after phase-3b (PR #38 merged), so 4b is **de
 ## Prerequisites — must be GO before execution
 
 - [x] Phase-3b code merged to main (PR #38, commit `748d42a`). Without it, `removeDriftChat` + `enrichElementStates` throw on remote.
-- [x] element-enrichment pinned to LookseeCore ≥0.8.2 (`element-enrichment/pom.xml` line 49: `<version>0.8.2</version>`).
+- [x] element-enrichment pinned to WebAuditCore ≥0.8.2 (`element-enrichment/pom.xml` line 49: `<version>0.8.2</version>`).
 - [ ] **4a stable in prod for 7 days** (phase 4a.6 calm window elapsed without rollback or anomaly). This is the hard gate; the consumer-side wiring (Step 1 below) can land before this clears since it's inert without the tfvar flip.
 - [ ] **Smoke-check still green** for `consumer=page-builder` at the time of 4b kickoff. Indicates browser-service is healthy enough to bring on a second consumer.
-- [ ] **Open question (must be resolved before Step 2):** element-enrichment has no Cloud Run module in `LookseeIaC/GCP/modules.tf`. PageBuilder, audit-manager, audit-service, journey-executor, journey-expander, content-audit, visual-design-audit, and information-architecture-audit all have modules; element-enrichment does not. Either:
+- [ ] **Open question (must be resolved before Step 2):** element-enrichment has no Cloud Run module in `WebAuditIaC/GCP/modules.tf`. PageBuilder, audit-manager, audit-service, journey-executor, journey-expander, content-audit, visual-design-audit, and information-architecture-audit all have modules; element-enrichment does not. Either:
   - (a) it's deployed via a different IaC mechanism (separate repo, manual Cloud Run deploy, Cloud Build trigger) that needs identifying, or
   - (b) it isn't productionized yet in this IaC topology — meaning 4b.2 deployment work is premature until it is.
 
@@ -52,46 +52,46 @@ The user/team must clarify before Step 2 lands. Step 1 (consumer-side `applicati
 
 ## Execution plan — 3 commits across 1–2 repos
 
-### Commit 1 (element-enrichment) — `feat(config): wire looksee browsing env vars (phase-4b)`
+### Commit 1 (element-enrichment) — `feat(config): wire WebAudit browsing env vars (phase-4b)`
 
-Edit `element-enrichment/src/main/resources/application.yml`. Append to the file (mirrors PageBuilder's 4a.3 + 4a.5 combined yaml shape, since element-enrichment's existing yaml has no `looksee:` block today):
+Edit `element-enrichment/src/main/resources/application.yml`. Append to the file (mirrors PageBuilder's 4a.3 + 4a.5 combined yaml shape, since element-enrichment's existing yaml has no `WebAudit:` block today):
 
 ```yaml
-# LookseeCore browsing configuration. Default mode is `local` — every instance
+# WebAuditCore browsing configuration. Default mode is `local` — every instance
 # opens a local Selenium driver. Flip to `remote` to route browser ops through
-# brandonkindred/browser-service; requires LOOKSEE_BROWSING_SERVICE_URL set.
+# brandonkindred/browser-service; requires WebAudit_BROWSING_SERVICE_URL set.
 # See browser-service/phase-4b-element-enrichment-cutover.md.
-looksee:
+WebAudit:
     browsing:
-        mode: ${LOOKSEE_BROWSING_MODE:local}
-        service-url: ${LOOKSEE_BROWSING_SERVICE_URL:}
-        connect-timeout: ${LOOKSEE_BROWSING_CONNECT_TIMEOUT:5s}
-        read-timeout: ${LOOKSEE_BROWSING_READ_TIMEOUT:120s}
+        mode: ${WebAudit_BROWSING_MODE:local}
+        service-url: ${WebAudit_BROWSING_SERVICE_URL:}
+        connect-timeout: ${WebAudit_BROWSING_CONNECT_TIMEOUT:5s}
+        read-timeout: ${WebAudit_BROWSING_READ_TIMEOUT:120s}
         smoke-check:
-            enabled: ${LOOKSEE_BROWSING_SMOKE_CHECK_ENABLED:false}
-            interval: ${LOOKSEE_BROWSING_SMOKE_CHECK_INTERVAL:60s}
-            target-url: ${LOOKSEE_BROWSING_SMOKE_CHECK_TARGET_URL:https://example.com}
-            browser: ${LOOKSEE_BROWSING_SMOKE_CHECK_BROWSER:CHROME}
+            enabled: ${WebAudit_BROWSING_SMOKE_CHECK_ENABLED:false}
+            interval: ${WebAudit_BROWSING_SMOKE_CHECK_INTERVAL:60s}
+            target-url: ${WebAudit_BROWSING_SMOKE_CHECK_TARGET_URL:https://example.com}
+            browser: ${WebAudit_BROWSING_SMOKE_CHECK_BROWSER:CHROME}
 ```
 
 Defaults preserve current behavior. No Dockerfile change (Cloud Run reads env at runtime, not build-time, same finding as 4a.3 for PageBuilder).
 
-PR title: **"feat(config): wire looksee browsing env vars for phase-4b cutover"**.
+PR title: **"feat(config): wire WebAudit browsing env vars for phase-4b cutover"**.
 
-### Commit 2 (LookseeIaC) — `feat(element-enrichment): add cloud_run module + cutover env vars`
+### Commit 2 (WebAuditIaC) — `feat(element-enrichment): add cloud_run module + cutover env vars`
 
 **Contingent on resolving the open question above.** If element-enrichment has no Cloud Run module today, this commit creates one mirroring `module "page_builder_cloud_run"` (same pattern, adjusted for element-enrichment's resource sizing, pubsub topics, and image variable). Plus:
 
-- New tfvar `element_enrichment_browsing_mode` (string, default `"local"`). **Default is `"local"`, not the global `var.looksee_browsing_mode`, so this commit lands inert in every environment** — including staging where `var.looksee_browsing_mode=remote` from 4a.5. The actual flip happens in 3a/3b.
+- New tfvar `element_enrichment_browsing_mode` (string, default `"local"`). **Default is `"local"`, not the global `var.WebAudit_browsing_mode`, so this commit lands inert in every environment** — including staging where `var.WebAudit_browsing_mode=remote` from 4a.5. The actual flip happens in 3a/3b.
 - New tfvar `element_enrichment_smoke_check_enabled` (bool, default `false`).
 - New tfvar `element_enrichment_image` (string, default `"docker.io/deepthought42/element-enrichment:latest"` — adjust to actual image name).
-- Wire `LOOKSEE_BROWSING_*` via `plain_environment_variables`. The mode env var reads `var.element_enrichment_browsing_mode` directly — no `coalesce` against the global. Per-consumer pin is the design; the global knob does not affect this consumer once the per-consumer override exists.
+- Wire `WebAudit_BROWSING_*` via `plain_environment_variables`. The mode env var reads `var.element_enrichment_browsing_mode` directly — no `coalesce` against the global. Per-consumer pin is the design; the global knob does not affect this consumer once the per-consumer override exists.
 
 If element-enrichment is deployed via a different mechanism, this commit goes wherever that lives. The substantive constraint stays identical: per-consumer mode override defaults to `"local"` so Commit 2 cannot flip the consumer just by landing.
 
 PR title: **"feat(element-enrichment): cutover env vars (phase-4b)"**.
 
-### Commit 3 (LookseeIaC, **staging then prod tfvars**) — `chore(<env>): flip element-enrichment to remote browsing`
+### Commit 3 (WebAuditIaC, **staging then prod tfvars**) — `chore(<env>): flip element-enrichment to remote browsing`
 
 Two **separate** PRs, identical-shape, staggered by the staging burn-in:
 
@@ -103,10 +103,10 @@ Once Commit 2 has landed and browser-service-staging is reachable:
 # Staging tfvars override
 element_enrichment_browsing_mode       = "remote"
 element_enrichment_smoke_check_enabled = true
-# looksee_browsing_service_url is already set in staging from 4a.5 —
+# WebAudit_browsing_service_url is already set in staging from 4a.5 —
 # no change needed there. Element-enrichment's per-consumer mode
 # override (above) is what actually flips this consumer to remote;
-# the shared looksee_browsing_mode from 4a.5 is unrelated to this
+# the shared WebAudit_browsing_mode from 4a.5 is unrelated to this
 # consumer's revision since the module reads its own override directly.
 ```
 
@@ -146,9 +146,9 @@ PR titles: **"chore(staging): flip element-enrichment to remote browsing (phase-
 
 ### Per-commit
 
-- Commit 1: `cd element-enrichment && mvn compile` — no behavior change with default env vars. The `LookseeBrowsingProperties` bean is present transitively via the `A11yCore` 0.8.2 pin; no extra dependency add needed.
+- Commit 1: `cd element-enrichment && mvn compile` — no behavior change with default env vars. The `WebAuditBrowsingProperties` bean is present transitively via the `A11yCore` 0.8.2 pin; no extra dependency add needed.
 - Commit 2: `terraform plan` — shows new module + env vars added; non-staging environments unchanged because tfvar defaults preserve current behavior.
-- Commit 3a: `terraform plan` against staging shows `LOOKSEE_BROWSING_SMOKE_CHECK_ENABLED=true` flip on element-enrichment revision. (`LOOKSEE_BROWSING_MODE=remote` is already in place from 4a.5.)
+- Commit 3a: `terraform plan` against staging shows `WebAudit_BROWSING_SMOKE_CHECK_ENABLED=true` flip on element-enrichment revision. (`WebAudit_BROWSING_MODE=remote` is already in place from 4a.5.)
 - Commit 3b: same against prod once 3a is signed off.
 
 ### Post-deploy (per environment)
@@ -171,17 +171,17 @@ Two granularities, both one-edit:
   element_enrichment_smoke_check_enabled = false
   ```
   Both are required: `CapturePageSmokeCheck.prepare()` throws `IllegalStateException` on startup if `smoke-check.enabled=true` while `mode!=remote` (the mode-gate added in 4a.4 to prevent false-green metrics from a local-mode probe). Flipping mode without disabling the watchdog crash-loops the next Cloud Run revision and turns rollback into an outage. Page-builder is unaffected because it reads its own `page_builder_browsing_mode` override.
-- **Coarse / multi-consumer**: only useful for consumers that haven't adopted a per-consumer pin (today, page-builder pre-retrofit). Setting `looksee_browsing_mode = "local"` flips those; consumers with their own `<consumer>_browsing_mode` pin are unaffected because their cloud_run module reads the per-consumer variable directly (no inheritance via `coalesce`). To roll back multiple per-consumer-pinned consumers at once, edit each consumer's pin individually — there is no shared rollback knob in this design. Trade-off accepted to preserve the staged-flip gate. For each consumer being rolled back with its watchdog on, also flip its `<consumer>_smoke_check_enabled = false` for the mode-gate crash-loop reason.
+- **Coarse / multi-consumer**: only useful for consumers that haven't adopted a per-consumer pin (today, page-builder pre-retrofit). Setting `WebAudit_browsing_mode = "local"` flips those; consumers with their own `<consumer>_browsing_mode` pin are unaffected because their cloud_run module reads the per-consumer variable directly (no inheritance via `coalesce`). To roll back multiple per-consumer-pinned consumers at once, edit each consumer's pin individually — there is no shared rollback knob in this design. Trade-off accepted to preserve the staged-flip gate. For each consumer being rolled back with its watchdog on, also flip its `<consumer>_smoke_check_enabled = false` for the mode-gate crash-loop reason.
 
 Per-consumer overrides being the default means the surgical case is the everyday path; the coarse path is the emergency button.
 
 ## Critical files
 
 - `element-enrichment/src/main/resources/application.yml` — Commit 1
-- `LookseeIaC/GCP/modules.tf` — Commit 2 (new `element_enrichment_cloud_run` module, contingent on resolving the open question)
-- `LookseeIaC/GCP/variables.tf` — Commit 2 (new tfvars)
-- `LookseeIaC/<staging tfvars>` — Commit 3a
-- `LookseeIaC/<prod tfvars>` — Commit 3b
+- `WebAuditIaC/GCP/modules.tf` — Commit 2 (new `element_enrichment_cloud_run` module, contingent on resolving the open question)
+- `WebAuditIaC/GCP/variables.tf` — Commit 2 (new tfvars)
+- `WebAuditIaC/<staging tfvars>` — Commit 3a
+- `WebAuditIaC/<prod tfvars>` — Commit 3b
 
 ## Issue + PRs
 
@@ -190,7 +190,7 @@ One tracking issue covering all three commits, since the burn-in is the unit of 
 ## Definition of done
 
 - [x] Commit 1 merged (consumer-side wiring).
-- [x] Commit 2 merged (LookseeIaC element-enrichment module + tfvars).
+- [x] Commit 2 merged (WebAuditIaC element-enrichment module + tfvars).
 - [x] Commit 3a merged + applied (staging flip).
 - [x] 48 consecutive hours of green staging burn-in.
 - [x] Commit 3b merged + applied (prod flip).

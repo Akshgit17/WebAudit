@@ -13,16 +13,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.invocation.InvocationOnMock;
 
-import com.looksee.audit.informationArchitecture.audits.TitleAndHeaderAudit;
-import com.looksee.models.PageState;
-import com.looksee.models.audit.Audit;
-import com.looksee.models.audit.AuditRecord;
-import com.looksee.models.audit.Score;
-import com.looksee.models.audit.messages.UXIssueMessage;
-import com.looksee.models.designsystem.DesignSystem;
-import com.looksee.services.AuditService;
-import com.looksee.services.UXIssueMessageService;
-import com.looksee.utils.BrowserUtils;
+import com.webaudit.audit.informationArchitecture.audits.TitleAndHeaderAudit;
+import com.webaudit.models.PageState;
+import com.webaudit.models.audit.Audit;
+import com.webaudit.models.audit.AuditRecord;
+import com.webaudit.models.audit.Score;
+import com.webaudit.models.audit.messages.UXIssueMessage;
+import com.webaudit.models.designsystem.DesignSystem;
+import com.webaudit.services.AuditService;
+import com.webaudit.services.UXIssueMessageService;
+import com.webaudit.utils.BrowserUtils;
 
 public class TitleAndHeaderAuditExecuteTest {
 

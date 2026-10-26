@@ -1,4 +1,4 @@
-# E2E Pub/Sub pipeline smoke test
+﻿# E2E Pub/Sub pipeline smoke test
 
 Driver invoked by `.github/workflows/e2e-pipeline.yml` (Wave 5.1 of the
 architecture review).
@@ -18,7 +18,7 @@ Specifically, `run.sh`:
    `audit_update`, `audit_error`) has been provisioned in the emulator by
    the workflow setup step.
 3. Creates a throwaway pull subscription on `url`, publishes a synthetic
-   `com.looksee.mapper.Body` envelope with:
+   `com.webaudit.mapper.Body` envelope with:
    - a Base64-encoded JSON `UrlMessage` payload,
    - W3C `traceparent` and `tracestate` attributes, and
    - a `source` attribute for provenance tagging.
@@ -55,17 +55,17 @@ npm, no pip install required.
 ```sh
 # Start the emulator and Neo4j (same as the workflow does):
 docker run -d --rm --name pubsub-emulator -p 8085:8085 \
-  -e PUBSUB_PROJECT_ID=looksee-test \
+  -e PUBSUB_PROJECT_ID=WebAudit-test \
   gcr.io/google.com/cloudsdktool/cloud-sdk:emulators \
   gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
 docker run -d --rm --name neo4j-smoke -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/looksee-test-password \
+  -e NEO4J_AUTH=neo4j/WebAudit-test-password \
   neo4j:5-community
 
 # Create the canonical topics (the workflow does this; locally do it manually):
 for t in url page_created page_audit audit_update audit_error; do
   curl -fsS -X PUT \
-    "http://localhost:8085/v1/projects/looksee-test/topics/$t" \
+    "http://localhost:8085/v1/projects/WebAudit-test/topics/$t" \
     -H 'content-type: application/json' -d '{}'
 done
 

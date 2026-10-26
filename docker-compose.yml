@@ -1,4 +1,4 @@
-# Look-see local-development stack.
+﻿# WebAudit local-development stack.
 # Usage:
 #   cp .env.local.example .env
 #   docker compose up --build
@@ -14,7 +14,7 @@
 # any one of them, create a docker-compose.override.yml that adds a port map.
 
 x-java-volumes: &java-volumes
-  - ./scripts/local/local-overrides.properties:/etc/looksee/local-overrides.properties:ro
+  - ./scripts/local/local-overrides.properties:/etc/webaudit/local-overrides.properties:ro
 
 x-java-env: &java-env
   # Use `-` (not `:-`) so an *empty* SPRING_PROFILES_ACTIVE in .env is
@@ -22,15 +22,15 @@ x-java-env: &java-env
   # disable the local profile when switching to real Auth0. Compose's
   # `:-` would otherwise replace an empty value with `local`.
   SPRING_PROFILES_ACTIVE: "${SPRING_PROFILES_ACTIVE-local}"
-  SPRING_CONFIG_ADDITIONAL_LOCATION: "optional:file:/etc/looksee/local-overrides.properties"
+  SPRING_CONFIG_ADDITIONAL_LOCATION: "optional:file:/etc/webaudit/local-overrides.properties"
   NEO4J_BOLT_URI: "${NEO4J_BOLT_URI:-bolt://neo4j:7687}"
   NEO4J_USERNAME: "${NEO4J_USERNAME:-neo4j}"
   NEO4J_PASSWORD: "${NEO4J_PASSWORD:-change-me}"
   NEO4J_DATABASE_NAME: "${NEO4J_DATABASE_NAME:-neo4j}"
-  PROJECT_ID: "${PROJECT_ID:-looksee-local}"
+  PROJECT_ID: "${PROJECT_ID:-webaudit-local}"
   PUBSUB_EMULATOR_HOST: "${PUBSUB_EMULATOR_HOST:-pubsub-emulator:8085}"
   SPRING_CLOUD_GCP_PUBSUB_EMULATOR_HOST: "${PUBSUB_EMULATOR_HOST:-pubsub-emulator:8085}"
-  SPRING_CLOUD_GCP_PROJECT_ID: "${PROJECT_ID:-looksee-local}"
+  SPRING_CLOUD_GCP_PROJECT_ID: "${PROJECT_ID:-webaudit-local}"
   SPRING_CLOUD_GCP_CREDENTIALS_LOCATION: ""
   GCP_CREDENTIALS_LOCATION: ""
   URL_TOPIC: "${URL_TOPIC:-url-topic}"
@@ -74,8 +74,8 @@ services:
       NEO4J_AUTH: "${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:-change-me}"
       NEO4J_PLUGINS: '["apoc"]'
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
     volumes:
       - neo4j-data:/data
       - neo4j-logs:/logs
@@ -88,7 +88,7 @@ services:
       timeout: 10s
       retries: 30
       start_period: 30s
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   neo4j-bootstrap:
     image: neo4j:5.20-community
@@ -103,27 +103,27 @@ services:
       SRC_CQL: /init/create-indexes-and-constraints.cql
       LOCAL_DEV_USER_ID: "${LOCAL_DEV_USER_ID:-local-dev-user}"
     volumes:
-      - ./LookseeIaC/create-indexes-and-constraints.cql:/init/create-indexes-and-constraints.cql:ro
+      - ./scripts/local/create-indexes-and-constraints.cql:/init/create-indexes-and-constraints.cql:ro
       - ./scripts/local/neo4j-bootstrap.sh:/init/bootstrap.sh:ro
     entrypoint: ["bash", "/init/bootstrap.sh"]
     restart: "no"
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   pubsub-emulator:
     image: gcr.io/google.com/cloudsdktool/cloud-sdk:emulators
     command: >
       gcloud beta emulators pubsub start
       --host-port=0.0.0.0:8085
-      --project=${PROJECT_ID:-looksee-local}
+      --project=${PROJECT_ID:-webaudit-local}
     ports:
-      - "8085:8085"
+      - "127.0.0.1:8085:8085"
     healthcheck:
       test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8085'"]
       interval: 5s
       timeout: 5s
       retries: 30
       start_period: 15s
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   selenium-chrome:
     image: selenium/standalone-chrome:125.0
@@ -132,14 +132,14 @@ services:
       SE_NODE_MAX_SESSIONS: "4"
       SE_SESSION_REQUEST_TIMEOUT: "60"
     ports:
-      - "4444:4444"
+      - "127.0.0.1:4444:4444"
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:4444/status | grep -q '\"ready\": true'"]
       interval: 5s
       timeout: 5s
       retries: 30
       start_period: 20s
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   pubsub-bootstrap:
     image: curlimages/curl:8.7.1
@@ -147,7 +147,7 @@ services:
       pubsub-emulator:
         condition: service_healthy
     environment:
-      PROJECT_ID: "${PROJECT_ID:-looksee-local}"
+      PROJECT_ID: "${PROJECT_ID:-webaudit-local}"
       PUBSUB_EMULATOR_HOST: "${PUBSUB_EMULATOR_HOST:-pubsub-emulator:8085}"
       URL_TOPIC: "${URL_TOPIC:-url-topic}"
       PAGE_AUDIT_TOPIC: "${PAGE_AUDIT_TOPIC:-page-audit-topic}"
@@ -163,7 +163,7 @@ services:
       - ./scripts/local/pubsub-bootstrap.sh:/init/bootstrap.sh:ro
     entrypoint: ["sh", "/init/bootstrap.sh"]
     restart: "no"
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   # ----- Java services -----
   #
@@ -189,14 +189,14 @@ services:
     environment: *java-env
     volumes: *java-volumes
     ports:
-      - "9080:9080"
+      - "127.0.0.1:9080:9080"
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:9080/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 20
       start_period: 60s
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   pagebuilder:
     build:
@@ -206,7 +206,7 @@ services:
     depends_on: *java-depends
     environment: *java-env
     volumes: *java-volumes
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   auditmanager:
     build:
@@ -216,7 +216,7 @@ services:
     depends_on: *java-depends
     environment: *java-env
     volumes: *java-volumes
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   contentaudit:
     build:
@@ -226,7 +226,7 @@ services:
     depends_on: *java-depends
     environment: *java-env
     volumes: *java-volumes
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   visualdesignaudit:
     build:
@@ -236,7 +236,7 @@ services:
     depends_on: *java-depends
     environment: *java-env
     volumes: *java-volumes
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   informationarchitectureaudit:
     build:
@@ -246,7 +246,7 @@ services:
     depends_on: *java-depends
     environment: *java-env
     volumes: *java-volumes
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   journeyexecutor:
     build:
@@ -256,7 +256,7 @@ services:
     depends_on: *java-depends
     environment: *java-env
     volumes: *java-volumes
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   journeyexpander:
     build:
@@ -266,7 +266,7 @@ services:
     depends_on: *java-depends
     environment: *java-env
     volumes: *java-volumes
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   auditservice:
     build:
@@ -276,7 +276,7 @@ services:
     depends_on: *java-depends
     environment: *java-env
     volumes: *java-volumes
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   elementenrichment:
     build:
@@ -286,7 +286,7 @@ services:
     depends_on: *java-depends
     environment: *java-env
     volumes: *java-volumes
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   journeymapcleanup:
     build:
@@ -296,7 +296,7 @@ services:
     depends_on: *java-depends
     environment: *java-env
     volumes: *java-volumes
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   journeyerrors:
     build:
@@ -306,24 +306,24 @@ services:
     depends_on: *java-depends
     environment: *java-env
     volumes: *java-volumes
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   broadcaster:
     build:
       context: .
       dockerfile: scripts/local/Dockerfile.java-service.local
-      args: { SERVICE_DIR: look-see-front-end-broadcaster }
+      args: { SERVICE_DIR: webaudit-front-end-broadcaster }
     depends_on: *java-depends
     environment: *java-env
     volumes: *java-volumes
-    networks: [looksee-net]
+    networks: [webaudit-net]
 
   # ----- UI -----
 
   ui:
     build:
       context: .
-      dockerfile: Look-see-UI-v3/Dockerfile.local
+      dockerfile: WebAudit-UI/Dockerfile.local
     depends_on:
       crawlerapi:
         condition: service_healthy
@@ -340,11 +340,11 @@ services:
       PUSHER_SECRET: "${PUSHER_SECRET:-}"
       PUSHER_CLUSTER: "${PUSHER_CLUSTER:-}"
     ports:
-      - "4200:4200"
-    networks: [looksee-net]
+      - "127.0.0.1:4200:4200"
+    networks: [webaudit-net]
 
 networks:
-  looksee-net:
+  webaudit-net:
     driver: bridge
 
 volumes:

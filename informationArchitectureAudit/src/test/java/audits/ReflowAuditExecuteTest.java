@@ -15,16 +15,16 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.looksee.audit.informationArchitecture.audits.ReflowAudit;
-import com.looksee.models.ElementState;
-import com.looksee.models.PageState;
-import com.looksee.models.audit.Audit;
-import com.looksee.models.audit.AuditRecord;
-import com.looksee.models.audit.messages.UXIssueMessage;
-import com.looksee.models.designsystem.DesignSystem;
-import com.looksee.services.AuditService;
-import com.looksee.services.ElementStateService;
-import com.looksee.services.PageStateService;
+import com.webaudit.audit.informationArchitecture.audits.ReflowAudit;
+import com.webaudit.models.ElementState;
+import com.webaudit.models.PageState;
+import com.webaudit.models.audit.Audit;
+import com.webaudit.models.audit.AuditRecord;
+import com.webaudit.models.audit.messages.UXIssueMessage;
+import com.webaudit.models.designsystem.DesignSystem;
+import com.webaudit.services.AuditService;
+import com.webaudit.services.ElementStateService;
+import com.webaudit.services.PageStateService;
 
 public class ReflowAuditExecuteTest {
 

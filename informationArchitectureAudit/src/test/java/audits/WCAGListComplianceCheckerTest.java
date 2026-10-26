@@ -10,8 +10,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Test;
 
-import com.looksee.audit.informationArchitecture.models.ListStructureAudit;
-import com.looksee.audit.informationArchitecture.models.WcagEmphasisComplianceAudit;
+import com.webaudit.audit.informationArchitecture.models.ListStructureAudit;
+import com.webaudit.audit.informationArchitecture.models.WcagEmphasisComplianceAudit;
 
 public class WCAGListComplianceCheckerTest {
 

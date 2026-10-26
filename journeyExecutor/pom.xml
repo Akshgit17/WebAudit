@@ -1,6 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+﻿<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   	<modelVersion>4.0.0</modelVersion>
-  	<groupId>com.looksee</groupId>
+  	<groupId>com.webaudit</groupId>
   	<artifactId>A11yJourneyExecutor</artifactId>
   	<version>1.1.2</version>
 	<packaging>jar</packaging>
@@ -50,7 +50,7 @@
 	    <!-- Phase-4c: drives Spring Boot's MetricsAutoConfiguration so the
 	         CompositeMeterRegistry + management.metrics.export.stackdriver.* binding
 	         exist. Required for the BrowsingClientMetricsConfig common tag to attach
-	         to a real registry rather than the looksee-messaging fallback
+	         to a real registry rather than the webaudit-messaging fallback
 	         SimpleMeterRegistry. -->
 	    <dependency>
 	      <groupId>org.springframework.boot</groupId>
@@ -85,7 +85,7 @@
 	    </dependency>
 
 		<dependency>
-            <groupId>com.looksee</groupId>
+            <groupId>com.webaudit</groupId>
             <artifactId>A11yCore</artifactId>
             <version>${core.version}</version>
         </dependency>
@@ -131,7 +131,7 @@
 								</rule>
 							</rules>
 							<excludes>
-								<exclude>com/looksee/journeyExecutor/AuditController*</exclude>
+								<exclude>com/webaudit/journeyExecutor/AuditController*</exclude>
 							</excludes>
 						</configuration>
 					</execution>
@@ -155,7 +155,7 @@
 				<version>${springboot.version}</version>
 				<configuration>
 					<fork>true</fork>
-					<mainClass>com.looksee.journeyExecutor.Application</mainClass>
+					<mainClass>com.webaudit.journeyExecutor.Application</mainClass>
 				</configuration>
 				<executions>
 					<execution>

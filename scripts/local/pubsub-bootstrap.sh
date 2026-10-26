@@ -1,14 +1,14 @@
-#!/bin/sh
+﻿#!/bin/sh
 # Bootstrap topics + subscriptions against the GCP Pub/Sub emulator for the
 # local docker-compose stack. Mirrors the topic -> service push wiring from
-# the production Terraform (LookseeIaC/GCP/modules.tf) so the local stack
+# the production Terraform (WebAuditIaC/GCP/modules.tf) so the local stack
 # actually delivers messages between services.
 #
 # Fails loudly (non-zero exit) on any HTTP error so the dependent Java
 # services don't start with a half-bootstrapped messaging layer.
 set -eu
 
-PROJECT_ID="${PROJECT_ID:-looksee-local}"
+PROJECT_ID="${PROJECT_ID:-webaudit-local}"
 EMULATOR_HOST="${PUBSUB_EMULATOR_HOST:-pubsub-emulator:8085}"
 API_URL="http://${EMULATOR_HOST}"
 

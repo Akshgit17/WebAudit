@@ -8,7 +8,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;
 
-import com.looksee.audit.informationArchitecture.models.WcagEmphasisComplianceAudit;
+import com.webaudit.audit.informationArchitecture.models.WcagEmphasisComplianceAudit;
 
 public class WcagEmphasisComplianceAuditTest {
 

@@ -11,9 +11,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
-import com.looksee.exceptions.UnknownAccountException;
-import com.looksee.models.Account;
-import com.looksee.services.AccountService;
+import com.webaudit.exceptions.UnknownAccountException;
+import com.webaudit.models.Account;
+import com.webaudit.services.AccountService;
 
 
 @Validated

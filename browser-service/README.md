@@ -1,18 +1,18 @@
-# Browser Service — Design Draft
+﻿# Browser Service — Design Draft
 
-> **Status:** design draft on Look-see branch `claude/extract-browsing-service-MgOw3`. Nothing in this directory is shipped yet. The contract below is the first thing up for review; once accepted, these artifacts move to the new repo `brandonkindred/browser-service` and implementation begins.
+> **Status:** design draft on WebAudit branch `claude/extract-browsing-service-MgOw3`. Nothing in this directory is shipped yet. The contract below is the first thing up for review; once accepted, these artifacts move to the new repo `brandonkindred/browser-service` and implementation begins.
 
 ## What this is
 
 A standalone HTTP service that exposes Selenium/Appium browser sessions to remote callers. Agents, audit services, and anything else that needs a browser can open a session, drive it, and close it — without embedding a WebDriver library.
 
-The engine is being lifted almost verbatim from `LookseeCore/looksee-browser/` (already a self-contained Java module with zero intra-repo coupling) and wrapped in a Spring Boot REST layer. Selenium 3 / Appium 7 get upgraded to Selenium 4 / Appium 8 during the move.
+The engine is being lifted almost verbatim from `WebAuditCore/webaudit-browser/` (already a self-contained Java module with zero intra-repo coupling) and wrapped in a Spring Boot REST layer. Selenium 3 / Appium 7 get upgraded to Selenium 4 / Appium 8 during the move.
 
 ## Who this is for
 
-- **LookseeCore** — today's consumer. Existing services (PageBuilder, element-enrichment, journeyExecutor, audits, etc.) migrate behind a compatibility shim: `BrowserService` keeps its public signatures but delegates to an HTTP client instead of an in-process `Browser`.
+- **WebAuditCore** — today's consumer. Existing services (PageBuilder, element-enrichment, journeyExecutor, audits, etc.) migrate behind a compatibility shim: `BrowserService` keeps its public signatures but delegates to an HTTP client instead of an in-process `Browser`.
 - **Khala** ([brandonkindred/Khala-Agentic-AI-Teams](https://github.com/brandonkindred/Khala-Agentic-AI-Teams)) — Python agentic-teams project that needs a browsing capability. Talks to this service over plain HTTP; no Java dependency.
-- **Anyone else** — the service is open source (MIT) and intentionally generic. No Look-see domain concepts leak into the public API.
+- **Anyone else** — the service is open source (MIT) and intentionally generic. No WebAudit domain concepts leak into the public API.
 
 ## Session model
 
@@ -65,10 +65,10 @@ For the trivial "open → navigate → screenshot → close" path, `POST /v1/cap
 | Session model | Stateful sessions, opaque `session_id`, idle + absolute TTL |
 | Mobile | Appium (Android / iOS) included. Same session API; mobile gestures use `/element/touch` |
 | Engine | Selenium 4 + Appium Java Client 8 (upgraded from today's Selenium 3 / Appium 7) |
-| Upstream | Existing Selenium Grid (in `LookseeIaC`) + optional BrowserStack — unchanged |
-| Clients | Java client (for LookseeCore's shim). Khala uses the HTTP API directly |
+| Upstream | Existing Selenium Grid (in `WebAuditIaC`) + optional BrowserStack — unchanged |
+| Clients | Java client (for WebAuditCore's shim). Khala uses the HTTP API directly |
 | Concurrency | 20 concurrent sessions per instance; 429 once capped. Horizontal scale via replicas |
-| Licence | MIT (inherited from Look-see) |
+| Licence | MIT (inherited from WebAudit) |
 
 ## Explicitly out of MVP
 
@@ -81,7 +81,7 @@ Listed here so nothing gets forgotten:
 - **MCP server.** The REST endpoints are named so each maps 1:1 to a future MCP tool (`browser.navigate`, `browser.screenshot`, etc.) but no MCP wrapper ships in MVP.
 - **Live-view UI.** Vendors like Browserbase ship a debug panel (VNC/CDP stream). Possible later.
 - **Cloud-storage backends.** Service never uploads to GCS/S3; callers handle storage.
-- **Chrome extension loading.** `LookseeChromeExtension` is a user-facing product unrelated to this service and is not bundled.
+- **Chrome extension loading.** `WebAuditChromeExtension` is a user-facing product unrelated to this service and is not bundled.
 
 ## Files in this directory
 
@@ -92,7 +92,7 @@ Listed here so nothing gets forgotten:
 
 1. **Render the spec.** Paste `openapi.yaml` into <https://editor.swagger.io> or run `npx @redocly/cli preview-docs openapi.yaml` for a browsable view.
 2. **Lint.** `npx @redocly/cli lint openapi.yaml` — must be clean.
-3. **Coverage walk.** Open `LookseeCore/looksee-browser/src/main/java/com/looksee/browser/Browser.java` and `MobileDevice.java`. Every `public` method should map to an endpoint — or be intentionally collapsed (e.g., the four screenshot variants live under one endpoint with a `strategy` field).
+3. **Coverage walk.** Open `WebAuditCore/webaudit-browser/src/main/java/com/webaudit/browser/Browser.java` and `MobileDevice.java`. Every `public` method should map to an endpoint — or be intentionally collapsed (e.g., the four screenshot variants live under one endpoint with a `strategy` field).
 
 ## Engine → endpoint map (for the coverage walk)
 
@@ -131,10 +131,10 @@ This spec is **phase 0**. The whole program, for reviewers who want it:
 | Phase | Work | Status |
 |---|---|---|
 | 0 | Lock the API contract (this directory) | in progress |
-| 1 | Stand up `brandonkindred/browser-service` repo; subtree-move `looksee-browser`; upgrade Selenium 3→4 / Appium 7→8; build Spring Boot REST layer | blocked on phase 0 |
-| 2 | Deploy to staging (Cloud Run via LookseeIaC pattern); load test | |
-| 3 | LookseeCore shim: `BrowsingClient` HTTP client + `mode=local\|remote` flag on `BrowserService`. One `looksee-core` minor-version bump | |
-| 4 | Per-consumer cutover (qa-testbed → element-enrichment → PageBuilder → audits → journeyExecutor/Expander). Each bumps `LOOKSEE_CORE_VERSION`, sets `mode=remote`, canaries | |
-| 5 | Remove `mode=local` path; delete `looksee-browser` module from LookseeCore; major-version bump | |
+| 1 | Stand up `brandonkindred/browser-service` repo; subtree-move `webaudit-browser`; upgrade Selenium 3→4 / Appium 7→8; build Spring Boot REST layer | blocked on phase 0 |
+| 2 | Deploy to staging (Cloud Run via WebAuditIaC pattern); load test | |
+| 3 | WebAuditCore shim: `BrowsingClient` HTTP client + `mode=local\|remote` flag on `BrowserService`. One `webaudit-core` minor-version bump | |
+| 4 | Per-consumer cutover (qa-testbed → element-enrichment → PageBuilder → audits → journeyExecutor/Expander). Each bumps `WEBAUDIT_CORE_VERSION`, sets `mode=remote`, canaries | |
+| 5 | Remove `mode=local` path; delete `webaudit-browser` module from WebAuditCore; major-version bump | |
 
 Each phase ends in a shippable, revertible state.

@@ -9,8 +9,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Test;
 
-import com.looksee.audit.informationArchitecture.audits.FormStructureAudit;
-import com.looksee.models.audit.GenericIssue;
+import com.webaudit.audit.informationArchitecture.audits.FormStructureAudit;
+import com.webaudit.models.audit.GenericIssue;
 
 public class FormStructureAuditTest {
 

@@ -1,0 +1,3 @@
+﻿org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.webaudit.config.WebAuditCoreAutoConfiguration,\
+com.webaudit.config.MessageBroadcasterAutoConfiguration

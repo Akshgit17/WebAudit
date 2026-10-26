@@ -27,8 +27,8 @@ import com.crawlerApi.integrations.IntegrationFacade;
 import com.crawlerApi.integrations.IntegrationMetadata;
 import com.crawlerApi.integrations.IntegrationProvider;
 import com.crawlerApi.integrations.IntegrationWithConfigResponse;
-import com.looksee.models.Account;
-import com.looksee.services.AccountService;
+import com.webaudit.models.Account;
+import com.webaudit.services.AccountService;
 
 @ExtendWith(MockitoExtension.class)
 class IntegrationsControllerTest {

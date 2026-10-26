@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -13,24 +14,24 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 @Profile("local")
 public class LocalSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // Install an anonymous principal so HttpServletRequest.getUserPrincipal()
-        // returns a non-null Principal whose getName() == "local-dev-user".
-        // Several controllers (e.g. AuditorController) call
-        // auth0Service.getCurrentUserAccount(principal) and then log
-        // principal.getName(); a null principal NPEs there. The anonymous
-        // authority lets Spring Security permit the request as part of the
-        // anonymous-allowed chain rather than relying on permitAll alone.
+        // LOCAL-ONLY development security configuration.
+        // Gated strictly on @Profile("local") so this configuration is NEVER loaded
+        // in production or staging environments.
+        // Installs an anonymous principal so HttpServletRequest.getUserPrincipal()
+        // returns a non-null Principal whose getName() == "local-dev-user" with
+        // default development roles and method authorizations.
         http
             .csrf(csrf -> csrf.disable())
             .cors(Customizer.withDefaults())
             .anonymous(anon -> anon
                 .principal("local-dev-user")
-                .authorities("ROLE_USER"))
+                .authorities("ROLE_USER", "read:actions"))
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
         return http.build();
     }

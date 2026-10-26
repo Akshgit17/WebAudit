@@ -1,4 +1,4 @@
-# Information Architecture Accessibility Audit
+﻿# Information Architecture Accessibility Audit
 
 A Spring Boot service that runs page-level information architecture and accessibility audits (WCAG-oriented checks) against stored `PageState` data and emits completion updates.
 
@@ -160,6 +160,3 @@ Please follow `CONTRIBUTING.md` and include:
 - clear commit messages
 - updated documentation when audit behavior changes
 
-## License
-
-See `LICENSE`.

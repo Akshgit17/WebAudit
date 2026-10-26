@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.crawlerApi.integrations.IntegrationFacade;
 import com.crawlerApi.integrations.IntegrationMetadata;
 import com.crawlerApi.integrations.IntegrationWithConfigResponse;
-import com.looksee.exceptions.UnknownAccountException;
-import com.looksee.models.Account;
+import com.webaudit.exceptions.UnknownAccountException;
+import com.webaudit.models.Account;
 import com.nimbusds.jwt.JWT;
 
 import io.swagger.v3.oas.annotations.Operation;

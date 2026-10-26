@@ -18,7 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.crawlerApi.service.Auth0Service;
-import com.looksee.models.Account;
+import com.webaudit.models.Account;
 
 @ExtendWith(MockitoExtension.class)
 class UserInfoControllerTest {

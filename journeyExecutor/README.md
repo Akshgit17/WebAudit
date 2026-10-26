@@ -1,10 +1,10 @@
-# Journey Executor
+﻿# Journey Executor
 
 A Spring Boot microservice that executes user journey workflows by navigating through web pages via a headless Chrome browser, validating journey paths, and publishing verified or discarded journey results to downstream services.
 
 ## Overview
 
-The **Journey Executor** is part of the Look-see accessibility audit platform's journey pipeline. It receives candidate journeys from the Journey Expander, replays each journey's steps in a headless browser, builds the resulting page state, and determines whether the journey is valid (verified) or invalid (discarded).
+The **Journey Executor** is part of the WebAudit accessibility audit platform's journey pipeline. It receives candidate journeys from the Journey Expander, replays each journey's steps in a headless browser, builds the resulting page state, and determines whether the journey is valid (verified) or invalid (discarded).
 
 **Role in the platform:**
 
@@ -98,7 +98,7 @@ Receives a Pub/Sub push message containing a journey candidate for execution.
 | `server.port` | `8080` | HTTP server port |
 | `management.server.port` | `80` | Actuator management port |
 | `management.health.pubsub.enabled` | `false` | Pub/Sub health check |
-| `logging.file` | `look-see.log` | Log file path |
+| `logging.file` | `WebAudit.log` | Log file path |
 
 ### application.yml (Resilience4j Retry Policies)
 
@@ -123,10 +123,10 @@ Environment-specific settings (Pub/Sub topics, Neo4j credentials, Selenium URLs)
 
 ## Build & Run
 
-### 1. Build LookseeCore (required dependency)
+### 1. Build WebAuditCore (required dependency)
 
 ```bash
-cd ../LookseeCore
+cd ../WebAuditCore
 mvn clean install -DskipTests
 cd ../journeyExecutor
 ```
@@ -184,7 +184,7 @@ After running tests, view the HTML coverage report at `target/site/jacoco/index.
 
 Two GitHub Actions workflows:
 
-- **`docker-ci-test.yml`** -- Runs on pull requests to `main`. Builds LookseeCore, runs tests, and performs a Docker build.
+- **`docker-ci-test.yml`** -- Runs on pull requests to `main`. Builds WebAuditCore, runs tests, and performs a Docker build.
 - **`docker-ci-release.yml`** -- Runs on push to `main`. Runs tests, bumps version via Semantic Release, builds and pushes the Docker image to Docker Hub, and creates a GitHub Release.
 
 Versioning is managed by [semantic-release](https://github.com/semantic-release/semantic-release) with Conventional Commits.
@@ -205,8 +205,5 @@ docker build --no-cache -t gcr.io/<PROJECT_ID>/journey-executor:<version> .
 docker push gcr.io/<PROJECT_ID>/journey-executor:<version>
 ```
 
-The service is deployed via Terraform as a Cloud Run service with a Pub/Sub push subscription to the `journey_candidate` topic. See `LookseeIaC/GCP/modules.tf` for the full deployment configuration.
+The service is deployed via Terraform as a Cloud Run service with a Pub/Sub push subscription to the `journey_candidate` topic. See `WebAuditIaC/GCP/modules.tf` for the full deployment configuration.
 
-## License
-
-This project is licensed under the terms specified in the [LICENSE](LICENSE) file.

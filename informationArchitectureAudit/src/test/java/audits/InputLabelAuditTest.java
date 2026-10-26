@@ -14,11 +14,11 @@ import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.looksee.audit.informationArchitecture.models.InputLabelAudit;
-import com.looksee.models.ElementState;
-import com.looksee.models.PageState;
-import com.looksee.models.audit.messages.UXIssueMessage;
-import com.looksee.services.ElementStateService;
+import com.webaudit.audit.informationArchitecture.models.InputLabelAudit;
+import com.webaudit.models.ElementState;
+import com.webaudit.models.PageState;
+import com.webaudit.models.audit.messages.UXIssueMessage;
+import com.webaudit.services.ElementStateService;
 
 public class InputLabelAuditTest {
 

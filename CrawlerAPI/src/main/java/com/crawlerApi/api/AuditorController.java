@@ -21,14 +21,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.crawlerApi.service.Auth0Service;
-import com.looksee.audits.performance.PerformanceInsight;
-import com.looksee.exceptions.AuditCreationException;
-import com.looksee.exceptions.UnknownAccountException;
-import com.looksee.models.Account;
-import com.looksee.models.PageState;
-import com.looksee.models.SimplePage;
-import com.looksee.models.dto.AuditRecordDto;
-import com.looksee.services.PageStateService;
+import com.webaudit.audits.performance.PerformanceInsight;
+import com.webaudit.exceptions.AuditCreationException;
+import com.webaudit.exceptions.UnknownAccountException;
+import com.webaudit.models.Account;
+import com.webaudit.models.PageState;
+import com.webaudit.models.SimplePage;
+import com.webaudit.models.dto.AuditRecordDto;
+import com.webaudit.services.PageStateService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

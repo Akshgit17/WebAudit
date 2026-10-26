@@ -1,6 +1,6 @@
-# Excludes from the docker build context for the local-dev compose stack.
+﻿# Excludes from the docker build context for the local-dev compose stack.
 # Compose services use `build.context: .` (repo root) so they can COPY
-# both LookseeCore and their own service tree. Everything below is either
+# both WebAuditCore and their own service tree. Everything below is either
 # unrelated to those builds or rebuilt inside the container anyway.
 
 # ---- VCS, IDE, OS ----
@@ -42,10 +42,10 @@
 # Browser extensions, VS Code plugin, IaC, docs, and the QA testbed
 # are not built into any compose image. Excluding them keeps the build
 # context small.
-LookseeChromeExtension
-look-see-VSCode-plugin
+WebAuditChromeExtension
+webaudit-vscode-plugin
 browser-service
-LookseeIaC
+WebAuditIaC
 docs
 qa-testbed
 tests

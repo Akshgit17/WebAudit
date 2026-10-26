@@ -13,8 +13,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.crawlerApi.config.Auth0Config;
-import com.looksee.models.Account;
-import com.looksee.services.AccountService;
+import com.webaudit.models.Account;
+import com.webaudit.services.AccountService;
 
 @ExtendWith(MockitoExtension.class)
 class Auth0ServiceTest {

@@ -15,8 +15,8 @@ import com.auth0.exception.Auth0Exception;
 import com.auth0.json.auth.UserInfo;
 import com.auth0.net.Request;
 import com.crawlerApi.config.Auth0Config;
-import com.looksee.models.Account;
-import com.looksee.services.AccountService;
+import com.webaudit.models.Account;
+import com.webaudit.services.AccountService;
 
 @Service
 public class Auth0Service {

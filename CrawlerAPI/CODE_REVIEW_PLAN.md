@@ -1,4 +1,4 @@
-# Code Review Findings and Remediation Plan
+﻿# Code Review Findings and Remediation Plan
 
 ## Review scope and method
 - Ran a baseline build check with `mvn test -q`.
@@ -16,7 +16,7 @@
 - Local setup is fragile and environment-dependent.
 
 **Fix plan**
-1. Replace `system` dependency usage for `com.looksee:core` with one of:
+1. Replace `system` dependency usage for `com.webaudit:core` with one of:
    - private Maven repository artifact publication (preferred), or
    - explicit install step (`mvn install:install-file`) in setup scripts/CI.
 2. Add a repository strategy section to README for Maven mirrors/proxy requirements where Central is restricted.

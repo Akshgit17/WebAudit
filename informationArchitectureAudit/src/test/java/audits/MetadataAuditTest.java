@@ -11,11 +11,11 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.looksee.audit.informationArchitecture.audits.MetadataAudit;
-import com.looksee.models.PageState;
-import com.looksee.models.audit.Score;
-import com.looksee.models.audit.messages.UXIssueMessage;
-import com.looksee.services.UXIssueMessageService;
+import com.webaudit.audit.informationArchitecture.audits.MetadataAudit;
+import com.webaudit.models.PageState;
+import com.webaudit.models.audit.Score;
+import com.webaudit.models.audit.messages.UXIssueMessage;
+import com.webaudit.services.UXIssueMessageService;
 
 public class MetadataAuditTest {
 

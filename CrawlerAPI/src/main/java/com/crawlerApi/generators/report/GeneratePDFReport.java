@@ -17,11 +17,11 @@ import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.joda.time.LocalDate;
 
-import com.looksee.models.ColorData;
-import com.looksee.models.enums.AuditSubcategory;
-import com.looksee.models.enums.WCAGComplianceLevel;
-import com.looksee.utils.ColorUtils;
-import com.looksee.utils.ImageUtils;
+import com.webaudit.models.ColorData;
+import com.webaudit.models.enums.AuditSubcategory;
+import com.webaudit.models.enums.WCAGComplianceLevel;
+import com.webaudit.utils.ColorUtils;
+import com.webaudit.utils.ImageUtils;
 
 public class GeneratePDFReport {
 
@@ -325,7 +325,7 @@ public class GeneratePDFReport {
 		addPage(page);
 		PDPageContentStream content_stream = new PDPageContentStream(document, page);
 	
-		URL background_url =new URL("https://storage.googleapis.com/look-see-inc-assets/report-images/backgrounds/background-path-pattern-light.png");
+		URL background_url =new URL("https://storage.googleapis.com/WebAudit-inc-assets/report-images/backgrounds/background-path-pattern-light.png");
 		addImageToPage(document, 0, 0, 1.0f, background_url, content_stream);
 		
 		content_stream.setNonStrokingColor(Color.WHITE);
@@ -354,7 +354,7 @@ public class GeneratePDFReport {
 		
 		//add emoji icons and scoring
 		//poor score
-		URL needs_work_emoji_url =new URL("https://storage.googleapis.com/look-see-inc-assets/icons/C-Sad-Face-128px.png");
+		URL needs_work_emoji_url =new URL("https://storage.googleapis.com/WebAudit-inc-assets/icons/C-Sad-Face-128px.png");
 		addImageToPage(document, LEFT_MARGIN_LG, 450, 0.3f, needs_work_emoji_url, content_stream);
 		
 		content_stream.setFont(getBoldFont(), HEADER_3);
@@ -2217,7 +2217,7 @@ public class GeneratePDFReport {
 		addPage(page);
 		PDPageContentStream content_stream = new PDPageContentStream(document, page);
 	
-		URL background_url =new URL("https://storage.googleapis.com/look-see-inc-assets/report-images/backgrounds/appendix-background-1.png");
+		URL background_url =new URL("https://storage.googleapis.com/WebAudit-inc-assets/report-images/backgrounds/appendix-background-1.png");
 		addImageToPage(document, -250, -150, 1.2f, background_url, content_stream);
 		
 		content_stream.setFont(getBaseFont(), 56);
@@ -2606,7 +2606,7 @@ public class GeneratePDFReport {
 			content_stream.endText();
 		}
 		else if(AuditSubcategory.IMAGERY.equals(category)) {
-			//URL visuals_icon = new URL("https://storage.googleapis.com/look-see-inc-assets/icons/landscape-icon.png");
+			//URL visuals_icon = new URL("https://storage.googleapis.com/WebAudit-inc-assets/icons/landscape-icon.png");
 			//addImageToPage(document, x, y, 0.4f, visuals_icon, content_stream);
 			
 			content_stream.setFont(getMediumFont(), TEXT_SIZE);
@@ -2906,17 +2906,17 @@ public class GeneratePDFReport {
 
 	private URL getScoreEmojiImage(int overall_score) throws MalformedURLException {
 		if(overall_score >= 80.0) {
-			//return new URL("https://storage.googleapis.com/look-see-inc-assets/icons/C-Happy-Face-128px.png");
+			//return new URL("https://storage.googleapis.com/WebAudit-inc-assets/icons/C-Happy-Face-128px.png");
 			//return new URL(HAPPY_FACE_PNG_URL);
 			return new URL("");
 		}
 		else if(overall_score >= 60.0 && overall_score < 80.0) {
-			//return new URL("https://storage.googleapis.com/look-see-inc-assets/icons/C-Average-Face-128px-2.png");
+			//return new URL("https://storage.googleapis.com/WebAudit-inc-assets/icons/C-Average-Face-128px-2.png");
 			//return new URL(AVERAGE_FACE_PNG_URL);
 			return new URL("");
 		}
 		else {
-			//return new URL("https://storage.googleapis.com/look-see-inc-assets/icons/C-Sad-Face-128px.png");
+			//return new URL("https://storage.googleapis.com/WebAudit-inc-assets/icons/C-Sad-Face-128px.png");
 			//return new URL(SAD_FACE_PNG_URL);
 			return new URL("");
 		}

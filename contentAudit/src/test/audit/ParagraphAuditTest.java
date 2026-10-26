@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.looksee.models.audit.ParagraphingAudit;
+import com.webaudit.models.audit.ParagraphingAudit;
 
 public class ParagraphAuditTest {
 	

@@ -1,6 +1,6 @@
 # QA Testbed
 
-Static HTML test pages used for QA and automated testing of the Look-see accessibility audit platform. These pages contain intentional accessibility issues and patterns for validating audit detection rules.
+Static HTML test pages used for QA and automated testing of the WebAudit accessibility audit platform. These pages contain intentional accessibility issues and patterns for validating audit detection rules.
 
 ## Overview
 
@@ -14,7 +14,7 @@ The QA Testbed provides a collection of test fixture pages that exercise specifi
 
 ### For Development
 
-Point a local Look-see instance at these test pages to verify audit behavior:
+Point a local WebAudit instance at these test pages to verify audit behavior:
 
 1. Serve the test pages locally (e.g., `python3 -m http.server 8000` from this directory)
 2. Start a page or domain audit against `http://localhost:8000/<test-page>.html`

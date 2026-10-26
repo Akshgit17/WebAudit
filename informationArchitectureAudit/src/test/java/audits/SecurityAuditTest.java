@@ -10,13 +10,13 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.looksee.audit.informationArchitecture.audits.SecurityAudit;
-import com.looksee.models.PageState;
-import com.looksee.models.audit.Audit;
-import com.looksee.models.audit.AuditRecord;
-import com.looksee.models.designsystem.DesignSystem;
-import com.looksee.services.AuditService;
-import com.looksee.services.UXIssueMessageService;
+import com.webaudit.audit.informationArchitecture.audits.SecurityAudit;
+import com.webaudit.models.PageState;
+import com.webaudit.models.audit.Audit;
+import com.webaudit.models.audit.AuditRecord;
+import com.webaudit.models.designsystem.DesignSystem;
+import com.webaudit.services.AuditService;
+import com.webaudit.services.UXIssueMessageService;
 
 public class SecurityAuditTest {
 

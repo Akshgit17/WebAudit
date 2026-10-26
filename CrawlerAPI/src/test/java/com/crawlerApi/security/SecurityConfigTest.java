@@ -15,7 +15,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.crawlerApi.config.Auth0Config;
 import com.crawlerApi.service.Auth0Service;
-import com.looksee.models.Account;
+import com.webaudit.models.Account;
 
 @ExtendWith(MockitoExtension.class)
 class SecurityConfigTest {

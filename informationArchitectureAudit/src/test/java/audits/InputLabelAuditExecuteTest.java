@@ -9,12 +9,12 @@ import java.lang.reflect.Field;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.looksee.audit.informationArchitecture.models.InputLabelAudit;
-import com.looksee.models.PageState;
-import com.looksee.models.audit.Audit;
-import com.looksee.models.audit.AuditRecord;
-import com.looksee.services.AuditService;
-import com.looksee.services.ElementStateService;
+import com.webaudit.audit.informationArchitecture.models.InputLabelAudit;
+import com.webaudit.models.PageState;
+import com.webaudit.models.audit.Audit;
+import com.webaudit.models.audit.AuditRecord;
+import com.webaudit.services.AuditService;
+import com.webaudit.services.ElementStateService;
 
 public class InputLabelAuditExecuteTest {
 

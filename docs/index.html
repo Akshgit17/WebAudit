@@ -1,11 +1,11 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en" data-theme="paper">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Look-see — Open-source Accessibility Audit Platform (WCAG 2.1 / 2.2)</title>
-<meta name="description" content="Look-see is an open-source accessibility audit platform for real websites. Automated WCAG 2.1 and 2.2 testing across rendered pixels, user journeys, content, and information architecture.">
-<meta name="keywords" content="accessibility audit, WCAG audit, WCAG 2.1, WCAG 2.2, open source accessibility, a11y, automated accessibility testing, web accessibility scanner, visual design audit, user journey testing, information architecture audit, Look-see">
+<title>WebAudit — Open-source Accessibility Audit Platform (WCAG 2.1 / 2.2)</title>
+<meta name="description" content="WebAudit is an open-source accessibility audit platform for real websites. Automated WCAG 2.1 and 2.2 testing across rendered pixels, user journeys, content, and information architecture.">
+<meta name="keywords" content="accessibility audit, WCAG audit, WCAG 2.1, WCAG 2.2, open source accessibility, a11y, automated accessibility testing, web accessibility scanner, visual design audit, user journey testing, information architecture audit, WebAudit">
 <meta name="author" content="Brandon Kindred and contributors">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="color-scheme" content="light dark">
@@ -16,22 +16,22 @@
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Look-see">
-<meta property="og:title" content="Look-see — Open-source Accessibility Audit Platform">
+<meta property="og:site_name" content="WebAudit">
+<meta property="og:title" content="WebAudit — Open-source Accessibility Audit Platform">
 <meta property="og:description" content="Automated WCAG 2.1 / 2.2 auditing for real websites. Checks rendered pixels, walks user journeys, and reports on the information architecture behind them.">
 <meta property="og:url" content="https://deepthought42.github.io/Accessibility-audit-platform/">
 <meta property="og:image" content="https://deepthought42.github.io/Accessibility-audit-platform/og-card.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Look-see — Open-source accessibility audit platform. WCAG 2.1 / 2.2.">
+<meta property="og:image:alt" content="WebAudit — Open-source accessibility audit platform. WCAG 2.1 / 2.2.">
 <meta property="og:locale" content="en_US">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Look-see — Open-source Accessibility Audit Platform">
+<meta name="twitter:title" content="WebAudit — Open-source Accessibility Audit Platform">
 <meta name="twitter:description" content="Automated WCAG 2.1 / 2.2 auditing for real websites. Rendered pixels, user journeys, content, IA.">
 <meta name="twitter:image" content="https://deepthought42.github.io/Accessibility-audit-platform/og-card.png">
-<meta name="twitter:image:alt" content="Look-see — Open-source accessibility audit platform.">
+<meta name="twitter:image:alt" content="WebAudit — Open-source accessibility audit platform.">
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23f4eee2' stroke='%23111418' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23c16a2c'/%3E%3C/svg%3E">
 
@@ -45,8 +45,8 @@
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "Look-see",
-  "alternateName": "Look-see Accessibility Audit Platform",
+  "name": "WebAudit",
+  "alternateName": "WebAudit Accessibility Audit Platform",
   "applicationCategory": "DeveloperApplication",
   "applicationSubCategory": "Accessibility Testing",
   "operatingSystem": "Web, Linux, Cloud",
@@ -54,7 +54,7 @@
   "url": "https://deepthought42.github.io/Accessibility-audit-platform/",
   "codeRepository": "https://github.com/deepthought42/Accessibility-audit-platform",
   "programmingLanguage": ["Java", "TypeScript", "HTML", "CSS"],
-  "license": "https://opensource.org/licenses/MIT",
+  "license": "",
   "isAccessibleForFree": true,
   "offers": {
     "@type": "Offer",
@@ -89,31 +89,31 @@
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "Does Look-see audit rendered pixels or only HTML?",
+      "name": "Does WebAudit audit rendered pixels or only HTML?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Look-see audits both. Most accessibility tools parse the DOM; Look-see also renders the page in a headless browser and measures color contrast, font sizing, whitespace, and image policy against the rendered output. CSS can lie; a screenshot cannot. A page can pass every rule-based checker and still be unreadable for a human."
+        "text": "WebAudit audits both. Most accessibility tools parse the DOM; WebAudit also renders the page in a headless browser and measures color contrast, font sizing, whitespace, and image policy against the rendered output. CSS can lie; a screenshot cannot. A page can pass every rule-based checker and still be unreadable for a human."
       }
     },
     {
       "@type": "Question",
-      "name": "Can Look-see audit user journeys, not just static URLs?",
+      "name": "Can WebAudit audit user journeys, not just static URLs?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Look-see discovers journeys by scraping interactive elements, executes them in a real headless Chrome session via Selenium, and audits the states that result. Discarded paths are recorded; verified ones are re-expanded until the map is complete. Static analysis misses everything that changes on interaction."
+        "text": "Yes. WebAudit discovers journeys by scraping interactive elements, executes them in a real headless Chrome session via Selenium, and audits the states that result. Discarded paths are recorded; verified ones are re-expanded until the map is complete. Static analysis misses everything that changes on interaction."
       }
     },
     {
       "@type": "Question",
-      "name": "Is Look-see a rule list or a framework?",
+      "name": "Is WebAudit a rule list or a framework?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Look-see is built on LookseeCore — a library of models, persistence, browser automation, messaging, cloud, and now LLM primitives. New audits compose from these without re-plumbing infrastructure. The looksee-llm module adds Anthropic Claude as a provider-agnostic backend, wired with redaction, caching, budgeting, and retries before any feature ships on it."
+        "text": "WebAudit is built on WebAuditCore — a library of models, persistence, browser automation, messaging, cloud, and now LLM primitives. New audits compose from these without re-plumbing infrastructure. The webaudit-llm module adds Anthropic Claude as a provider-agnostic backend, wired with redaction, caching, budgeting, and retries before any feature ships on it."
       }
     },
     {
       "@type": "Question",
-      "name": "Which WCAG versions does Look-see support?",
+      "name": "Which WCAG versions does WebAudit support?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "The platform covers WCAG 2.1 Level AA and AAA; the Visual Studio Code plugin adds WCAG 2.2 rule coverage. Compliance level is configurable per domain."
@@ -121,7 +121,7 @@
     },
     {
       "@type": "Question",
-      "name": "What developer surfaces does Look-see offer?",
+      "name": "What developer surfaces does WebAudit offer?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Three: an Angular web interface that shows live audit progress, a Chrome extension for in-page auditing of live pages without uploading them anywhere, and a Visual Studio Code plugin that lints React, Vue, Angular, and plain HTML for WCAG 2.2 issues as you type."
@@ -151,7 +151,7 @@
     <span>Spring 2026</span>
   </div>
 
-  <h1 class="masthead__title" aria-label="Look-see — Open-source Accessibility Audit Platform">
+  <h1 class="masthead__title" aria-label="WebAudit — Open-source Accessibility Audit Platform">
     <span class="masthead__wordmark" aria-hidden="true">
       <span class="masthead__word">Look</span><span class="masthead__dash">&#8209;</span><span class="masthead__word">see</span>
     </span>
@@ -197,7 +197,7 @@
 
   <div class="prose prose--intro">
     <p class="dropcap">
-      <strong>Look-see</strong> is an open-source platform for finding, explaining, and fixing accessibility issues on real websites.
+      <strong>WebAudit</strong> is an open-source platform for finding, explaining, and fixing accessibility issues on real websites.
       It crawls the pages you ship, walks the journeys your users actually take, and reports on what it sees &mdash;
       in <em>HTML</em>, in <em>rendered pixels</em>, and in the way pages fit together.
     </p>
@@ -307,12 +307,12 @@
   <div class="chapter__head">
     <span class="chapter__num" aria-hidden="true">03</span>
     <h2 id="why-h" class="chapter__title">Why it&apos;s unusual</h2>
-    <p class="chapter__kicker">Three choices that put Look-see somewhere other tools aren&apos;t.</p>
+    <p class="chapter__kicker">Three choices that put WebAudit somewhere other tools aren&apos;t.</p>
   </div>
 
   <figure class="pullquote">
     <blockquote>
-      <p>Most accessibility tools parse the DOM. Look-see also renders the page.</p>
+      <p>Most accessibility tools parse the DOM. WebAudit also renders the page.</p>
     </blockquote>
     <figcaption>&mdash; The design principle behind the visual audit.</figcaption>
   </figure>
@@ -333,7 +333,7 @@
       <h3>It audits journeys, not just URLs.</h3>
       <p>
         Modern applications are state machines. Auditing the landing page is like inspecting a theatre by its lobby.
-        Look-see discovers journeys by scraping interactive elements, executes them in a real browser, and audits the
+        WebAudit discovers journeys by scraping interactive elements, executes them in a real browser, and audits the
         states produced along the way. Discarded paths are recorded; verified ones are re-expanded until the map is
         complete.
       </p>
@@ -342,9 +342,9 @@
       <span class="reasons__num" aria-hidden="true">iii.</span>
       <h3>It&apos;s an engine, not a rule list.</h3>
       <p>
-        Beneath the audit services is <code>LookseeCore</code> &mdash; models, persistence, browser automation,
+        Beneath the audit services is <code>WebAuditCore</code> &mdash; models, persistence, browser automation,
         messaging, cloud, and now LLM. New audits compose from these primitives without re-plumbing infrastructure.
-        The <code>looksee-llm</code> module is the newest: a provider-agnostic layer with Anthropic Claude as the
+        The <code>webaudit-llm</code> module is the newest: a provider-agnostic layer with Anthropic Claude as the
         first backend, wired with redaction, caching, budgeting, and retries before any feature ships on it.
       </p>
     </li>
@@ -451,7 +451,7 @@
       <line x1="510" y1="472" x2="510" y2="510" class="diagram__edge" marker-end="url(#ah)"/>
       <g class="node node--ui" data-role="ui">
         <rect x="380" y="510" width="260" height="36" rx="4"/>
-        <text x="510" y="533" text-anchor="middle" class="node__title">Look-see UI · Angular</text>
+        <text x="510" y="533" text-anchor="middle" class="node__title">WebAudit UI · Angular</text>
       </g>
 
       <!-- annotation -->
@@ -476,7 +476,7 @@
         <h4>Use a graph database for a graph-shaped domain.</h4>
         <p>
           Accounts own Domains, which own Pages, which contain Elements, which participate in Journeys. Those aren't
-          rows &mdash; they are edges. Neo4j lets Look-see query <em>every page where an element appears on a verified
+          rows &mdash; they are edges. Neo4j lets WebAudit query <em>every page where an element appears on a verified
           journey</em> in a single traversal, instead of five joins. Spring Data Neo4j wires 37 repositories into the
           core and every service inherits them.
         </p>
@@ -509,7 +509,7 @@
           Every service is started with <span class="mono">-ea</span>. Preconditions use
           <span class="mono">Objects.requireNonNull</span> and always run; postconditions and invariants use
           <span class="mono">assert</span> and run in test and staging. The contracts are documented, not implied.
-          See <span class="mono">LookseeCore/docs/DESIGN_BY_CONTRACT.md</span>.
+          See <span class="mono">WebAuditCore/docs/DESIGN_BY_CONTRACT.md</span>.
         </p>
       </div>
     </div>
@@ -523,7 +523,7 @@
         <h4>Ship on Cloud Run; deploy with Terraform.</h4>
         <p>
           Each service is a Docker image. Infrastructure &mdash; Pub/Sub topics, Secret Manager entries, Cloud Run
-          services, the Neo4j VM, VPC access &mdash; is declared in <span class="mono">LookseeIaC/GCP</span>. A fresh
+          services, the Neo4j VM, VPC access &mdash; is declared in <span class="mono">WebAuditIaC/GCP</span>. A fresh
           environment is one <span class="mono">terraform apply</span>.
         </p>
       </div>
@@ -544,7 +544,7 @@
       <time class="timeline__date" datetime="2026-04">April 2026</time>
       <h3 class="timeline__title">Browser module extraction</h3>
       <p>
-        <span class="mono">com.looksee.browsing</span> became <span class="mono">com.looksee.browser</span>. Spring
+        <span class="mono">com.webaudit.browsing</span> became <span class="mono">com.webaudit.browser</span>. Spring
         compile-time dependencies were removed. The browser module can now be reused outside the platform &mdash;
         useful for any tool that needs honest, headless page rendering.
       </p>
@@ -562,9 +562,9 @@
 
     <li class="timeline__item timeline__item--accent">
       <time class="timeline__date" datetime="2026-03">March 2026</time>
-      <h3 class="timeline__title"><span class="mono">looksee-llm</span> foundation module</h3>
+      <h3 class="timeline__title"><span class="mono">webaudit-llm</span> foundation module</h3>
       <p>
-        A provider-agnostic LLM layer joined LookseeCore. Anthropic Claude is the first backend &mdash; Opus for full
+        A provider-agnostic LLM layer joined WebAuditCore. Anthropic Claude is the first backend &mdash; Opus for full
         analysis, Haiku for cost-sensitive jobs, Sonnet in the middle. Redaction, Caffeine caching, budgeting,
         Resilience4j retries and Micrometer metrics are wired before the first feature ships on it. Vision input
         is supported so audits can reason about screenshots, not only markup.
@@ -597,33 +597,33 @@
       <span class="linkcard__desc">The monorepo. Services, UI, extensions, infrastructure.</span>
     </a>
 
-    <a class="linkcard" href="https://github.com/deepthought42/Accessibility-audit-platform/tree/main/LookseeCore" rel="noopener">
+    <a class="linkcard" href="https://github.com/deepthought42/Accessibility-audit-platform/tree/main/WebAuditCore" rel="noopener">
       <span class="linkcard__label">Library</span>
-      <span class="linkcard__title">LookseeCore</span>
+      <span class="linkcard__title">WebAuditCore</span>
       <span class="linkcard__desc">Shared models, persistence, browser, messaging, cloud, LLM.</span>
     </a>
 
-    <a class="linkcard" href="https://github.com/deepthought42/Accessibility-audit-platform/tree/main/Look-see-UI-v3" rel="noopener">
+    <a class="linkcard" href="https://github.com/deepthought42/Accessibility-audit-platform/tree/main/WebAudit-UI" rel="noopener">
       <span class="linkcard__label">Frontend</span>
-      <span class="linkcard__title">Look-see-UI-v3</span>
+      <span class="linkcard__title">WebAudit-UI</span>
       <span class="linkcard__desc">Angular 17 interface. Real-time audit progress over Pusher.</span>
     </a>
 
-    <a class="linkcard" href="https://github.com/deepthought42/Accessibility-audit-platform/tree/main/look-see-VSCode-plugin" rel="noopener">
+    <a class="linkcard" href="https://github.com/deepthought42/Accessibility-audit-platform/tree/main/webaudit-vscode-plugin" rel="noopener">
       <span class="linkcard__label">Developer tool</span>
       <span class="linkcard__title">VS Code plugin</span>
       <span class="linkcard__desc">WCAG 2.2 linting for React, Vue, Angular and plain HTML &mdash; as you type.</span>
     </a>
 
-    <a class="linkcard" href="https://github.com/deepthought42/Accessibility-audit-platform/tree/main/LookseeChromeExtension" rel="noopener">
+    <a class="linkcard" href="https://github.com/deepthought42/Accessibility-audit-platform/tree/main/WebAuditChromeExtension" rel="noopener">
       <span class="linkcard__label">Browser</span>
       <span class="linkcard__title">Chrome extension</span>
       <span class="linkcard__desc">Audit the page you are on, without uploading it anywhere.</span>
     </a>
 
-    <a class="linkcard" href="https://github.com/deepthought42/Accessibility-audit-platform/tree/main/LookseeIaC" rel="noopener">
+    <a class="linkcard" href="https://github.com/deepthought42/Accessibility-audit-platform/tree/main/WebAuditIaC" rel="noopener">
       <span class="linkcard__label">Infrastructure</span>
-      <span class="linkcard__title">LookseeIaC</span>
+      <span class="linkcard__title">WebAuditIaC</span>
       <span class="linkcard__desc">Terraform for GCP. Cloud Run, Pub/Sub, Secret Manager, VPC, Neo4j VM.</span>
     </a>
   </div>

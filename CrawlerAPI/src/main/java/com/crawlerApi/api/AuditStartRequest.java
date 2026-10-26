@@ -1,6 +1,6 @@
 package com.crawlerApi.api;
 
-import com.looksee.models.enums.AuditLevel;
+import com.webaudit.models.enums.AuditLevel;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

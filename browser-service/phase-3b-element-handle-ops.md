@@ -1,14 +1,14 @@
-# Phase 3b — Remote Element-Handle Ops for `RemoteBrowser`
+﻿# Phase 3b — Remote Element-Handle Ops for `RemoteBrowser`
 
-> **Goal:** Every currently-throwing override in `LookseeCore/looksee-core/src/main/java/com/looksee/services/browser/RemoteBrowser.java` gets a real remote implementation that routes through `brandonkindred/browser-service`, plus `StepExecutor` stops reaching through `browser.getDriver()` so journey execution works in remote mode. Shipped as LookseeCore 0.7.0.
+> **Goal:** Every currently-throwing override in `WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/browser/RemoteBrowser.java` gets a real remote implementation that routes through `brandonkindred/browser-service`, plus `StepExecutor` stops reaching through `browser.getDriver()` so journey execution works in remote mode. Shipped as WebAuditCore 0.7.0.
 >
-> **Where to work:** locally in the Look-see monorepo. Suggest a feature branch: `git checkout -b phase-3b/element-handle-ops`.
+> **Where to work:** locally in the WebAudit monorepo. Suggest a feature branch: `git checkout -b phase-3b/element-handle-ops`.
 >
-> **Sibling reference:** this doc mirrors [`phase-3-looksee-shim.md`](./phase-3-looksee-shim.md) in structure (step-by-step, per-step commits, definition-of-done). Phase 3 shipped page-level remote ops and left an explicit `UnsupportedOperationException("phase 3b")` marker in every method this doc is about to wire up.
+> **Sibling reference:** this doc mirrors [`phase-3-WebAudit-shim.md`](./phase-3-WebAudit-shim.md) in structure (step-by-step, per-step commits, definition-of-done). Phase 3 shipped page-level remote ops and left an explicit `UnsupportedOperationException("phase 3b")` marker in every method this doc is about to wire up.
 
 ## Why this phase exists now
 
-Phase 3 (merged as LookseeCore 0.6.0) shipped a working remote shim for page-level operations. But it deliberately left every element-handle method stubbed:
+Phase 3 (merged as WebAuditCore 0.6.0) shipped a working remote shim for page-level operations. But it deliberately left every element-handle method stubbed:
 
 ```java
 // RemoteBrowser.java today
@@ -18,7 +18,7 @@ public WebElement findElement(String xpath) {
 }
 ```
 
-That decision was right for 0.6.0 — phase 3 was already a large change — but it means **every consumer that uses element-handle ops is still forced onto `looksee.browsing.mode=local`**. A consumer census (run during phase-3b planning) found:
+That decision was right for 0.6.0 — phase 3 was already a large change — but it means **every consumer that uses element-handle ops is still forced onto `WebAudit.browsing.mode=local`**. A consumer census (run during phase-3b planning) found:
 
 | Consumer | Element-handle usage | Remote-mode ready? |
 |---|---|---|
@@ -26,7 +26,7 @@ That decision was right for 0.6.0 — phase 3 was already a large change — but
 | AuditManager / audit-service / contentAudit / IA audit / visualDesignAudit / journeyErrors / journey-map-cleanup / CrawlerAPI / front-end-broadcaster | No direct `Browser` calls | Yes, today |
 | **element-enrichment** | `browser.removeDriftChat()` in prod | Blocked on 3b |
 | **journeyExecutor** | `stepExecutor.execute(...)` + `browser.getDriver().getCurrentUrl()` | Blocked on 3b |
-| **StepExecutor** (LookseeCore internal; journeyExecutor uses it) | `findElement`, `scrollToElementCentered`, raw `getDriver()`-based click + LoginStep field entry + exception path URL read | Blocked on 3b |
+| **StepExecutor** (WebAuditCore internal; journeyExecutor uses it) | `findElement`, `scrollToElementCentered`, raw `getDriver()`-based click + LoginStep field entry + exception path URL read | Blocked on 3b |
 
 Phase 3b unblocks everything in the bottom three rows. Phase 4 (per-consumer cutover) becomes feasible for every consumer after it merges.
 
@@ -35,7 +35,7 @@ Phase 3b unblocks everything in the bottom three rows. Phase 4 (per-consumer cut
 | In scope | Out of scope |
 |---|---|
 | Extend `BrowsingClient` facade with `ElementsApi`, `TouchApi`, `DomApi`, `MouseApi`, `AlertsApi`, `OpsApi` wrappers | Expanding `ExecuteApi` coverage — we have dedicated endpoints for every op StepExecutor needs, so `/execute` stays unused in 3b |
-| New `RemoteWebElement implements WebElement` (in `looksee-core`) with cached `rect` / `attributes` / `displayed` | Replacing `Selenium WebElement` in consumer signatures with a Look-see–owned type (Option B — breaks every caller; out of scope) |
+| New `RemoteWebElement implements WebElement` (in `webaudit-core`) with cached `rect` / `attributes` / `displayed` | Replacing `Selenium WebElement` in consumer signatures with a WebAudit–owned type (Option B — breaks every caller; out of scope) |
 | New `RemoteAlert implements org.openqa.selenium.Alert` for the `isAlertPresent` surface | Full Selenium `Alert` parity — we ship `accept`/`dismiss`/`getText`; `sendKeys` stays phase-3c if needed |
 | Wire all 18 currently-throwing `RemoteBrowser` overrides | Any change to local-mode `Browser.java` methods beyond three explicit additions (§6) |
 | Three new `Browser` methods: `performClick(WebElement)`, `performAction(WebElement, Action, String)`, `getCurrentUrl()` — local bodies preserve 0.6.0 semantics byte-for-byte | Replacing `ActionFactory` wholesale; we keep it for local mode and route around it in remote |
@@ -62,76 +62,76 @@ If something looks refactor-tempting inside `Browser.java` or `StepExecutor.java
 ## Prerequisites
 
 ```bash
-java -version     # 17.x (LookseeCore stays on Java 17; do not bump)
+java -version     # 17.x (WebAuditCore stays on Java 17; do not bump)
 mvn -v            # 3.9+
 git status        # clean working tree
 ```
 
-Phase 3 must be merged (`LookseeCore 0.6.0` on `main`). Re-sync `browser-service/openapi.yaml` into `LookseeCore/looksee-browsing-client/src/main/resources/openapi.yaml` if it drifted since phase 3; the element/scroll/dom/mouse/alert endpoints listed in §4 must all be present in the spec.
+Phase 3 must be merged (`WebAuditCore 0.6.0` on `main`). Re-sync `browser-service/openapi.yaml` into `WebAuditCore/webaudit-browsing-client/src/main/resources/openapi.yaml` if it drifted since phase 3; the element/scroll/dom/mouse/alert endpoints listed in §4 must all be present in the spec.
 
 ## Step 0 — Branch + sanity
 
 ```bash
-cd /path/to/Look-see
+cd /path/to/WebAudit
 git checkout -b phase-3b/element-handle-ops
-cd LookseeCore
-mvn -q -pl looksee-core -am verify
+cd WebAuditCore
+mvn -q -pl webaudit-core -am verify
 ```
 
 Expect: `BUILD SUCCESS`, 119 tests run, 0 failures (the 0.6.0 baseline).
 
-Then run the grep-sanity sweep. Two sweeps, separately, both from the **repo root** so emitted paths carry the `LookseeCore/` prefix and filters work:
+Then run the grep-sanity sweep. Two sweeps, separately, both from the **repo root** so emitted paths carry the `WebAuditCore/` prefix and filters work:
 
 ### Sweep A — external consumers
 
-The goal here is to catch any code **outside LookseeCore** that reaches through `Browser` into a live driver. Remote mode must not break these paths.
+The goal here is to catch any code **outside WebAuditCore** that reaches through `Browser` into a live driver. Remote mode must not break these paths.
 
 ```bash
-cd /path/to/Look-see   # repo root
+cd /path/to/WebAudit   # repo root
 
 # Any consumer building its own Actions chain?
-grep -rn "new Actions(" --include="*.java" | grep -v '^LookseeCore/'
+grep -rn "new Actions(" --include="*.java" | grep -v '^WebAuditCore/'
 
 # Any consumer calling findElements (plural) on a driver or element?
-grep -rn "\.findElements(" --include="*.java" | grep -v '^LookseeCore/'
+grep -rn "\.findElements(" --include="*.java" | grep -v '^WebAuditCore/'
 
 # Any consumer using browser.getDriver()?
-grep -rn "\.getDriver()\." --include="*.java" | grep -v '^LookseeCore/'
+grep -rn "\.getDriver()\." --include="*.java" | grep -v '^WebAuditCore/'
 ```
 
 Expected output for Sweep A:
 
 - `new Actions(` — empty.
 - `.findElements(` — empty.
-- `.getDriver().` — exactly one hit: `journeyExecutor/src/main/java/com/looksee/journeyExecutor/AuditController.java:562`. That's the call Step 7.4 rewrites.
+- `.getDriver().` — exactly one hit: `journeyExecutor/src/main/java/com/webaudit/journeyExecutor/AuditController.java:562`. That's the call Step 7.4 rewrites.
 
 If Sweep A returns any unexpected hit, resolve it by either (a) adding the missing operation to the §6 `Browser` extension surface, or (b) documenting the consumer as a phase-3c follow-up. **Do not start implementing until Sweep A matches the expected output above.**
 
-### Sweep B — LookseeCore-internal reach-throughs
+### Sweep B — WebAuditCore-internal reach-throughs
 
-LookseeCore has a pre-existing set of `browser.getDriver()` and `driver.findElements()` reach-throughs inside `BrowserService`, `PageStateAdapter.toPageState(Browser, long, String)`, `BrowserUtils`, and `com.looksee.browsing.table.Table`. These **were already remote-incompatible in 0.6.0** — the Browser-taking overloads simply aren't called from the phase-3 remote path (which uses the byte[] overload of `PageStateAdapter.toPageState`). They'll become remote-incompatible surface as soon as any consumer tries to call those methods with a `RemoteBrowser`.
+WebAuditCore has a pre-existing set of `browser.getDriver()` and `driver.findElements()` reach-throughs inside `BrowserService`, `PageStateAdapter.toPageState(Browser, long, String)`, `BrowserUtils`, and `com.webaudit.browsing.table.Table`. These **were already remote-incompatible in 0.6.0** — the Browser-taking overloads simply aren't called from the phase-3 remote path (which uses the byte[] overload of `PageStateAdapter.toPageState`). They'll become remote-incompatible surface as soon as any consumer tries to call those methods with a `RemoteBrowser`.
 
 Phase 3b does **not** fix them — that's phase 3c. Sweep B just enumerates them so phase 3c inherits the list:
 
 ```bash
-cd /path/to/Look-see   # repo root
+cd /path/to/WebAudit   # repo root
 
-# LookseeCore-internal reach-throughs (expected non-empty; see §14.9)
-grep -rn "\.getDriver()\." --include="*.java" LookseeCore/ \
-  | grep -v "LookseeCore/looksee-core/src/main/java/com/looksee/services/StepExecutor.java" \
-  | grep -v "LookseeCore/looksee-core/src/test/"
+# WebAuditCore-internal reach-throughs (expected non-empty; see §14.9)
+grep -rn "\.getDriver()\." --include="*.java" WebAuditCore/ \
+  | grep -v "WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/StepExecutor.java" \
+  | grep -v "WebAuditCore/webaudit-core/src/test/"
 
-grep -rn "\.findElements(" --include="*.java" LookseeCore/ \
-  | grep -v "LookseeCore/looksee-core/src/test/"
+grep -rn "\.findElements(" --include="*.java" WebAuditCore/ \
+  | grep -v "WebAuditCore/webaudit-core/src/test/"
 ```
 
 Expected: non-empty. Compare against the enumeration in §14.9 — if the list has grown since planning, update §14.9 in the same commit that addresses the divergence. Do **not** block phase 3b merge on this sweep.
 
 ## Step 1 — Extend `BrowsingClient` facade
 
-Add wrappers over six generated API classes. The facade still returns generated DTOs directly (same pragmatic choice as phase 3 — see `phase-3-looksee-shim.md` §14).
+Add wrappers over six generated API classes. The facade still returns generated DTOs directly (same pragmatic choice as phase 3 — see `phase-3-WebAudit-shim.md` §14).
 
-**File:** `LookseeCore/looksee-browsing-client/src/main/java/com/looksee/browsing/client/BrowsingClient.java`
+**File:** `WebAuditCore/webaudit-browsing-client/src/main/java/com/webaudit/browsing/client/BrowsingClient.java`
 
 New fields:
 
@@ -175,7 +175,7 @@ public AlertState getAlert(String sessionId);
 public void respondToAlert(String sessionId, AlertChoice choice, String inputOrNull);
 ```
 
-Translate the three overlapping enum types (`ElementAction`, `TouchAction`, `AlertChoice`) between Look-see's existing `com.looksee.browser.enums.*` and the generated variants at this seam, same pattern as `BrowserType`/`BrowserEnvironment` in phase 3.
+Translate the three overlapping enum types (`ElementAction`, `TouchAction`, `AlertChoice`) between WebAudit's existing `com.webaudit.browser.enums.*` and the generated variants at this seam, same pattern as `BrowserType`/`BrowserEnvironment` in phase 3.
 
 Retire `BrowsingClient.capture` and `BrowsingClient.getCaptureScreenshotBytes` — no longer called from `BrowserService.capturePage` after Step 8. Leave a deprecation comment pointing callers at the generated `CaptureApi` if they want the single-shot.
 
@@ -185,13 +185,13 @@ Retire `BrowsingClient.capture` and `BrowsingClient.getCaptureScreenshotBytes` �
 
 New file:
 
-`LookseeCore/looksee-core/src/main/java/com/looksee/services/browser/RemoteWebElement.java`
+`WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/browser/RemoteWebElement.java`
 
 ```java
-package com.looksee.services.browser;
+package com.webaudit.services.browser;
 
-import com.looksee.browsing.generated.model.ElementState;
-import com.looksee.browsing.generated.model.Rect;
+import com.webaudit.browsing.generated.model.ElementState;
+import com.webaudit.browsing.generated.model.Rect;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -399,13 +399,13 @@ public Alert isAlertPresent() {
 }
 ```
 
-New file `LookseeCore/looksee-core/src/main/java/com/looksee/services/browser/RemoteAlert.java`:
+New file `WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/browser/RemoteAlert.java`:
 
 ```java
-package com.looksee.services.browser;
+package com.webaudit.services.browser;
 
-import com.looksee.browsing.client.BrowsingClient;
-import com.looksee.browsing.generated.model.AlertChoice;
+import com.webaudit.browsing.client.BrowsingClient;
+import com.webaudit.browsing.generated.model.AlertChoice;
 import org.openqa.selenium.Alert;
 
 public final class RemoteAlert implements Alert {
@@ -435,7 +435,7 @@ At this point every `UnsupportedOperationException("phase 3b")` in `RemoteBrowse
 
 ## Step 6 — New `Browser` methods: `performClick`, `performAction`, `getCurrentUrl`
 
-Three additions to `LookseeCore/looksee-browser/src/main/java/com/looksee/browser/Browser.java`. Local bodies are exactly what `StepExecutor` was doing against `getDriver()` in phase 3; this just gives remote mode a seam to override.
+Three additions to `WebAuditCore/webaudit-browser/src/main/java/com/webaudit/browser/Browser.java`. Local bodies are exactly what `StepExecutor` was doing against `getDriver()` in phase 3; this just gives remote mode a seam to override.
 
 ```java
 // Browser.java
@@ -445,11 +445,11 @@ public void performClick(WebElement element) {
     ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
 }
 
-public void performAction(WebElement element, com.looksee.browser.enums.Action action, String input) {
+public void performAction(WebElement element, com.webaudit.browser.enums.Action action, String input) {
     assert element != null;
     assert action != null;
     // Existing behavior lives in ActionFactory; centralize here so RemoteBrowser can fork.
-    new com.looksee.browser.ActionFactory(driver).execAction(element, input == null ? "" : input, action);
+    new com.webaudit.browser.ActionFactory(driver).execAction(element, input == null ? "" : input, action);
 }
 
 public String getCurrentUrl() {
@@ -473,7 +473,7 @@ public void performClick(WebElement element) {
 }
 
 @Override
-public void performAction(WebElement element, com.looksee.browser.enums.Action action, String input) {
+public void performAction(WebElement element, com.webaudit.browser.enums.Action action, String input) {
     if (!(element instanceof RemoteWebElement)) {
         throw new IllegalStateException("performAction: element not from this RemoteBrowser session");
     }
@@ -491,7 +491,7 @@ public String getCurrentUrl() {
 }
 ```
 
-`toGeneratedAction(com.looksee.browser.enums.Action)` is a one-line translator — same pattern as the enum translators in phase 3.
+`toGeneratedAction(com.webaudit.browser.enums.Action)` is a one-line translator — same pattern as the enum translators in phase 3.
 
 **Commit:** `feat(core): add Browser.performClick/performAction/getCurrentUrl with local defaults`
 
@@ -527,26 +527,26 @@ Current (lines 52–65):
 LoginStep login_step = (LoginStep)step;
 WebElement username_element = browser.getDriver().findElement(By.xpath(login_step.getUsernameElement().getXpath()));
 ActionFactory action_factory = new ActionFactory(browser.getDriver());
-action_factory.execAction(username_element, login_step.getTestUser().getUsername(), com.looksee.browser.enums.Action.SEND_KEYS);
+action_factory.execAction(username_element, login_step.getTestUser().getUsername(), com.webaudit.browser.enums.Action.SEND_KEYS);
 
 WebElement password_element = browser.getDriver().findElement(By.xpath(login_step.getPasswordElement().getXpath()));
-action_factory.execAction(password_element, login_step.getTestUser().getPassword(), com.looksee.browser.enums.Action.SEND_KEYS);
+action_factory.execAction(password_element, login_step.getTestUser().getPassword(), com.webaudit.browser.enums.Action.SEND_KEYS);
 
 WebElement submit_element = browser.getDriver().findElement(By.xpath(login_step.getSubmitElement().getXpath()));
-action_factory.execAction(submit_element, "", com.looksee.browser.enums.Action.CLICK);
+action_factory.execAction(submit_element, "", com.webaudit.browser.enums.Action.CLICK);
 ```
 
 After:
 ```java
 LoginStep login_step = (LoginStep)step;
 WebElement username_element = browser.findElement(login_step.getUsernameElement().getXpath());
-browser.performAction(username_element, com.looksee.browser.enums.Action.SEND_KEYS, login_step.getTestUser().getUsername());
+browser.performAction(username_element, com.webaudit.browser.enums.Action.SEND_KEYS, login_step.getTestUser().getUsername());
 
 WebElement password_element = browser.findElement(login_step.getPasswordElement().getXpath());
-browser.performAction(password_element, com.looksee.browser.enums.Action.SEND_KEYS, login_step.getTestUser().getPassword());
+browser.performAction(password_element, com.webaudit.browser.enums.Action.SEND_KEYS, login_step.getTestUser().getPassword());
 
 WebElement submit_element = browser.findElement(login_step.getSubmitElement().getXpath());
-browser.performAction(submit_element, com.looksee.browser.enums.Action.CLICK, "");
+browser.performAction(submit_element, com.webaudit.browser.enums.Action.CLICK, "");
 ```
 
 ### 7.3 `StepExecutor.execute` — exception handler URL read
@@ -587,7 +587,7 @@ The existing `StepExecutorTest` must pass unchanged — the local bodies of the 
 // Before (0.6.0):
 CaptureRequest req = new CaptureRequest()
     .url(java.net.URI.create(url.toString()))
-    .browser(com.looksee.browsing.generated.model.BrowserType.fromValue(browser.toString()))
+    .browser(com.webaudit.browsing.generated.model.BrowserType.fromValue(browser.toString()))
     .extract(java.util.List.of(CaptureRequest.ExtractEnum.SOURCE));
 CaptureResponse resp = browsingClient.capture(req);
 byte[] screenshotBytes = browsingClient.getCaptureScreenshotBytes(resp.getCaptureId());
@@ -629,11 +629,11 @@ Local-mode `capturePage` stays byte-identical to 0.6.0.
 
 ## Step 9 — Tests
 
-### 9.1 `looksee-browsing-client`
+### 9.1 `webaudit-browsing-client`
 
 Extend `BrowsingClientTest` with one forward-case-per-new-facade-method. Target ~15 new test cases. Mock each new `*Api`, assert sessionId + enum translation + element_handle passthrough. No HTTP.
 
-### 9.2 `looksee-core`
+### 9.2 `webaudit-core`
 
 Four new test classes:
 
@@ -653,9 +653,9 @@ And separately:
 
 ## Step 10 — Version bump + CHANGELOG
 
-- `A11yParent` 0.6.0 → 0.7.0 across every pom (same `mvn versions:set -DnewVersion=0.7.0 -DgenerateBackupPoms=false -DprocessAllModules=true` pattern as phase 3; also manually bump `<looksee.version>0.6.0</looksee.version>` in the root pom).
-- `LOOKSEE_CORE_VERSION` at repo root → `0.7.0`.
-- `LookseeCore/CHANGELOG.md` new `## [0.7.0]` entry summarizing:
+- `A11yParent` 0.6.0 → 0.7.0 across every pom (same `mvn versions:set -DnewVersion=0.7.0 -DgenerateBackupPoms=false -DprocessAllModules=true` pattern as phase 3; also manually bump `<WebAudit.version>0.6.0</WebAudit.version>` in the root pom).
+- `WEBAUDIT_CORE_VERSION` at repo root → `0.7.0`.
+- `WebAuditCore/CHANGELOG.md` new `## [0.7.0]` entry summarizing:
   - Remote element-handle ops wired up; every phase-3b `UnsupportedOperationException` removed.
   - New `RemoteWebElement` + `RemoteAlert`.
   - Three new `Browser` methods: `performClick`, `performAction`, `getCurrentUrl`.
@@ -664,19 +664,19 @@ And separately:
   - Default mode still `local`; zero behavior change for consumers that don't opt in.
   - `journeyExecutor` consumer: one-line fix so remote journey execution works.
 
-Also bump every consumer service pom that pins LookseeCore (same sweep phase 3 needed): `AuditManager`, `audit-service`, `contentAudit`, `CrawlerAPI`, `PageBuilder`, `visualDesignAudit`, `informationArchitectureAudit`, `journeyExecutor`, `journeyExpander`, `journey-map-cleanup`, `journeyErrors`, `element-enrichment`, `look-see-front-end-broadcaster`. Use the same sed pattern phase 3 used for the version-pin CI check.
+Also bump every consumer service pom that pins WebAuditCore (same sweep phase 3 needed): `AuditManager`, `audit-service`, `contentAudit`, `CrawlerAPI`, `PageBuilder`, `visualDesignAudit`, `informationArchitectureAudit`, `journeyExecutor`, `journeyExpander`, `journey-map-cleanup`, `journeyErrors`, `element-enrichment`, `webaudit-front-end-broadcaster`. Use the same sed pattern phase 3 used for the version-pin CI check.
 
-**Commit:** `chore: bump LookseeCore to 0.7.0 + CHANGELOG`
+**Commit:** `chore: bump WebAuditCore to 0.7.0 + CHANGELOG`
 
 ## Step 11 — Verification
 
-1. **Clean build from LookseeCore root:**
+1. **Clean build from WebAuditCore root:**
    ```bash
-   cd LookseeCore && mvn -q clean verify
+   cd WebAuditCore && mvn -q clean verify
    ```
    Expect: `BUILD SUCCESS`. Test count: ~170 (was 119 in 0.6.0). Any silent drop means a test fell off — investigate before merging.
 
-2. **Local-mode regression:** spin up any consumer (PageBuilder is easiest) against the fresh 0.7.0 with no `looksee.browsing.*` config. Run its existing happy-path integration. Behavior must be indistinguishable from 0.6.0.
+2. **Local-mode regression:** spin up any consumer (PageBuilder is easiest) against the fresh 0.7.0 with no `WebAudit.browsing.*` config. Run its existing happy-path integration. Behavior must be indistinguishable from 0.6.0.
 
 3. **Remote-mode sanity (optional, needs a running browser-service):** same script as phase 3 §10.3, plus:
    - `findElement` on a visible button returns a `WebElement` whose `isDisplayed()` is true without a second network call.
@@ -686,7 +686,7 @@ Also bump every consumer service pom that pins LookseeCore (same sweep phase 3 n
 
 4. **Scope-preservation check:**
    ```bash
-   git diff --stat main..HEAD -- LookseeCore/looksee-browser/
+   git diff --stat main..HEAD -- WebAuditCore/webaudit-browser/
    # Expect: only Browser.java (three new methods) + pom.xml parent-version bump.
    git diff --stat main..HEAD -- journeyExecutor/
    # Expect: only AuditController.java one-line change + pom.xml bump.
@@ -695,7 +695,7 @@ Also bump every consumer service pom that pins LookseeCore (same sweep phase 3 n
 ## Definition of done
 
 - [ ] `BrowsingClient` exposes wrappers over `ElementsApi`, `TouchApi`, `DomApi`, `MouseApi`, `AlertsApi`. `capture`/`getCaptureScreenshotBytes` retired.
-- [ ] `RemoteWebElement` + `RemoteAlert` exist in `looksee-core`; cache-backed reads served without network; unsupported methods throw with phase-3c markers.
+- [ ] `RemoteWebElement` + `RemoteAlert` exist in `webaudit-core`; cache-backed reads served without network; unsupported methods throw with phase-3c markers.
 - [ ] Every `UnsupportedOperationException("phase 3b")` in `RemoteBrowser` is gone; only `getDriver()` throws (intentionally).
 - [ ] `Browser.performClick`, `Browser.performAction`, `Browser.getCurrentUrl` exist with local default bodies; `RemoteBrowser` overrides all three.
 - [ ] `StepExecutor` has no raw `browser.getDriver()` calls; `journeyExecutor/.../AuditController.java:562` likewise.
@@ -710,7 +710,7 @@ Also bump every consumer service pom that pins LookseeCore (same sweep phase 3 n
 git push -u origin phase-3b/element-handle-ops
 ```
 
-PR body (same template as phase 3): summary of commit clusters, `mvn verify` snippet, explicit note that default mode is still local, link to this doc and to `phase-3-looksee-shim.md`.
+PR body (same template as phase 3): summary of commit clusters, `mvn verify` snippet, explicit note that default mode is still local, link to this doc and to `phase-3-WebAudit-shim.md`.
 
 ## 14. Open items flagged for reviewer
 
@@ -720,26 +720,26 @@ PR body (same template as phase 3): summary of commit clusters, `mvn verify` sni
 2. **`RemoteWebElement` unsupported method surface — phase-3c inherit list.** Every `UnsupportedOperationException` in `RemoteWebElement.java` is a phase-3c candidate. The list, verbatim: `click`, `submit`, `sendKeys(CharSequence...)`, `clear`, `getTagName`, `isSelected`, `isEnabled`, `getText`, `findElements(By)`, `findElement(By)`, `getCssValue`, `getScreenshotAs`. Plus `RemoteAlert.sendKeys(String)`. Phase 3c should keep this list as its in-scope task list.
 3. **`/execute` endpoint stays unused in 3b.** Every StepExecutor path routes through dedicated endpoints. If a future consumer really needs arbitrary JS exec (e.g. for pulling a CSP nonce), add a `BrowsingClient.executeScript` facade wrapper and a `Browser.executeScript(String, Object...)` method in a separate phase rather than retrofitting.
 4. **`Actions` API usage.** The Step 0 grep confirmed only `StepExecutor` builds an `Actions` chain (indirectly via `ActionFactory`). If another consumer ever does so (e.g. for drag-and-drop), extend `Browser.performAction` with additional enum values rather than re-exposing `getDriver()`. This is a guardrail for future reviewers, not an action item now.
-5. **OpenAPI spec drift.** Same caveat as phase-3 §14.1. The spec copy in `LookseeCore/looksee-browsing-client/src/main/resources/openapi.yaml` must be re-synced from `brandonkindred/browser-service:openapi.yaml` whenever an element/scroll/dom/mouse/alert endpoint is added or renamed. Promote to a published Maven artifact once browser-service stabilizes release cadence.
+5. **OpenAPI spec drift.** Same caveat as phase-3 §14.1. The spec copy in `WebAuditCore/webaudit-browsing-client/src/main/resources/openapi.yaml` must be re-synced from `brandonkindred/browser-service:openapi.yaml` whenever an element/scroll/dom/mouse/alert endpoint is added or renamed. Promote to a published Maven artifact once browser-service stabilizes release cadence.
 6. **Retries / backoff on the facade.** Phase 3 deferred retries; 3b's higher chattiness (every scroll-to-element is a round trip) raises the blast radius of a transient failure. Not a blocker for merging 0.7.0, but the first consumer that sees flakes in production should get this as the immediate next change, centralized in `BrowsingClient` rather than per-caller.
 7. **`StepExecutor` remote verification.** Live-service end-to-end verification for a journey with LoginStep requires a running browser-service + a real login target. Document the manual steps in the PR description; don't make them a CI gate for 3b merge (too fragile).
-8. **`Browser.performAction` default implementation reaches into `ActionFactory`.** `ActionFactory` is in `com.looksee.browser` and currently only instantiable via `new ActionFactory(driver)`. The local-mode body does exactly what StepExecutor used to inline — no behavior change — but it does centralize a small amount of logic. If this becomes the "one place ActionFactory is called from" and StepExecutor grows new actions, consider folding `ActionFactory` into `Browser.performAction` as a later cleanup. Out of scope now.
+8. **`Browser.performAction` default implementation reaches into `ActionFactory`.** `ActionFactory` is in `com.webaudit.browser` and currently only instantiable via `new ActionFactory(driver)`. The local-mode body does exactly what StepExecutor used to inline — no behavior change — but it does centralize a small amount of logic. If this becomes the "one place ActionFactory is called from" and StepExecutor grows new actions, consider folding `ActionFactory` into `Browser.performAction` as a later cleanup. Out of scope now.
 
-9. **LookseeCore-internal `browser.getDriver()` reach-throughs — phase-3c inherit list.** Sweep B in Step 0 surfaces a large set of `getDriver()` / `driver.findElements()` call sites **inside LookseeCore** that were remote-incompatible in 0.6.0 too. They don't break phase 3 because the remote path never reaches them (capturePage uses the byte[] `PageStateAdapter` overload; every other consumer method with a `Browser` parameter is only called in local mode today). Phase 3b leaves them alone; phase 3c owns making them remote-safe. Enumerated verbatim so the 3c plan inherits this list:
+9. **WebAuditCore-internal `browser.getDriver()` reach-throughs — phase-3c inherit list.** Sweep B in Step 0 surfaces a large set of `getDriver()` / `driver.findElements()` call sites **inside WebAuditCore** that were remote-incompatible in 0.6.0 too. They don't break phase 3 because the remote path never reaches them (capturePage uses the byte[] `PageStateAdapter` overload; every other consumer method with a `Browser` parameter is only called in local mode today). Phase 3b leaves them alone; phase 3c owns making them remote-safe. Enumerated verbatim so the 3c plan inherits this list:
 
-   - `LookseeCore/looksee-core/src/main/java/com/looksee/services/browser/PageStateAdapter.java`
+   - `WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/browser/PageStateAdapter.java`
      - `toPageState(URL, Browser, boolean, int, long)` — lines 86, 94, 106, 126 (`browser.getDriver().{getCurrentUrl,getPageSource,getTitle,manage().window().getSize}`)
      - `toPageState(Browser, long, String)` — lines 177, 194, 216 (same surface as above)
-   - `LookseeCore/looksee-core/src/main/java/com/looksee/services/BrowserService.java`
+   - `WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/BrowserService.java`
      - Line 441 — `browser.getDriver().getCurrentUrl()` (URL host extraction)
      - Lines 935, 949 — `elem.findElements(By.xpath(...))` (DOM tree walks on passed-in `WebElement`)
      - Lines 1028, 1311, 1703 — `driver.findElements(By.xpath(...))` (internal, inside methods that take a `WebDriver` directly — these callers need auditing)
      - Line 1940 — `browser.getDriver().findElement(By.xpath(...))`
      - Lines 3278–3279, 3388 — `browser.getDriver().{getCurrentUrl,findElements}` for form extraction + screenshot upload
      - Line 3316 — `form_elem.findElements(By.tagName("input"))`
-   - `LookseeCore/looksee-core/src/main/java/com/looksee/utils/BrowserUtils.java`
+   - `WebAuditCore/webaudit-core/src/main/java/com/webaudit/utils/BrowserUtils.java`
      - Lines 1377, 1465 — `browser.getDriver().getCurrentUrl()` in URL sanitization paths
-   - `LookseeCore/looksee-core/src/main/java/com/looksee/browsing/table/Table.java`
+   - `WebAuditCore/webaudit-core/src/main/java/com/webaudit/browsing/table/Table.java`
      - Lines 44, 51, 52 — `element.findElements(...)` nested DOM traversal inside the Table helper
 
    Phase 3c's high-level job against this list: (a) expand `RemoteWebElement` to support `findElements` by exposing a `BrowsingClient.findChildElements(sessionId, elementHandle, xpath)` facade wrapper; (b) add `Browser.getPageSource()`, `Browser.getTitle()`, `Browser.getWindowSize()` as first-class methods so `PageStateAdapter`'s `Browser`-taking overloads stop needing `getDriver()`; (c) audit the three `driver.findElements` call sites in `BrowserService` lines 1028/1311/1703 to see whether they take a `WebDriver` from a caller that's always local (no consumer does this today) or whether they need an alternate remote path. Update this enumeration whenever `Browser.java` gains a new driver-reaching method in a subsequent release.

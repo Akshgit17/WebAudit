@@ -10,7 +10,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;
 
-import com.looksee.audit.informationArchitecture.audits.HeaderStructureAudit;
+import com.webaudit.audit.informationArchitecture.audits.HeaderStructureAudit;
 
 class HeaderStructureH1Test {
 

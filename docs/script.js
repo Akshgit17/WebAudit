@@ -1,8 +1,8 @@
-(function () {
+﻿(function () {
   'use strict';
 
   const doc = document.documentElement;
-  const KEY = 'looksee.theme';
+  const KEY = 'WebAudit.theme';
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ---------- Theme toggle ----------------------------------

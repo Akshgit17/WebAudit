@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.looksee.browser.Crawler;
-import com.looksee.models.designsystem.DesignSystem;
-import com.looksee.services.AuditRecordService;
-import com.looksee.services.AuditService;
-import com.looksee.services.DesignSystemService;
+import com.webaudit.browser.Crawler;
+import com.webaudit.models.designsystem.DesignSystem;
+import com.webaudit.services.AuditRecordService;
+import com.webaudit.services.AuditService;
+import com.webaudit.services.DesignSystemService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

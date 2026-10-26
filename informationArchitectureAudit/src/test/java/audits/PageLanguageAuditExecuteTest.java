@@ -9,11 +9,11 @@ import java.lang.reflect.Field;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.looksee.audit.informationArchitecture.audits.PageLanguageAudit;
-import com.looksee.models.PageState;
-import com.looksee.models.audit.Audit;
-import com.looksee.models.audit.AuditRecord;
-import com.looksee.services.AuditService;
+import com.webaudit.audit.informationArchitecture.audits.PageLanguageAudit;
+import com.webaudit.models.PageState;
+import com.webaudit.models.audit.Audit;
+import com.webaudit.models.audit.AuditRecord;
+import com.webaudit.services.AuditService;
 
 public class PageLanguageAuditExecuteTest {
 

@@ -1,4 +1,4 @@
-# `/docs` — the Look-see website
+﻿# `/docs` — the WebAudit website
 
 A hand-written static site that introduces the project to strangers.
 Served from this directory by **GitHub Pages**, no build step required.
@@ -34,7 +34,7 @@ Or any other static server: `npx serve`, `caddy file-server`, `basic-http-server
 To use a custom domain:
 
 1. Create a file `docs/CNAME` containing the bare hostname (no protocol), e.g.
-   `looksee.dev`.
+   `WebAudit.dev`.
 2. Point a `CNAME` DNS record at `<user>.github.io`.
 3. In **Settings → Pages**, check **Enforce HTTPS** once the certificate is issued.
 
@@ -82,6 +82,3 @@ visible demo.
   declared if Google Fonts is blocked.
 - No other third-party scripts, analytics, or CDNs.
 
-## License
-
-Same as the root repository.

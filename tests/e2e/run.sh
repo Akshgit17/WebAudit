@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-# End-to-end smoke test for the Looksee Pub/Sub pipeline infrastructure.
+﻿#!/usr/bin/env bash
+# End-to-end smoke test for the WebAudit Pub/Sub pipeline infrastructure.
 #
 # Wave 5.1 of the architecture review
 # (/root/.claude/plans/gleaming-jumping-thunder.md).
@@ -14,7 +14,7 @@
 #
 #   1.  The Pub/Sub emulator is reachable and healthy.
 #   2.  Every canonical topic the pipeline relies on has been provisioned.
-#   3.  A Pub/Sub Body envelope (the `com.looksee.mapper.Body` DTO that
+#   3.  A Pub/Sub Body envelope (the `com.webaudit.mapper.Body` DTO that
 #       every service consumes) round-trips through the emulator with its
 #       Base64-encoded data AND its W3C trace-context attributes intact.
 #       This is the Wave 2.2 contract: without it, distributed traces
@@ -27,18 +27,18 @@
 # extending this script or replacing the body of main().
 set -euo pipefail
 
-PROJECT="${PUBSUB_PROJECT_ID:-looksee-test}"
+PROJECT="${PUBSUB_PROJECT_ID:-WebAudit-test}"
 EMU="${PUBSUB_EMULATOR_HOST:-localhost:8085}"
 EMU_URL="http://${EMU}"
 NEO4J_HTTP="${NEO4J_HTTP_URL:-http://localhost:7474}"
 NEO4J_USER="${SPRING_DATA_NEO4J_USERNAME:-neo4j}"
-NEO4J_PASSWORD="${SPRING_DATA_NEO4J_PASSWORD:-looksee-test-password}"
+NEO4J_PASSWORD="${SPRING_DATA_NEO4J_PASSWORD:-WebAudit-test-password}"
 NEO4J_DATABASE="${SPRING_DATA_NEO4J_DATABASE:-neo4j}"
 
 # Traceparent used to prove Wave 2.2 context propagation survives the
 # emulator. Valid W3C format: 00-<trace-id>-<span-id>-<flags>.
 TRACEPARENT="00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
-TRACESTATE="looksee=smoke-test"
+TRACESTATE="WebAudit=smoke-test"
 
 TEST_SUBSCRIPTION="url-e2e-smoke-$$"
 TMP_DIR="$(mktemp -d)"
@@ -114,7 +114,7 @@ delete_test_subscription() {
         >/dev/null 2>&1 || true
 }
 
-# Build a Body envelope that matches com.looksee.mapper.Body and publish it
+# Build a Body envelope that matches com.webaudit.mapper.Body and publish it
 # to the `url` topic with W3C trace attributes. The payload is a synthetic
 # URL message; the exact content is irrelevant, only that every byte
 # round-trips unchanged.
@@ -203,7 +203,7 @@ Wave 2.2 distributed tracing depends on this attribute surviving the emulator."
 
 # Runs a trivial Cypher smoke query via Neo4j's HTTP transactional endpoint.
 # Validates that the testcontainer is up and speaks the same wire protocol
-# the Looksee persistence layer will use at runtime.
+# the WebAudit persistence layer will use at runtime.
 verify_neo4j_smoke() {
     log "running Neo4j smoke query via HTTP transactional API"
     local auth

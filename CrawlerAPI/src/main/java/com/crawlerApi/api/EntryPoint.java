@@ -25,8 +25,9 @@ import io.swagger.v3.oas.annotations.servers.Server;
  *
  */
 
-@SpringBootApplication(exclude={Neo4jDataAutoConfiguration.class, SecurityAutoConfiguration.class })
-@ComponentScan(basePackages = {"com.crawlerApi*"})
+@SpringBootApplication(exclude={SecurityAutoConfiguration.class })
+@ComponentScan(basePackages = {"com.crawlerApi*", "com.webaudit*"})
+@org.springframework.context.annotation.Import({com.webaudit.config.WebAuditCoreAutoConfiguration.class})
 @PropertySources({
 	@PropertySource("classpath:application.properties"),
 	@PropertySource("classpath:auth0.properties")
@@ -37,22 +38,22 @@ import io.swagger.v3.oas.annotations.servers.Server;
 @EntityScan(basePackages = { "com.crawlerApi.models"} )
 @OpenAPIDefinition(
     info = @Info(
-        title = "Crawler API",
+        title = "WebAudit Crawler API",
         version = "1.0.0",
-        description = "API for web crawling and auditing functionality",
+        description = "API for WebAudit web crawling and auditing functionality",
         contact = @Contact(
-            name = "API Support",
-            email = "support@looksee.com"
+            name = "WebAudit API Support",
+            email = "support@webaudit.io"
         ),
         license = @License(
-            name = "MIT License",
-            url = "https://opensource.org/licenses/MIT"
+            name = "WebAudit",
+            url = ""
         )
     ),
     servers = {
-        @Server(url = "https://api.looksee.com/v1", description = "Production Server"),
-        @Server(url = "https://staging-api.looksee.com/v1", description = "Staging Server"),
-        @Server(url = "http://localhost:8080/v1", description = "Local Development")
+        @Server(url = "https://api.webaudit.io/v1", description = "Production Server"),
+        @Server(url = "https://staging-api.webaudit.io/v1", description = "Staging Server"),
+        @Server(url = "http://localhost:9080/v1", description = "Local Development")
     }
 )
 public class EntryPoint {

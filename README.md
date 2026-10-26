@@ -1,370 +1,585 @@
-<!--
-  Meta keywords for search engines & GitHub topics:
-  WCAG 2.2, WCAG 2.1, accessibility audit, a11y, ADA compliance, Section 508,
-  automated accessibility testing, color contrast checker, alt text audit,
-  screen reader testing, keyboard navigation, axe alternative, Pa11y alternative,
-  Lighthouse accessibility, Angular, Spring Boot, Neo4j, headless browser,
-  Selenium, WCAG scanner, inclusive design, EN 301 549
--->
+# WebAudit — Automated Website Auditing Platform
 
 <p align="center">
-  <a href="https://deepthought42.github.io/Accessibility-audit-platform/">
-    <img src="Look-see-UI-v3/src/assets/Wordmark_Red.png" alt="Look-see logo" width="220" />
-  </a>
-</p>
-
-<h1 align="center">Look-see — Automated WCAG 2.2 Accessibility Audit Platform</h1>
-
-<p align="center">
-  <strong>Look-see reads your website the way a user does — in HTML, in rendered pixels, and across the journeys between pages. Then it tells you where it falls apart.</strong>
+  <strong>WebAudit is an automated website auditing platform that crawls and analyzes web applications to identify accessibility, content, visual-design, information-architecture, and user-journey issues.</strong>
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg" /></a>
-  <img alt="WCAG 2.2 AA" src="https://img.shields.io/badge/WCAG-2.2%20AA-success" />
-  <img alt="ADA & Section 508" src="https://img.shields.io/badge/compliance-ADA%20%7C%20Section%20508%20%7C%20EN%20301%20549-informational" />
+  <img alt="WCAG 2.1 & 2.2 AA" src="https://img.shields.io/badge/WCAG-2.2%20AA-success" />
+  <img alt="Standards" src="https://img.shields.io/badge/compliance-ADA%20%7C%20Section%20508%20%7C%20EN%20301%20549-informational" />
   <img alt="Java" src="https://img.shields.io/badge/Java-17%20%7C%2021-orange?logo=openjdk&logoColor=white" />
-  <img alt="Spring Boot" src="https://img.shields.io/badge/Spring%20Boot-2.6-6DB33F?logo=springboot&logoColor=white" />
-  <img alt="Angular" src="https://img.shields.io/badge/Angular-17-DD0031?logo=angular&logoColor=white" />
-  <img alt="Neo4j" src="https://img.shields.io/badge/Neo4j-graph-008CC1?logo=neo4j&logoColor=white" />
-  <img alt="GCP" src="https://img.shields.io/badge/Cloud-GCP%20Cloud%20Run-4285F4?logo=googlecloud&logoColor=white" />
-  <img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen" />
-</p>
-
-<p align="center">
-  <img src="Look-see-UI-v3/src/assets/Banner_1.png" alt="Look-see dashboard showing content, visual design, information architecture, and journey scores from a live audit." />
-  <!-- TODO(design): replace with a bespoke a11y-superhero hero image pairing the Look-see logo with WCAG category icons. -->
-</p>
-
-<p align="center">
-  <a href="#quick-start">Quick start</a> ·
-  <a href="#what-look-see-audits">What it audits</a> ·
-  <a href="#architecture">Architecture</a> ·
-  <a href="#deploy-to-your-own-cloud">Deploy</a> ·
-  <a href="#roadmap">Roadmap</a> ·
-  <a href="https://deepthought42.github.io/Accessibility-audit-platform/">Project site</a>
+  <img alt="Spring Boot" src="https://img.shields.io/badge/Spring%20Boot-2.6%20%7C%203.x-6DB33F?logo=springboot&logoColor=white" />
+  <img alt="React" src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black" />
+  <img alt="Neo4j" src="https://img.shields.io/badge/Neo4j-5.x-008CC1?logo=neo4j&logoColor=white" />
+  <img alt="GCP Pub/Sub" src="https://img.shields.io/badge/Messaging-GCP%20Pub%2FSub-4285F4?logo=googlecloud&logoColor=white" />
 </p>
 
 ---
 
-## What is Look-see?
-
-**Look-see is an open-source accessibility audit platform.** It crawls your site, drives it in a real headless browser, and grades every page against **WCAG 2.2 / 2.1 AA**, **ADA**, **Section 508**, and **EN 301 549**. Unlike one-page scanners, it follows the journeys users actually take — clicking, navigating, and validating end-to-end flows — so the issues it reports are the ones a real visitor would hit.
-
-Under the hood it's a monorepo of small services: a crawler API, a page builder, four specialized audit workers (content, visual design, information architecture, journeys), an Angular UI, a Chrome extension, and a VS Code extension for real-time feedback in your editor. They trade work over Google Cloud Pub/Sub and describe the site in a Neo4j graph.
-
-## Where we are
-
-Look-see is **engineered in public** and isn't 1.0 yet. The services below are real and runnable, but the project is still being stitched together — not a polished hosted product. Expect rough edges, roadmap items that are sketched before they're wired up, and docs that occasionally describe intent before they describe reality.
-
-For the current cadence, skim the [commits](https://github.com/deepthought42/Accessibility-audit-platform/commits/main) and [open issues](https://github.com/deepthought42/Accessibility-audit-platform/issues). A hosted version at [look-see.com](https://deepthought42.github.io/Accessibility-audit-platform/) is planned but not live; self-hosting is the supported path today.
-
-If that sounds more interesting than it sounds like a warning, you're in the right place. PRs welcome. Bug reports from real websites especially welcome.
-
-## Why it's unusual
-
-**It looks at pixels, not only at HTML.** Most accessibility tools parse the DOM and stop there. Look-see also renders the page and audits the output a user actually sees — contrast measured from the paint on screen, not from stylesheet rules that may be overridden. A page can pass every rule-based checker and still be unreadable: light grey on white, a font that computed to 10px, a button that vanishes below a sticky banner. The visual-design service sees what a user sees.
-
-**It audits journeys, not just URLs.** Modern applications are state machines. Auditing the landing page is like inspecting a theatre by its lobby. Look-see discovers interactive elements, drives a real headless browser through them, and audits the states you only reach by clicking — mid-login, mid-checkout, mid-search.
-
-**It's a graph, not a list.** The site is stored in Neo4j, so pages, elements, journeys, and issues relate the way they actually do in a product. Ask it "which heading hierarchy violations affect which user journeys?" and it has an answer, not a spreadsheet.
-
-**It meets developers where they work.** Chrome extension, VS Code extension, Angular dashboard — the same audit data, three surfaces. Live scores arrive over WebSocket as workers finish, so you watch the audit happen instead of waiting for a PDF.
-
-**It's MIT-licensed and self-hostable.** One `terraform apply` on GCP and your data never leaves your cloud. That matters for compliance teams and for anyone who's been burned by a vendor rug-pull.
-
-## What Look-see audits
-
-Every page is scored across four WCAG-aligned categories:
-
-| Category | WCAG success criteria covered | Example checks |
-|---|---|---|
-| **Visual Design** | 1.4.1 Use of Color · 1.4.3 Contrast (Minimum) · 1.4.6 Contrast (Enhanced) · 1.4.11 Non-text Contrast · 1.4.12 Text Spacing | Color contrast (AA & AAA), typography scale, image quality, whitespace, imagery contrast |
-| **Content** | 1.1.1 Non-text Content · 3.1.5 Reading Level · 1.3.1 Info & Relationships | Alt text presence & quality, readability grade, paragraph structure, plain-language |
-| **Information Architecture** | 1.3.1 Info & Relationships · 2.4.6 Headings & Labels · 3.3.2 Labels or Instructions · 4.1.2 Name/Role/Value | Heading hierarchy, table semantics, form labels, link text, landmarks, page metadata |
-| **Journeys** | 2.1.1 Keyboard · 2.4.3 Focus Order · 2.4.7 Focus Visible · 3.2.2 On Input | Keyboard reachability, focus order, interactive element discovery, multi-step flow validation |
-
-## Who it's for
-
-- **Accessibility leads & a11y consultants** who need repeatable, auditable WCAG reports across large sites.
-- **Product & engineering teams** shipping under ADA, Section 508, or European Accessibility Act deadlines.
-- **Agencies** running periodic audits for clients, with white-labelable reports.
-- **Open-source maintainers** who want a Pa11y / axe-core alternative that handles full user journeys, not just static pages.
-
-## Quick Start
-
-### Prerequisites
-
-- **Java 17+** (Eclipse Temurin recommended; `CrawlerAPI` requires Java 21)
-- **Maven 3.9+**
-- **Node.js 18.19+** and **npm 10+** (for the Angular UI)
-- **Neo4j** 5.x (local Docker is fine)
-- **Docker** (optional, for containerized runs)
-- **Google Cloud SDK** (optional, only for GCP integrations like Vision/NLP)
-
-### 1. Clone and build the shared core
-
-All Java services depend on the `LookseeCore` library — build it once, locally.
-
-```bash
-git clone https://github.com/deepthought42/Accessibility-audit-platform.git
-cd Accessibility-audit-platform
-(cd LookseeCore && mvn clean install -DskipTests)
-```
-
-### 2. Run a service
-
-```bash
-cd AuditManager                       # or any other service directory
-mvn clean package -DskipTests
-java -ea -jar target/*.jar            # -ea enables Design-by-Contract assertions
-```
-
-### 3. Run the web UI
-
-```bash
-cd Look-see-UI-v3
-npm install
-ng serve
-# open http://localhost:4200
-```
-
-### 4. Run anything in Docker
-
-Every backend service ships a `Dockerfile`:
-
-```bash
-cd <service-directory>
-docker build -t looksee/<service-name> .
-docker run -p 8080:8080 looksee/<service-name>
-```
-
-## Architecture
-
-Look-see is a pub/sub-driven monorepo. A single **CrawlerAPI** fronts the platform; work flows asynchronously through Google Cloud Pub/Sub topics to specialized workers, then back to the UI over a Pusher WebSocket.
-
-```mermaid
-flowchart LR
-    Browser([User Browser])
-
-    subgraph Ingestion
-        API[CrawlerAPI]
-        PB[PageBuilder]
-    end
-
-    subgraph Orchestration
-        AM[AuditManager]
-    end
-
-    subgraph Workers["Audit Workers"]
-        CA["contentAudit<br/>alt text · readability"]
-        VD["visualDesignAudit<br/>contrast · typography"]
-        IA["informationArchitectureAudit<br/>headings · forms · landmarks"]
-    end
-
-    AS[audit-service]
-
-    Browser -->|HTTP / REST| API
-    API -->|url| PB
-    PB -->|page_created| AM
-    AM -->|page_audit| CA
-    AM -->|page_audit| VD
-    AM -->|page_audit| IA
-    CA -->|audit_update| AS
-    VD -->|audit_update| AS
-    IA -->|audit_update| AS
-    AS -. Pusher WebSocket .-> Browser
-
-    classDef svc fill:#fff,stroke:#ff1a4b,stroke-width:2px,color:#111
-    classDef client fill:#e8f3ff,stroke:#1e7cff,stroke-width:2px,color:#111
-    class API,PB,AM,CA,VD,IA,AS svc
-    class Browser client
-```
-
-**Shared across every Java service: [LookseeCore](LookseeCore/)** (`A11yCore` Maven artifact) — Neo4j models, Spring Data repositories, Selenium WebDriver automation, GCP integrations (Storage, Vision, NLP, Pub/Sub), and Pusher broadcasting.
-
-> For the full pub/sub topic list, message payloads, and journey-pipeline diagram, see the expanded [Architecture details](#architecture-details) below.
-
-## Packages
-
-Each top-level directory is a service or library. Click through for service-specific docs.
-
-### Backend services (Spring Boot)
-
-| Service | Role | Java |
-|---|---|---|
-| [`CrawlerAPI`](CrawlerAPI/) | Public REST API — web crawling, domains, users, billing | 21 |
-| [`PageBuilder`](PageBuilder/) | Builds page state models from crawled URLs with headless Chrome | 17 |
-| [`AuditManager`](AuditManager/) | Orchestrates page audit lifecycle; routes pub/sub events | 17 |
-| [`contentAudit`](contentAudit/) | Alt text, readability, paragraph structure | 17 |
-| [`visualDesignAudit`](visualDesignAudit/) | Color contrast, typography, imagery, whitespace | 17 |
-| [`informationArchitectureAudit`](informationArchitectureAudit/) | Headings, tables, forms, links, metadata | 17 |
-| [`audit-service`](audit-service/) | Processes audit progress and broadcasts live updates | 17 |
-| [`look-see-front-end-broadcaster`](look-see-front-end-broadcaster/) | Pushes `page_created` and `audit_update` events to the UI | 17 |
-| [`element-enrichment`](element-enrichment/) | Enriches elements with visual and semantic metadata | 17 |
-| [`journeyExecutor`](journeyExecutor/) | Executes and validates user journey paths | 17 |
-| [`journeyExpander`](journeyExpander/) | Expands verified journeys by discovering interactive elements | 17 |
-| [`journey-map-cleanup`](journey-map-cleanup/) | Cleans stale journey candidates in domain maps | 17 |
-| [`journeyErrors`](journeyErrors/) | Dead-letter handler for failed journey candidates | 17 |
-
-### Libraries, UIs, and extensions
-
-| Package | Role |
-|---|---|
-| [`LookseeCore`](LookseeCore/) | Shared core library — models, persistence, browser, GCP, messaging |
-| [`Look-see-UI-v3`](Look-see-UI-v3/) | Angular 17 web dashboard |
-| [`LookseeChromeExtension`](LookseeChromeExtension/) | Chrome extension for in-page accessibility issue detection |
-| [`look-see-VSCode-plugin`](look-see-VSCode-plugin/) | VS Code extension for real-time WCAG 2.2 analysis in the editor |
-| [`LookseeIaC`](LookseeIaC/) | Terraform IaC for GCP deployment |
-| [`page-audit-enrichment`](page-audit-enrichment/) | Page audit data enrichment utilities |
-| [`qa-testbed`](qa-testbed/) | QA test fixture pages for accessibility testing |
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Backend services | Java 17 / 21, Spring Boot 2.6, Maven |
-| Shared library | `LookseeCore` (`A11yCore` Maven artifact) |
-| Database | Neo4j (graph) via Spring Data Neo4j |
-| Messaging | Google Cloud Pub/Sub (async) · Pusher (real-time WebSocket) |
-| Browser automation | Selenium WebDriver 3.141.59 |
-| Cloud platform | Google Cloud — Cloud Run, Storage, Vision, NLP, Secret Manager |
-| Frontend | Angular 17, TypeScript 5.5, Tailwind CSS, Angular Material |
-| Authentication | Auth0 (OAuth2 / JWT) |
-| Payments | Stripe (subscription billing) |
-| Analytics | Segment |
-| Infrastructure | Terraform (GCP), GitHub Actions (CI/CD) |
-| Container runtime | Docker, Google Cloud Run |
-
-## Deploy to your own cloud
-
-Look-see deploys to **Google Cloud Run** via a single Terraform package. See the full deployment guide — required variables, Secret Manager wiring, Pub/Sub topics, and a sample GitHub Actions workflow — in:
-
-→ **[LookseeIaC/GCP/README.md](LookseeIaC/GCP/README.md)**
-
-## CI/CD
-
-The monorepo CI (`.github/workflows/ci.yml`) uses path-based change detection to build and test only affected modules. Each service also ships its own workflows:
-
-- **`docker-ci-test.yml`** — on PR: build, test, Docker build verification
-- **`docker-ci-release.yml`** — on merge to `main`: test, semantic version bump, Docker image push to Docker Hub
-
-## Roadmap
-
-- 🌐 **[look-see.com](https://deepthought42.github.io/Accessibility-audit-platform/)** — hosted SaaS launch (coming soon)
-- 📊 **Trend dashboards** — score deltas over time per page and per journey
-- 🤖 **Auto-fix suggestions** — LLM-generated remediation PRs
-- 🌍 **PDF & Office document audits** — go beyond the browser
-- 🏷️ **White-label reports** — for agencies and consultants
-
-Follow the [Issues](https://github.com/deepthought42/Accessibility-audit-platform/issues) tab to track progress.
-
-## Contributing
-
-PRs are very welcome. Good first issues are tagged in each service's repo. Please:
-
-1. Fork and branch from `main`.
-2. Run `mvn install -DskipTests` in `LookseeCore` before building any dependent service.
-3. Keep changes scoped to one service where possible — CI will only rebuild what you touched.
-4. Enable Java assertions (`-ea`) when running locally; Look-see uses Design-by-Contract checks.
-
-## License
-
-Look-see is released under the [MIT License](LICENSE). © 2024–2026 Look-see contributors.
-
-Individual subdirectories may retain their original Apache 2.0 license files from before the monorepo migration; the MIT license at the repository root governs the project as a whole going forward.
+## Table of Contents
+
+1. [What is WebAudit?](#what-is-webaudit)
+2. [The Problem It Solves](#the-problem-it-solves)
+3. [How WebAudit Works](#how-webaudit-works)
+4. [Architecture Overview](#architecture-overview)
+5. [Technology Stack](#technology-stack)
+6. [Crawling Process (Selenium WebDriver)](#crawling-process-selenium-webdriver)
+7. [Website Representation in Neo4j](#website-representation-in-neo4j)
+8. [Audit Pipeline & Google Cloud Pub/Sub](#audit-pipeline--google-cloud-pubsub)
+9. [Accessibility Auditing](#accessibility-auditing)
+10. [Content Auditing](#content-auditing)
+11. [Visual-Design Auditing](#visual-design-auditing)
+12. [Information-Architecture Auditing](#information-architecture-auditing)
+13. [User-Journey Analysis](#user-journey-analysis)
+14. [Neo4j Graph Database Details](#neo4j-graph-database-details)
+15. [Google Cloud Pub/Sub Messaging](#google-cloud-pubsub-messaging)
+16. [Selenium Browser Automation Details](#selenium-browser-automation-details)
+17. [REST APIs Reference](#rest-apis-reference)
+18. [Project Structure](#project-structure)
+19. [Setup Instructions](#setup-instructions)
+20. [Configuration & Environment Variables](#configuration--environment-variables)
+21. [How to Run the Project](#how-to-run-the-project)
+22. [How to Test the Project](#how-to-test-the-project)
+23. [Known Limitations](#known-limitations)
+24. [Future Improvements](#future-improvements)
 
 ---
 
-## Architecture details
+## 1. What is WebAudit?
 
-### Pub/Sub message flow
+**WebAudit** is a web-based automated website auditing platform that crawls websites, extracts rich visual and semantic page data in real browsers, and executes modular audit rules to evaluate web applications.
 
-Full system view — the page-audit pipeline, the journey pipeline, dead-letter handling, and real-time broadcasting to the UI.
+Unlike traditional static linters that inspect raw HTML strings without executing JavaScript, WebAudit drives a full headless browser (Selenium WebDriver with Chrome) to evaluate computed styles, render tree layouts, interactive page states, and end-to-end user journeys between pages. All extracted pages, DOM elements, audit observations, and journey transitions are stored in a **Neo4j graph database** and orchestrated asynchronously via **Google Cloud Pub/Sub**.
+
+---
+
+## 2. The Problem It Solves
+
+Modern web applications present challenges that traditional static accessibility checkers miss:
+
+- **CSS & Computed Styles Miscalculations**: A static rule checker cannot detect if text rendered over an image or CSS background has insufficient contrast, or if a sticky navigation bar obscures interactive elements. WebAudit measures contrast and spacing from actual computed styles and rendered coordinates.
+- **Single-Page Applications & Dynamic DOM**: Web apps load states via JavaScript and user interaction. WebAudit discovers interactive controls, clicks through them, and audits intermediate application states (forms, modals, multi-step flows).
+- **Siloed Page-by-Page Reports**: Standard scanners generate disjointed spreadsheets per URL. WebAudit stores the website as an interconnected graph, mapping how pages, elements, journeys, and issues correlate across the site.
+- **Fragmented Developer Experience**: Audits often occur post-deployment via manual spreadsheets. WebAudit integrates via a React 18 TypeScript web dashboard, a Chrome browser extension, a VS Code IDE extension, and REST APIs.
+
+---
+
+## 3. How WebAudit Works
+
+The end-to-end auditing lifecycle follows a systematic pipeline:
+
+```
+User / REST API / Extension
+           │
+           ▼
+[ CrawlerAPI ] ──► Creates Domain & DomainAuditRecord in Neo4j
+           │
+           ▼ (Pub/Sub: url-topic)
+[ PageBuilder ] ──► Drives headless Chrome via Selenium WebDriver
+           │        Loads URL, computes styles, takes screenshots
+           │        Persists PageState & ElementState graph in Neo4j
+           │
+           ├────────────────────────────┐
+           ▼ (page-created-topic)       ▼ (journey-verified-topic)
+   [ AuditManager ]              [ journeyExpander ]
+           │                            │ Discovers clickables
+           ▼ (page-audit-topic)         ▼ (journey-candidate-topic)
+┌───────────────────────────────┐ [ journeyExecutor ]
+│ Parallel Audit Workers:       │       │ Executes journey steps in browser
+│  • contentAudit               │       ▼ Validates flow & focus
+│  • visualDesignAudit          │ Re-enters loop if verified
+│  • informationArchitectureAudit
+└──────────────┬────────────────┘
+               ▼ (audit-update-topic)
+[ audit-service ] & [ front-end-broadcaster ]
+               │
+               ▼ (Pusher WebSocket & Neo4j writes)
+[ WebAudit React UI / Clients ]
+```
+
+1. **Initiation**: A user submits a domain or URL through the WebAudit web dashboard, browser extension, or `POST /v1/domains`.
+2. **Ingestion & Browser Extraction**: `PageBuilder` receives the message, launches headless Chrome, extracts the complete DOM tree, calculates computed CSS styles, captures full-page and element screenshots, and writes the structured graph into Neo4j.
+3. **Audit Dispatch**: `AuditManager` captures the built page event and dispatches audit jobs to specialized microservices over Pub/Sub.
+4. **Multi-Disciplinary Evaluation**: Dedicated workers evaluate the page concurrently:
+   - **Visual Design**: Contrast (WCAG AA/AAA), font sizes, typography, whitespace, element spacing.
+   - **Content**: Alt-text coverage across media types, reading grade levels, paragraph structure.
+   - **Information Architecture**: Heading hierarchies, semantic landmarks, form controls, table structures, descriptive links.
+5. **Journey Exploration**: `journeyExpander` and `journeyExecutor` interactively click links and buttons, navigate through state transitions, check keyboard focus and reachability, and construct a user-journey map.
+6. **Broadcasting & Storage**: All audit records, issues, and compliance scores persist in Neo4j and stream in real time to the React UI via WebSockets.
+
+---
+
+## 4. Architecture Overview
+
+WebAudit is organized as a modular microservices monorepo:
 
 ```mermaid
 flowchart TD
-    UI([Look-see UI])
+    UI([WebAudit UI / React 18 + Vite])
+    EXT([Chrome Extension / VS Code])
 
-    subgraph Ingestion["Ingestion"]
-        API[CrawlerAPI]
-        PB[PageBuilder]
-        EE[element-enrichment]
+    subgraph Ingestion["Ingestion Layer"]
+        API[CrawlerAPI<br/>Java 21 / Spring Boot 3]
+        PB[PageBuilder<br/>Selenium Headless Chrome]
+        EE[element-enrichment<br/>Metadata Enrichment]
     end
 
-    subgraph Orchestration["Orchestration"]
-        AM[AuditManager]
+    subgraph Orchestration["Orchestration Layer"]
+        AM[AuditManager<br/>Lifecycle Controller]
     end
 
-    subgraph PageAudits["Per-page audit workers"]
-        CA[contentAudit]
-        VD[visualDesignAudit]
-        IA[informationArchitectureAudit]
+    subgraph Workers["Audit Worker Services"]
+        CA["contentAudit<br/>Alt Text · Readability"]
+        VD["visualDesignAudit<br/>Color Contrast · Typography"]
+        IA["informationArchitectureAudit<br/>Headings · Forms · Landmarks"]
     end
 
-    subgraph JourneyPipeline["Journey pipeline (domain-level audits)"]
-        JX[journeyExpander]
-        JE[journeyExecutor]
-        JCL[journey-map-cleanup]
-        JER[journeyErrors]
+    subgraph Journey["Journey Pipeline"]
+        JX[journeyExpander<br/>Element Discovery]
+        JE[journeyExecutor<br/>Browser Flow Execution]
+        JC[journey-map-cleanup<br/>State Maintenance]
+        DL[journeyErrors<br/>Dead-Letter Handler]
     end
 
-    subgraph Broadcast["Real-time broadcast"]
-        FB[front-end-broadcaster]
-        AS[audit-service]
+    subgraph Storage["Persistence & Messaging"]
+        NEO[(Neo4j Graph Database 5.x)]
+        PS[[Google Cloud Pub/Sub]]
     end
 
-    UI -->|HTTP / REST| API
-    API -->|url · AuditStartMessage| PB
+    subgraph RealTime["Real-Time Broadcasting"]
+        AS[audit-service<br/>Progress Aggregator]
+        BC[front-end-broadcaster<br/>WebSocket Pusher]
+    end
 
-    PB -->|page_created · PageBuiltMessage| AM
-    PB -->|page_created| FB
-    PB -->|page_created| EE
-    PB -->|journey_verified · VerifiedJourneyMessage| JX
+    UI -->|REST API| API
+    EXT -->|REST API| API
+    API -->|url-topic| PB
+    PB -->|Cypher / SDN| NEO
+    PB -->|page-created-topic| AM
+    PB -->|page-created-topic| BC
+    PB -->|journey-verified-topic| JX
 
-    AM -->|page_audit · PageAuditMessage| CA
-    AM -->|page_audit| VD
-    AM -->|page_audit| IA
+    AM -->|page-audit-topic| CA
+    AM -->|page-audit-topic| VD
+    AM -->|page-audit-topic| IA
 
-    CA -->|audit_update · AuditProgressUpdate| AS
-    VD -->|audit_update| AS
-    IA -->|audit_update| AS
+    CA -->|Cypher / SDN| NEO
+    VD -->|Cypher / SDN| NEO
+    IA -->|Cypher / SDN| NEO
 
-    JX -->|journey_candidate · JourneyCandidateMessage| JE
-    JE -->|journey_verified · re-enter loop| JX
-    JE -->|journey_discarded| API
-    JE -->|audit_error| AS
+    CA -->|audit-update-topic| AS
+    VD -->|audit-update-topic| AS
+    IA -->|audit-update-topic| AS
 
-    JCL -. scheduled trigger<br/>cleans stale CANDIDATEs .-> JX
-    JER -. dead-letter<br/>marks failed as ERROR .-> JX
+    JX -->|journey-candidate-topic| JE
+    JE -->|journey-verified-topic| JX
+    JE -->|Cypher / SDN| NEO
+    JE -->|audit-error-topic| DL
 
-    FB -. Pusher WebSocket .-> UI
-    AS -. Pusher WebSocket .-> UI
-
-    classDef svc fill:#fff,stroke:#ff1a4b,stroke-width:2px,color:#111
-    classDef client fill:#e8f3ff,stroke:#1e7cff,stroke-width:2px,color:#111
-    classDef journey fill:#fff7e8,stroke:#e39800,stroke-width:2px,color:#111
-    classDef ops fill:#f3e8ff,stroke:#7a3cff,stroke-width:2px,color:#111
-    class API,PB,EE,AM,CA,VD,IA,FB,AS svc
-    class UI client
-    class JX,JE journey
-    class JCL,JER ops
+    AS -->|WebSocket / Pusher| UI
+    BC -->|WebSocket / Pusher| UI
 ```
 
-### Key Pub/Sub topics
+---
 
-| Topic | Publishers | Subscribers | Payload |
+## 5. Technology Stack
+
+| Component | Technology | Version / Details |
+|---|---|---|
+| **Core Shared Library** | WebAudit Core (`WebAuditCore`) | Java 17, 10 modular libraries |
+| **API Gateway / Public API** | Spring Boot 3.x, Spring MVC | Java 21, REST APIs, OpenAPI 3 / Swagger |
+| **Microservice Framework** | Spring Boot | 2.6.x (workers), 3.x (`CrawlerAPI`) |
+| **Graph Database** | Neo4j Community / Enterprise | 5.20+ via Spring Data Neo4j (SDN) |
+| **Browser Automation** | Selenium WebDriver | 3.141.59 with standalone Headless Chrome |
+| **Message Broker** | Google Cloud Pub/Sub | GCP Cloud Pub/Sub / Local Pub/Sub Emulator |
+| **Real-Time Push** | Pusher / WebSockets | Live audit progress streaming |
+| **Web UI** | React 18, TypeScript 5.5, Vite | Tailored CSS Tokens, Modern Dashboard |
+| **Cloud Infrastructure (Optional)** | Google Cloud Platform | Cloud Run, Vision API (production only) |
+| **Authentication** | Auth0 | JWT / OAuth2 bearer token security |
+| **Billing** | Stripe | Subscription token validation |
+| **Build System** | Apache Maven | Multi-module reactor builds (Maven 3.9+) |
+
+---
+
+## 6. Crawling Process (Selenium WebDriver)
+
+Crawling is performed by `PageBuilder` and `WebAuditCore/webaudit-browser`:
+
+1. **Browser Initialization**: `BrowserConnectionHelper` instantiates a remote `ChromeDriver` pointing to the configured Selenium hub (`SELENIUM_URLS`).
+2. **Page Navigation**: The browser navigates to the target URL, waiting for `document.readyState === 'complete'` and full visual settlement.
+3. **DOM Extraction**: JavaScript scripts injected into the browser extract:
+   - DOM element hierarchies and parent-child relations.
+   - Computed CSS styles (color, background-color, font-family, font-size, margin, padding, visibility, z-index).
+   - Rendered bounding boxes (`x`, `y`, `width`, `height`).
+   - Text contents, links, semantic tag names, and attributes (`role`, `aria-*`, `alt`, `href`, `tabindex`).
+4. **Visual Assets**: Full-page screenshots and element snapshots are captured for pixel-level visual analysis and UI review.
+5. **Model Generation**: Extracted data is mapped to `PageState` and `ElementState` domain objects and persisted to Neo4j.
+
+---
+
+## 7. Website Representation in Neo4j
+
+WebAudit models websites as an interconnected graph rather than flat relational tables:
+
+```mermaid
+graph TD
+    Account["Account<br/>(id, email, subscriptionToken)"]
+    Domain["Domain<br/>(url, name)"]
+    DomainAuditRecord["DomainAuditRecord<br/>(status, auditList)"]
+    Page["Page<br/>(url, path)"]
+    PageState["PageState<br/>(url, screenshotUrl, fullDomHash)"]
+    PageAuditRecord["PageAuditRecord<br/>(status)"]
+    Element["Element<br/>(name, xpath)"]
+    ElementState["ElementState<br/>(tag, text, fgColor, bgColor, bounds)"]
+    Audit["Audit<br/>(name, score, status)"]
+    Issue["UXIssueMessage / ColorContrastIssue<br/>(wcagRule, priority, description)"]
+    DomainMap["DomainMap"]
+    Journey["Journey<br/>(status, candidateSteps)"]
+    Step["Step<br/>(action, key)"]
+
+    Account -->|HAS_DOMAIN| Domain
+    Domain -->|HAS_AUDIT_RECORD| DomainAuditRecord
+    Domain -->|HAS_PAGE| Page
+    Domain -->|HAS_DOMAIN_MAP| DomainMap
+    DomainMap -->|CONTAINS_JOURNEY| Journey
+    Journey -->|CONTAINS_STEP| Step
+    DomainAuditRecord -->|HAS_PAGE_AUDIT_RECORD| PageAuditRecord
+    Page -->|HAS_STATE| PageState
+    PageState -->|HAS_ELEMENT| Element
+    Element -->|HAS_STATE| ElementState
+    PageAuditRecord -->|HAS_AUDIT| Audit
+    Audit -->|HAS_ISSUE| Issue
+    Issue -->|FOR_ELEMENT| ElementState
+```
+
+---
+
+## 8. Audit Pipeline & Google Cloud Pub/Sub
+
+WebAudit uses Google Cloud Pub/Sub to decouple services and provide asynchronous, reliable processing:
+
+| Topic Name | Publisher(s) | Subscriber(s) | Payload Structure |
 |---|---|---|---|
-| `url` | CrawlerAPI | PageBuilder | `AuditStartMessage` (URL, audit level, account) |
-| `page_created` | PageBuilder | AuditManager, front-end-broadcaster | `PageBuiltMessage` (account, page, audit record IDs) |
-| `page_audit` | AuditManager | contentAudit, visualDesignAudit, informationArchitectureAudit | `PageAuditMessage` (page audit, page, account IDs) |
-| `audit_update` | Audit services | audit-service | `AuditProgressUpdate` (progress, category, status) |
-| `audit_error` | All services | (logging/monitoring) | Error details |
-| `journey_verified` | PageBuilder, journeyExecutor | journeyExpander | `VerifiedJourneyMessage` (journey, account, audit record) |
-| `journey_candidate` | journeyExpander | journeyExecutor | `JourneyCandidateMessage` (journey, browser, map) |
-| `journey_discarded` | journeyExecutor | CrawlerAPI | `DiscardedJourneyMessage` |
-| `journey_completion_cleanup` | (scheduled) | journey-map-cleanup | Trigger payload |
+| `url-topic` | CrawlerAPI | PageBuilder | `AuditStartMessage` / `DomainAuditUrlMessage` (account ID, audit record ID, target URL, browser) |
+| `page-created-topic` | PageBuilder | AuditManager, front-end-broadcaster | `PageBuiltMessage` (account ID, page ID, audit record ID) |
+| `page-audit-topic` | AuditManager | contentAudit, visualDesignAudit, informationArchitectureAudit | `PageAuditMessage` (page audit record ID, page state ID, account ID) |
+| `audit-update-topic` | contentAudit, visualDesignAudit, informationArchitectureAudit | audit-service | `AuditProgressUpdate` (audit record ID, category, progress, status) |
+| `audit-error-topic` | All services | journeyErrors, monitoring | `AuditError` (error message, stack trace, context ID) |
+| `journey-verified-topic` | PageBuilder, journeyExecutor | journeyExpander | `VerifiedJourneyMessage` (journey ID, account ID, audit record ID) |
+| `journey-candidate-topic` | journeyExpander | journeyExecutor | `JourneyCandidateMessage` (journey candidate, browser type, map ID) |
+| `journey-discarded-topic` | journeyExecutor | CrawlerAPI | `DiscardedJourneyMessage` (discarded journey ID, reason) |
+| `element-extraction-topic` | PageBuilder | element-enrichment | Element extraction payload |
+| `journey-map-cleanup-topic` | Scheduled trigger | journey-map-cleanup | Cleanup trigger signal |
 
-### Monorepo history
+---
 
-Each top-level directory is a former standalone repository. Former `origin` URLs are listed in [`LEGACY_REMOTES.txt`](LEGACY_REMOTES.txt) for reference. The monorepo uses a **single new history** at the root (per-repo commit histories are not included). To preserve old SHAs, clone the URLs in `LEGACY_REMOTES.txt` into separate folders or use `git filter-repo` to replay histories under subdirectories.
+## 9. Accessibility Auditing
+
+WebAudit benchmarks audited pages against **WCAG 2.1 & 2.2 Level AA / AAA** requirements:
+
+- **Perceivable**: Text color contrast, non-text contrast, images with informative alt text, semantic element labeling, readable typography.
+- **Operable**: Keyboard focus visibility, logical tab navigation order, accessible links and form controls.
+- **Understandable**: Reading difficulty metrics (Flesch-Kincaid, ARI), paragraph lengths, plain language assessment.
+- **Robust**: Valid semantic markup, landmarks, correct ARIA roles and labels.
+
+---
+
+## 10. Content Auditing (`contentAudit`)
+
+The `contentAudit` service analyzes readability, copy, and media alternatives:
+
+1. **Alt Text Coverage**:
+   - `ImageAltTextAudit`: Inspects `<img>` elements for missing `alt`, empty `alt` on non-decorative images, and repetitive filenames (e.g. `img_123.jpg`) used as descriptions.
+   - `SVGAltTextAudit`: Inspects `<svg>` elements for accessible `<title>`, `<desc>`, or `aria-label`.
+   - `CanvasAltTextAudit`: Checks `<canvas>` tags for fallback text.
+   - `IframeAltTextAudit`: Verifies that `<iframe>` elements contain descriptive `title` attributes.
+   - `ObjectAltTextAudit` & `AppletAltTextAudit`: Validates legacy media tags for accessible fallbacks.
+2. **Readability Scoring** (`ReadabilityAudit`):
+   - Computes Flesch-Kincaid Grade Level, Automated Readability Index (ARI), and Coleman-Liau scores to detect unnecessarily complex prose.
+3. **Paragraph Structure** (`ParagraphingAudit`):
+   - Checks paragraph length and structure to ensure digestible reading flow.
+
+---
+
+## 11. Visual-Design Auditing (`visualDesignAudit`)
+
+The `visualDesignAudit` service inspects layout and aesthetics from computed CSS:
+
+1. **Text Color Contrast** (`TextColorContrastAudit`):
+   - Calculates relative luminance and contrast ratio according to the WCAG 2.1 algorithm:
+     $$\text{Ratio} = \frac{L_1 + 0.05}{L_2 + 0.05}$$
+   - Evaluates compliance against:
+     - WCAG AA Normal Text: $\ge 4.5:1$
+     - WCAG AA Large Text (18pt / 24px or bold 14pt / 18.66px): $\ge 3.0:1$
+     - WCAG AAA Enhanced: $\ge 7.0:1$ (normal) and $\ge 4.5:1$ (large)
+2. **Non-Text Color Contrast** (`NonTextColorContrastAudit`):
+   - Evaluates borders, interactive UI component boundaries, and graphical indicators against the $3.0:1$ minimum threshold (WCAG 1.4.11).
+3. **Typography & Font Scaling** (`FontAudit`, `TypefacesAudit`):
+   - Verifies minimum font size readability and consistent typography scale across headings and body text.
+4. **Spacing & Whitespace** (`MarginAudit`, `PaddingAudit`):
+   - Audits margins, padding, and element touch targets to prevent cramped touch and click targets.
+5. **Image Quality & Policies** (`ImageAudit`, `ImagePolicyAudit`):
+   - Evaluates image resolution, aspect ratio distortion, and contrast against underlying backgrounds.
+
+---
+
+## 12. Information-Architecture Auditing (`informationArchitectureAudit`)
+
+The `informationArchitectureAudit` service audits document structure and navigation:
+
+1. **Heading Hierarchy** (`HeaderStructureAudit`, `TitleAndHeaderAudit`):
+   - Verifies the presence of a single `<h1>` per page.
+   - Ensures no skipped heading levels (e.g., `<h2>` immediately followed by `<h4>`).
+2. **Form Structure & Controls** (`FormStructureAudit`, `InputPurposeAudit`):
+   - Ensures every `<input>`, `<select>`, and `<textarea>` is associated with an explicit `<label>` or `aria-label`.
+   - Inspects input purpose (`autocomplete` attributes) for common user fields.
+3. **Link Accessibility** (`LinksAudit`):
+   - Detects non-descriptive link text (e.g., "click here", "read more", "link").
+   - Identifies empty anchor tags or missing `href` attributes.
+4. **Semantic Tables** (`TableStructureAudit`):
+   - Verifies `<th>` table headers with `scope` attributes and table summary/caption elements.
+5. **Page Metadata & Language** (`MetadataAudit`, `PageLanguageAudit`):
+   - Checks `<html lang="...">` presence and validity.
+   - Validates `<title>` uniqueness and `<meta name="description">` presence.
+6. **Orientation & Reflow** (`OrientationAudit`, `ReflowAudit`, `TextSpacingAudit`):
+   - Checks responsiveness and reflow compatibility without horizontal scrolling or text clipping.
+
+---
+
+## 13. User-Journey Analysis
+
+Modern websites are stateful applications. WebAudit includes a dedicated journey exploration subsystem:
+
+- **Interactive Element Discovery** (`journeyExpander`): Identifies actionable elements (links, buttons, form submit controls, menu toggles) on the current `PageState` and generates candidate exploration paths (`JourneyCandidateMessage`).
+- **Browser Journey Execution** (`journeyExecutor`): Drives headless Chrome to execute step actions (`click`, `type`, `submit`). It verifies that each step reaches a valid state, checks focus visibility (`:focus` outline), and validates keyboard accessibility.
+- **Exploration Map Maintenance** (`journey-map-cleanup`): Prunes expired or redundant candidate paths from the `DomainMap` graph.
+- **Failure Recovery** (`journeyErrors`): Dead-letter processor that records unrecoverable journey execution failures in Neo4j.
+
+---
+
+## 14. Neo4j Graph Database Details
+
+WebAudit connects to Neo4j via **Spring Data Neo4j (SDN)**. 
+
+### Schema Indexes & Constraints
+Schema indexes are managed through Cypher migrations (`WebAuditIaC/create-indexes-and-constraints.cql`):
+- Unique constraints on `Account(key)`, `Domain(key)`, `Page(key)`, `PageState(key)`, `Element(key)`, `ElementState(key)`.
+- Lookup indexes on `Account(userId)`, `Account(email)`, `Domain(url)`.
+- Outbox event indexes for the transactional outbox pattern.
+
+### Transactional Outbox Pattern
+To prevent distributed inconsistencies between Neo4j state changes and Pub/Sub publishing, WebAudit implements the **Transactional Outbox Pattern** (`OutboxPublishingGateway`, `OutboxEventRepository`). Messages are written into Neo4j in the same database transaction as domain writes and published to Pub/Sub once committed.
+
+---
+
+## 15. Google Cloud Pub/Sub Messaging
+
+Services communicate via Google Cloud Pub/Sub:
+- **Cloud Deployment**: Deployed on Google Cloud Run with Pub/Sub push subscriptions delivering HTTP POST requests directly to each microservice's `/` endpoint.
+- **Local Development**: Supported through the Google Cloud SDK Pub/Sub emulator (`pubsub-emulator:8085`). Spring Cloud GCP connects automatically via `PUBSUB_EMULATOR_HOST`.
+- **Idempotency**: All subscriber controllers use `IdempotencyService` to check message IDs against Neo4j (`ProcessedMessage`), preventing duplicate execution during Pub/Sub message redelivery.
+
+---
+
+## 16. Selenium Browser Automation Details
+
+- **Headless Chrome**: Run via `selenium/standalone-chrome:125.0` in Docker or via remote Selenium Hubs.
+- **Browser Service Interface**: `BrowserService` abstracts navigation, screenshot capturing, script execution, and cookie/session handling.
+- **Design-by-Contract**: Core browser and persistence classes use contract assertions (`-ea` flag enabled in runtime JVM).
+
+---
+
+## 17. REST APIs Reference
+
+The primary REST API is served by `CrawlerAPI` on port `9080` (base path `/v1`).
+
+### Domains API (`/v1/domains`)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/v1/domains` | List all monitored domains for the authenticated account with crawl progress |
+| `POST` | `/v1/domains` | Register a new domain and initiate an automated audit crawl |
+| `GET` | `/v1/domains/{id}` | Retrieve domain details, verified journeys, and pages |
+| `DELETE` | `/v1/domains/{id}` | Remove a domain from the account |
+| `POST` | `/v1/domains/{id}/audit` | Manually trigger a fresh audit on an existing domain |
+
+### Audits API (`/v1/audits`)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/v1/audits` | Retrieve all audit records from the last 30 days |
+| `GET` | `/v1/audits/{id}` | Retrieve comprehensive audit details, category breakdown, and scores |
+| `GET` | `/v1/audits/{id}/issues` | List all detected accessibility and UX issues for an audit |
+
+### Audit Records API (`/v1/auditrecords`)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/v1/auditrecords` | List audit records belonging to the current account |
+| `GET` | `/v1/auditrecords/{id}` | Retrieve specific audit record details |
+| `POST` | `/v1/auditrecords/{id}/report` | Request an audit summary report for a specific record |
+
+### Pages & Elements API (`/v1/pages`, `/v1/elements`)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/v1/pages/{id}` | Get page state, full DOM hierarchy, and element count |
+| `GET` | `/v1/pages/{id}/screenshot` | Retrieve full-page screenshot metadata and image URI |
+| `GET` | `/v1/elements/{id}` | Retrieve individual element attributes, computed CSS, and bounds |
+
+### Health & Monitoring
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/actuator/health` | Spring Boot Actuator health check (`{"status":"UP"}`) |
+| `GET` | `/actuator/info` | Service build and environment info |
+
+---
+
+## 18. Project Structure
+
+```
+WebAudit/
+├── WebAuditCore/                     # Shared Java core multi-module reactor
+│   ├── webaudit-models/              # Domain entities (Account, Domain, PageState, Audit, Issue)
+│   ├── webaudit-persistence/         # Spring Data Neo4j repositories & service layer
+│   ├── webaudit-browser/             # Selenium WebDriver automation & CDP helpers
+│   ├── webaudit-browsing-client/     # Generated client SDK for browser service
+│   ├── webaudit-messaging/           # Pub/Sub outbox, idempotency, poison pill handling
+│   ├── webaudit-gcp/                 # GCP Cloud Storage, Vision API, Secret Manager
+│   ├── webaudit-nlp/                 # Readability algorithms & text processing
+│   ├── webaudit-utils/               # Color contrast math & geometry helpers
+│   ├── webaudit-llm/                 # LLM client support & resilience
+│   └── webaudit-core/                # Umbrella module re-exporting all sub-libraries
+├── CrawlerAPI/                      # Public REST API (Java 21 / Spring Boot 3)
+├── PageBuilder/                     # Web crawler & DOM extractor (Selenium)
+├── AuditManager/                    # Audit lifecycle orchestrator
+├── contentAudit/                    # Content & readability audit worker
+├── visualDesignAudit/               # Color contrast & visual styling audit worker
+├── informationArchitectureAudit/    # Headings, forms, landmarks, & metadata audit worker
+├── audit-service/                   # Audit progress tracker & aggregator
+├── webaudit-front-end-broadcaster/  # Real-time WebSocket event broadcaster
+├── element-enrichment/              # Background element metadata enrichment worker
+├── journeyExecutor/                 # Headless browser user-journey runner
+├── journeyExpander/                 # Interactive element discovery & journey expander
+├── journey-map-cleanup/             # Stale candidate journey pruner
+├── journeyErrors/                   # Dead-letter queue & journey error handler
+├── WebAudit-UI/                  # Web dashboard (React 18, TypeScript, Vite)
+├── WebAuditChromeExtension/          # Chrome browser extension (Manifest v3)
+├── webaudit-vscode-plugin/          # Visual Studio Code editor extension
+├── WebAuditIaC/                      # Infrastructure scripts (local indexes & constraints)
+├── scripts/                         # Build & container bootstrapping scripts
+├── docker-compose.yml               # Local development container orchestration
+├── README-LOCAL.md                  # Detailed local setup and Docker guide
+└── README.md                        # Primary project documentation
+```
+
+---
+
+## 19. Setup Instructions
+
+### Prerequisites
+
+- **Java**: JDK 17 (JDK 21 required for `CrawlerAPI`)
+- **Maven**: Version 3.9+
+- **Node.js**: Node 18.19+ and npm 10+ (for React UI)
+- **Docker & Docker Compose**: Docker 24+ with Compose v2
+- **Neo4j**: Neo4j 5.20+ (included in Docker Compose)
+
+---
+
+## 20. Configuration & Environment Variables
+
+Key configuration variables (see `.env.local.example`):
+
+| Variable | Default (Local) | Purpose |
+|---|---|---|
+| `SPRING_PROFILES_ACTIVE` | `local` | `local` bypasses Auth0 security for local development |
+| `NEO4J_BOLT_URI` | `bolt://neo4j:7687` | Neo4j Bolt database connection URI |
+| `NEO4J_USERNAME` | `neo4j` | Database username |
+| `NEO4J_PASSWORD` | `change-me` | Database password |
+| `PROJECT_ID` | `webaudit-local` | GCP project ID / Pub/Sub emulator namespace |
+| `PUBSUB_EMULATOR_HOST` | `pubsub-emulator:8085` | Google Cloud Pub/Sub emulator host:port |
+| `SELENIUM_URLS` | `http://selenium-chrome:4444/wd/hub` | Selenium WebDriver grid hub URL |
+| `AUTH0_API_URI` | `http://localhost:9080/v1` | Backend API URL for frontend clients |
+| `AUTH0_APP_URI` | `http://localhost:4200` | Frontend dashboard URL |
+
+---
+
+## 21. How to Run the Project
+
+### Option A: Complete Local Docker Compose (Recommended)
+
+```bash
+# 1. Copy environment configuration
+cp .env.local.example .env
+
+# 2. Launch the full stack
+docker compose up --build
+```
+
+Access the application:
+- **Web UI**: [http://localhost:4200](http://localhost:4200)
+- **CrawlerAPI**: [http://localhost:9080](http://localhost:9080)
+- **Neo4j Browser**: [http://localhost:7474](http://localhost:7474)
+
+### Option B: Running Individual Services Natively
+
+1. **Build and install the shared core library first**:
+   ```bash
+   cd WebAuditCore
+   mvn clean install -DskipTests
+   cd ..
+   ```
+
+2. **Run a specific service** (e.g., AuditManager):
+   ```bash
+   cd AuditManager
+   mvn clean package -DskipTests
+   java -ea -jar target/*.jar
+   ```
+
+3. **Run the React UI**:
+   ```bash
+   cd WebAudit-UI
+   npm install
+   npm run dev
+   ```
+
+---
+
+## 22. How to Test the Project
+
+```bash
+# Run unit tests across WebAudit Core
+cd WebAuditCore
+mvn test
+
+# Run tests for a specific service
+cd ../AuditManager
+mvn test
+
+# Run tests for React UI
+cd ../WebAudit-UI
+npm test
+```
+
+*Note: Integration tests tagged with `@Tag("requires-docker")` require a running Docker daemon (Testcontainers) and are skipped by default during unit test passes.*
+
+---
+
+## 23. Known Limitations
+
+- **Local Pusher Broadcast**: Live WebSocket notifications are disabled locally when Pusher credentials are blank; the UI relies on REST queries in local mode.
+- **Third-Party APIs**: Cloud Vision API, Google Cloud NLP, and Stripe webhook flows are mocked or skipped when API keys are not supplied.
+- **CrawlerAPI Java Version**: `CrawlerAPI` is on Java 21 / Spring Boot 3, while worker services run on Java 17 / Spring Boot 2.6.
+
+---
+
+## 24. Future Improvements
+
+- Upgrade remaining microservices to Spring Boot 3.x and Java 21.
+- Add headless Firefox and WebKit (Playwright/Selenium) multi-browser matrix testing.
+- Implement automated accessibility remediation PR generators.
+- Export audit reports to standardized PDF and CSV formats.
+

@@ -6,22 +6,22 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.looksee.models.Account;
-import com.looksee.models.DiscoveryRecord;
-import com.looksee.models.Domain;
-import com.looksee.models.Form;
-import com.looksee.models.LookseeObject;
-import com.looksee.models.Test;
-import com.looksee.models.TestRecord;
-import com.looksee.models.audit.Audit;
-import com.looksee.models.audit.AuditRecord;
-import com.looksee.models.audit.messages.UXIssueMessage;
-import com.looksee.models.audit.stats.AuditStats;
-import com.looksee.models.dto.DomainDto;
-import com.looksee.models.dto.TestCreatedDto;
-import com.looksee.models.dto.TestDto;
-import com.looksee.models.dto.TestRecordDto;
-import com.looksee.models.enums.TestStatus;
+import com.webaudit.models.Account;
+import com.webaudit.models.DiscoveryRecord;
+import com.webaudit.models.Domain;
+import com.webaudit.models.Form;
+import com.webaudit.models.WebAuditObject;
+import com.webaudit.models.Test;
+import com.webaudit.models.TestRecord;
+import com.webaudit.models.audit.Audit;
+import com.webaudit.models.audit.AuditRecord;
+import com.webaudit.models.audit.messages.UXIssueMessage;
+import com.webaudit.models.audit.stats.AuditStats;
+import com.webaudit.models.dto.DomainDto;
+import com.webaudit.models.dto.TestCreatedDto;
+import com.webaudit.models.dto.TestDto;
+import com.webaudit.models.dto.TestRecordDto;
+import com.webaudit.models.enums.TestStatus;
 import com.pusher.rest.Pusher;
 
 /**
@@ -134,7 +134,7 @@ public class MessageBroadcaster {
      * @param test {@link Test} to be emitted to clients
      * @throws JsonProcessingException 
      */
-	public static void broadcastPathObject(LookseeObject path_object, String host, String user_id) throws JsonProcessingException {	
+	public static void broadcastPathObject(WebAuditObject path_object, String host, String user_id) throws JsonProcessingException {	
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
 

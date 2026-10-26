@@ -10,8 +10,8 @@ import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.looksee.models.audit.GenericIssue;
-import com.looksee.utils.FormValidator;
+import com.webaudit.models.audit.GenericIssue;
+import com.webaudit.utils.FormValidator;
 
 public class FormValidatorTest {
 

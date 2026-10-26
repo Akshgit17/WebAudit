@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
-  title: Crawler API
+  title: WebAudit Crawler API
   version: 1.0.0
   description: |
-    OpenAPI specification for the Crawler API. Generated from Spring controller mappings
+    OpenAPI specification for the WebAudit Crawler API. Generated from Spring controller mappings
     under `src/main/java/com/crawlerApi/api`. Many endpoints require an authenticated account
     context (JWT) and return domain-specific DTOs for domains, audits, pages, elements, and test records.
 servers:

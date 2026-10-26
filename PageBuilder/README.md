@@ -1,8 +1,8 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/e2376d355755402aaa5bf7c533750851)](https://www.codacy.com?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=deepthought42/PageBuilder&amp;utm_campaign=Badge_Grade)
+﻿[![Codacy Badge](https://app.codacy.com/project/badge/Grade/e2376d355755402aaa5bf7c533750851)](https://www.codacy.com?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=deepthought42/PageBuilder&amp;utm_campaign=Badge_Grade)
 
 # PageBuilder
 
-A Spring Boot microservice that builds `PageState` objects and their associated `ElementState` data from incoming Google Cloud Pub/Sub audit messages. It acts as the page-extraction step in the Looksee audit pipeline, receiving a URL, loading the page via a headless browser, persisting the resulting DOM structure, and publishing downstream messages for further processing.
+A Spring Boot microservice that builds `PageState` objects and their associated `ElementState` data from incoming Google Cloud Pub/Sub audit messages. It acts as the page-extraction step in the WebAudit audit pipeline, receiving a URL, loading the page via a headless browser, persisting the resulting DOM structure, and publishing downstream messages for further processing.
 
 ## Architecture
 
@@ -54,21 +54,21 @@ java -ea -jar target/PageBuilder-*.jar
 - **Maven 3.8+**
 - **Docker** (for containerised builds)
 - **Google Cloud SDK** (for GCR / Pub/Sub interaction)
-- **LookseeCore JAR** -- downloaded automatically by `scripts/download-core.sh`
+- **WebAudit Core JAR** -- downloaded automatically by `scripts/download-core.sh`
 
 ## Getting Started
 
 ### Build and Run Locally
 
 ```bash
-# Download the LookseeCore dependency
+# Download the WebAudit Core dependency
 bash scripts/download-core.sh
 
 # Install it into the local Maven repository
 mvn install:install-file \
-  -Dfile=libs/core-$(sed -n 's:.*<looksee-core.version>\(.*\)</looksee-core.version>.*:\1:p' pom.xml | head -n1).jar \
-  -DgroupId=com.looksee -DartifactId=core \
-  -Dversion=$(sed -n 's:.*<looksee-core.version>\(.*\)</looksee-core.version>.*:\1:p' pom.xml | head -n1) \
+  -Dfile=libs/core-$(sed -n 's:.*<webaudit-core.version>\(.*\)</webaudit-core.version>.*:\1:p' pom.xml | head -n1).jar \
+  -DgroupId=com.webaudit -DartifactId=core \
+  -Dversion=$(sed -n 's:.*<webaudit-core.version>\(.*\)</webaudit-core.version>.*:\1:p' pom.xml | head -n1) \
   -Dpackaging=jar
 
 # Build
@@ -145,7 +145,7 @@ Interactive API docs are available at `/swagger-ui.html` when the service is run
 | Lombok 1.18.34 | Boilerplate reduction via annotations |
 | SpringDoc OpenAPI 1.7.0 | Swagger UI and OpenAPI 3.0 documentation |
 | Swagger Annotations 2.2.31 | OpenAPI annotation support |
-| LookseeCore 0.3.16 | Shared models, services, and GCP utilities |
+| WebAuditCore (WebAudit Core) 0.3.16 | Shared models, services, and GCP utilities |
 | Resilience4j | Retry policies for WebDriver, Neo4j, and GCP calls |
 
 ## Testing
@@ -225,6 +225,3 @@ MATCH (n:PageState) SET n.secured=n.isSecure RETURN n
 MATCH (n:PageState) SET n.isSecure=NULL RETURN n
 ```
 
-## License
-
-This project is licensed under the terms specified in the [LICENSE](LICENSE) file.

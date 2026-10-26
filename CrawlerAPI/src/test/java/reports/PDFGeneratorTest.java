@@ -5,7 +5,7 @@ public class PDFGeneratorTest {
 
 	@Test
 	public void tableOfContentsPageTest() throws IOException, URISyntaxException {
-		GeneratePDFReport pdf_report = new GeneratePDFReport("look-see");
+		GeneratePDFReport pdf_report = new GeneratePDFReport("WebAudit");
 		
 		pdf_report.generateTableOfContents();
 		pdf_report.writeToDoc();
@@ -13,14 +13,14 @@ public class PDFGeneratorTest {
 	
 	@Test
 	public void coverPageTest() throws IOException, URISyntaxException {
-		GeneratePDFReport pdf_report = new GeneratePDFReport("look-see");
+		GeneratePDFReport pdf_report = new GeneratePDFReport("WebAudit");
 		
 		pdf_report.generateCoverPage("Acme.com");
 		pdf_report.writeToDoc();
 	}
 	@Test
 	public void welcomePageTest() throws IOException, URISyntaxException {
-		GeneratePDFReport pdf_report = new GeneratePDFReport("look-see");
+		GeneratePDFReport pdf_report = new GeneratePDFReport("WebAudit");
 		
 		pdf_report.generateWelcomePage("Acme.com", 50);
 		pdf_report.writeToDoc();
@@ -28,7 +28,7 @@ public class PDFGeneratorTest {
 	
 	@Test
 	public void scoringPageTest() throws IOException, URISyntaxException {
-		GeneratePDFReport pdf_report = new GeneratePDFReport("look-see");
+		GeneratePDFReport pdf_report = new GeneratePDFReport("WebAudit");
 		
 		pdf_report.generateScoringPage("Acme.com");
 		pdf_report.writeToDoc();
@@ -36,7 +36,7 @@ public class PDFGeneratorTest {
 	
 	@Test
 	public void scoreOverviewTest() throws IOException, URISyntaxException {
-		GeneratePDFReport pdf_report = new GeneratePDFReport("look-see");
+		GeneratePDFReport pdf_report = new GeneratePDFReport("WebAudit");
 		
 		pdf_report.generateScoreOverviewPage(77, "Acme.com", new ArrayList<>());
 		pdf_report.writeToDoc();
@@ -44,7 +44,7 @@ public class PDFGeneratorTest {
 	
 	@Test
 	public void scoreBreakdownTest() throws IOException, URISyntaxException {
-		GeneratePDFReport pdf_report = new GeneratePDFReport("look-see");
+		GeneratePDFReport pdf_report = new GeneratePDFReport("WebAudit");
 		
 		pdf_report.generateScoreBreakdownPage(77, "Acme.com", 80, 48, 61, 94, 77);
 		pdf_report.writeToDoc();
@@ -52,7 +52,7 @@ public class PDFGeneratorTest {
 	
 	@Test
 	public void colorManagementCoverTest() throws IOException, URISyntaxException {
-		GeneratePDFReport pdf_report = new GeneratePDFReport("look-see");
+		GeneratePDFReport pdf_report = new GeneratePDFReport("WebAudit");
 		
 		pdf_report.generateColorManagementCoverPage(77, "Acme.com");
 		pdf_report.writeToDoc();
@@ -60,7 +60,7 @@ public class PDFGeneratorTest {
 	
 	@Test
 	public void colorManagementColorPaletteReportTest() throws IOException, URISyntaxException {
-		GeneratePDFReport pdf_report = new GeneratePDFReport("look-see");
+		GeneratePDFReport pdf_report = new GeneratePDFReport("WebAudit");
 		
 		List<String> colors = new ArrayList<>();
 		colors.add("255, 0, 80");
@@ -76,7 +76,7 @@ public class PDFGeneratorTest {
 	
 	@Test
 	public void colorManagementColorPalettePsychologyPageTest() throws IOException, URISyntaxException {
-		GeneratePDFReport pdf_report = new GeneratePDFReport("look-see");
+		GeneratePDFReport pdf_report = new GeneratePDFReport("WebAudit");
 		
 		List<String> colors = new ArrayList<>();
 		colors.add("255, 0, 80");
@@ -91,7 +91,7 @@ public class PDFGeneratorTest {
 	
 	@Test
 	public void colorManagementColorPaletteWhyItMattersPageTest() throws IOException, URISyntaxException {
-		GeneratePDFReport pdf_report = new GeneratePDFReport("look-see");
+		GeneratePDFReport pdf_report = new GeneratePDFReport("WebAudit");
 		
 		pdf_report.generateColorPaletteWhyItMattersPage();
 		pdf_report.writeToDoc();
@@ -99,7 +99,7 @@ public class PDFGeneratorTest {
 	
 	@Test
 	public void colorManagementTextContrastDescriptionTest() throws IOException, URISyntaxException {
-		GeneratePDFReport pdf_report = new GeneratePDFReport("look-see");
+		GeneratePDFReport pdf_report = new GeneratePDFReport("WebAudit");
 		
 		pdf_report.generateColorManagementTextColorContrastPage(69, "acme.com", "", 84, 8, 22);
 		pdf_report.generateTextColorContrastWhyItMattersPage();
@@ -110,7 +110,7 @@ public class PDFGeneratorTest {
 	
 	@Test
 	public void generateFullReportTest() throws IOException, URISyntaxException {
-		GeneratePDFReport pdf_report = new GeneratePDFReport("look-see");
+		GeneratePDFReport pdf_report = new GeneratePDFReport("WebAudit");
 		
 		List<AuditSubcategory> needs_improvement = new ArrayList<>();
 		needs_improvement.add(AuditSubcategory.COLOR_MANAGEMENT);

@@ -8,8 +8,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import com.looksee.audit.informationArchitecture.models.KeyboardAccessibleAudit;
-import com.looksee.models.ElementState;
+import com.webaudit.audit.informationArchitecture.models.KeyboardAccessibleAudit;
+import com.webaudit.models.ElementState;
 
 public class KeyboardAccessibleTest {
 

@@ -1,4 +1,4 @@
-# visualDesignAudit
+﻿# visualDesignAudit
 
 A Spring Boot microservice that performs visual design audits on web pages, evaluating elements like color contrast, typography, imagery, and whitespace against WCAG 2.1 accessibility standards and design system guidelines.
 
@@ -11,7 +11,7 @@ The Visual Design Audit service receives page audit requests via Google Cloud Pu
 - **Color Palette** - Validates that colors used on the page match the design system palette
 - **Font Audit** - Checks font size consistency (minimum 12px) and header font weight consistency
 - **Typefaces Audit** - Validates use of no more than 2 typefaces and typeface cascade consistency
-- **Image Copyright** - Detects potential copyright issues by identifying stock/unlicensed images
+
 - **Image Policy** - Checks images for policy violations (adult content, violence) per design system rules
 - **Margin Audit** - Validates margins are multiples of 8 and not misused as padding
 - **Padding Audit** - Validates padding values are multiples of 8 with proper units
@@ -31,7 +31,7 @@ The Visual Design Audit service receives page audit requests via Google Cloud Pu
 ```
 src/
   main/
-    java/com/looksee/visualDesignAudit/
+    java/com/webaudit/visualDesignAudit/
       Application.java            # Spring Boot entry point
       AuditController.java        # REST controller for Pub/Sub messages
       audit/
@@ -49,7 +49,7 @@ src/
       application.yml
       logback.xml                  # Logging configuration
   test/
-    java/com/looksee/visualDesignAudit/
+    java/com/webaudit/visualDesignAudit/
       ApplicationTest.java
       AuditControllerTest.java
       audit/
@@ -126,7 +126,7 @@ Tests cover all 11 source classes across the project:
 | `ColorPaletteAudit` | `ColorPaletteAuditTest` | Palette matching, scoring |
 | `FontAudit` | `FontAuditTest` | Font size consistency, header analysis, mobile readability |
 | `TypefacesAudit` | `TypefacesAuditTest` | Typeface counting, cascade consistency |
-| `ImageAudit` | `ImageAuditTest` | Copyright detection scoring |
+
 | `ImagePolicyAudit` | `ImagePolicyAuditTest` | Adult/violent content detection, policy compliance |
 | `MarginAudit` | `MarginAuditTest` | Multiple-of-8 validation, unit cleaning, margin-as-padding detection |
 | `PaddingAudit` | `PaddingAuditTest` | Multiple-of-8 validation, spacing consistency |
@@ -219,8 +219,5 @@ Key configuration properties in `application.properties`:
 | `server.port` | `8080` | HTTP server port |
 | `management.server.port` | `80` | Management endpoint port |
 | `management.health.pubsub.enabled` | `false` | Pub/Sub health check |
-| `logging.file` | `look-see.log` | Log file path |
+| `logging.file` | `webaudit.log` | Log file path |
 
-## License
-
-ISC License - see [LICENSE](LICENSE) for details.

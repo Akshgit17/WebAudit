@@ -1,0 +1,13 @@
+﻿# syntax=docker/dockerfile:1.6
+FROM node:20-bookworm-slim
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends bash ca-certificates curl && rm -rf /var/lib/apt/lists/*
+
+COPY WebAudit-UI/package.json WebAudit-UI/package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
+
+COPY WebAudit-UI/ ./
+
+EXPOSE 4200
+CMD ["bash", "-c", "bash scripts/generate-env-local.sh && bash scripts/generate-config-local.sh && npx vite --host 0.0.0.0 --port 4200"]

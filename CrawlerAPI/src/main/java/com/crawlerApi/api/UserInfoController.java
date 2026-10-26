@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.crawlerApi.service.Auth0Service;
-import com.looksee.models.Account;
+import com.webaudit.models.Account;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

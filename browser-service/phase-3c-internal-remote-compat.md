@@ -1,14 +1,14 @@
-# Phase 3c — Close the Internal Remote-Compat Gap in LookseeCore
+﻿# Phase 3c — Close the Internal Remote-Compat Gap in WebAuditCore
 
-> **Goal:** Two LookseeCore-internal code paths — `PageStateAdapter`'s `Browser`-taking overloads and `BrowserUtils`'s URL-sanitization helpers — stop reaching through `browser.getDriver()` so they work in both modes. With this change, **every high-value consumer call path is mode-agnostic**, unblocking phase 4a.2's PageBuilder `buildPageState` → `capturePage` migration and every downstream cutover in phase 4.
+> **Goal:** Two WebAuditCore-internal code paths — `PageStateAdapter`'s `Browser`-taking overloads and `BrowserUtils`'s URL-sanitization helpers — stop reaching through `browser.getDriver()` so they work in both modes. With this change, **every high-value consumer call path is mode-agnostic**, unblocking phase 4a.2's PageBuilder `buildPageState` → `capturePage` migration and every downstream cutover in phase 4.
 >
-> **Where to work:** locally in the Look-see monorepo against LookseeCore. Suggest a feature branch: `git checkout -b phase-3c/internal-remote-compat`.
+> **Where to work:** locally in the WebAudit monorepo against WebAuditCore. Suggest a feature branch: `git checkout -b phase-3c/internal-remote-compat`.
 >
-> **Sibling references:** this doc mirrors [`phase-3-looksee-shim.md`](./phase-3-looksee-shim.md), [`phase-3b-element-handle-ops.md`](./phase-3b-element-handle-ops.md), and [`phase-4-consumer-cutover.md`](./phase-4-consumer-cutover.md) in structure. The scope for 3c was enumerated in phase-3b §14.9 as the inherit list.
+> **Sibling references:** this doc mirrors [`phase-3-WebAudit-shim.md`](./phase-3-WebAudit-shim.md), [`phase-3b-element-handle-ops.md`](./phase-3b-element-handle-ops.md), and [`phase-4-consumer-cutover.md`](./phase-4-consumer-cutover.md) in structure. The scope for 3c was enumerated in phase-3b §14.9 as the inherit list.
 
 ## Why this phase exists now
 
-Phase 3 shipped `RemoteBrowser`. Phase 3b (just merged in #38, LookseeCore 0.7.0) wired every element-handle op through it, so every method on `Browser` that takes or returns a `WebElement` now works in remote mode. But phase-3b §14.9 explicitly enumerated a set of **LookseeCore-internal** code paths that were still remote-incompatible because they reach through `browser.getDriver()` for driver-level state (`getPageSource`, `getTitle`, `window().getSize()`, `getCurrentUrl`).
+Phase 3 shipped `RemoteBrowser`. Phase 3b (just merged in #38, WebAuditCore 0.7.0) wired every element-handle op through it, so every method on `Browser` that takes or returns a `WebElement` now works in remote mode. But phase-3b §14.9 explicitly enumerated a set of **WebAuditCore-internal** code paths that were still remote-incompatible because they reach through `browser.getDriver()` for driver-level state (`getPageSource`, `getTitle`, `window().getSize()`, `getCurrentUrl`).
 
 These paths don't break anything today because nothing routes a `RemoteBrowser` through them. But the moment phase 4a.2 migrates PageBuilder's `buildPageState` call site, `PageStateAdapter.toPageState(Browser, long, String)` runs with a `RemoteBrowser` in its `browser` slot — and throws `UnsupportedOperationException("RemoteBrowser has no local WebDriver")` on line 94 at the first `browser.getDriver().getPageSource()` call.
 
@@ -42,47 +42,47 @@ If something looks refactor-tempting inside `PageStateAdapter` or `BrowserUtils`
 ## Prerequisites
 
 ```bash
-java -version     # 17.x (LookseeCore stays on Java 17)
+java -version     # 17.x (WebAuditCore stays on Java 17)
 mvn -v            # 3.9+
 git status        # clean working tree on main
 ```
 
-- Phase 3b code merged (LookseeCore 0.7.0 on `main`) — confirmed.
-- No concurrent `Browser.java` changes in flight — check `git log LookseeCore/looksee-browser/src/main/java/com/looksee/browser/Browser.java` before starting.
+- Phase 3b code merged (WebAuditCore 0.7.0 on `main`) — confirmed.
+- No concurrent `Browser.java` changes in flight — check `git log WebAuditCore/webaudit-browser/src/main/java/com/webaudit/browser/Browser.java` before starting.
 
 ## Step 0 — Branch + sanity
 
 ```bash
-cd /path/to/Look-see
+cd /path/to/WebAudit
 git checkout -b phase-3c/internal-remote-compat
 
-cd LookseeCore && mvn -q verify   # 0.7.0 green baseline (155 looksee-core tests, 31 browsing-client tests)
+cd WebAuditCore && mvn -q verify   # 0.7.0 green baseline (155 webaudit-core tests, 31 browsing-client tests)
 ```
 
 Then run the narrowed grep sanity to confirm the §14.9 subset is still exactly as enumerated (nothing drifted in since phase 3b):
 
 ```bash
-cd /path/to/Look-see
+cd /path/to/WebAudit
 
 # PageStateAdapter reach-throughs — expect exactly 7 hits (lines 86, 94, 106, 126, 177, 194, 216).
-grep -n "browser\\.getDriver()" LookseeCore/looksee-core/src/main/java/com/looksee/services/browser/PageStateAdapter.java
+grep -n "browser\\.getDriver()" WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/browser/PageStateAdapter.java
 
 # BrowserUtils reach-throughs — expect 2 hits (lines 1377, 1465).
-grep -n "browser\\.getDriver()\\.getCurrentUrl" LookseeCore/looksee-core/src/main/java/com/looksee/utils/BrowserUtils.java
+grep -n "browser\\.getDriver()\\.getCurrentUrl" WebAuditCore/webaudit-core/src/main/java/com/webaudit/utils/BrowserUtils.java
 ```
 
 If either grep returns more or fewer hits than expected, update §14.9 in the same commit that addresses the divergence.
 
 ## Step 1 — Add `Browser.getTitle()`
 
-**File:** `LookseeCore/looksee-browser/src/main/java/com/looksee/browser/Browser.java`
+**File:** `WebAuditCore/webaudit-browser/src/main/java/com/webaudit/browser/Browser.java`
 
 One new method, local default mirrors current `driver.getTitle()` semantics. Inline:
 
 ```java
 /**
  * Returns the current document title. Local-mode delegates to
- * {@link WebDriver#getTitle()}; {@link com.looksee.services.browser.RemoteBrowser}
+ * {@link WebDriver#getTitle()}; {@link com.webaudit.services.browser.RemoteBrowser}
  * overrides this to derive the title from the remote {@link #getSource()}
  * response via Jsoup — no new browser-service endpoint required.
  */
@@ -93,7 +93,7 @@ public String getTitle() {
 
 Place it in the same "High-level ops routed through the Browser abstraction" section at the bottom of `Browser.java` where `performClick`, `performAction`, and `getCurrentUrl` live (phase 3b additions).
 
-**File:** `LookseeCore/looksee-core/src/main/java/com/looksee/services/browser/RemoteBrowser.java`
+**File:** `WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/browser/RemoteBrowser.java`
 
 Override — parse title from `getSource()` via Jsoup:
 
@@ -108,13 +108,13 @@ public String getTitle() {
 }
 ```
 
-Jsoup is already a LookseeCore dep (used by `PageStateAdapter` itself) — no new dep.
+Jsoup is already a WebAuditCore dep (used by `PageStateAdapter` itself) — no new dep.
 
 **Commit:** `feat(core): add Browser.getTitle() with local default + RemoteBrowser override`
 
 ## Step 2 — Migrate `PageStateAdapter` Browser-taking overloads
 
-**File:** `LookseeCore/looksee-core/src/main/java/com/looksee/services/browser/PageStateAdapter.java`
+**File:** `WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/browser/PageStateAdapter.java`
 
 Two overloads, seven call-site migrations total. Pattern-for-pattern replacements:
 
@@ -131,7 +131,7 @@ No imports to remove (WebDriver / Dimension are still used elsewhere in the file
 
 ## Step 3 — Migrate `BrowserUtils`
 
-**File:** `LookseeCore/looksee-core/src/main/java/com/looksee/utils/BrowserUtils.java`
+**File:** `WebAuditCore/webaudit-core/src/main/java/com/webaudit/utils/BrowserUtils.java`
 
 Two single-line edits:
 
@@ -146,7 +146,7 @@ Same rationale as Step 2. Local-mode behavior is byte-identical (local `Browser.
 
 ### 4.1 `PageStateAdapterRemoteModeTest` — new
 
-`LookseeCore/looksee-core/src/test/java/com/looksee/services/browser/PageStateAdapterRemoteModeTest.java`
+`WebAuditCore/webaudit-core/src/test/java/com/webaudit/services/browser/PageStateAdapterRemoteModeTest.java`
 
 Drives `PageStateAdapter.toPageState(Browser, long, String)` and `toPageState(URL, Browser, boolean, int, long)` with a mocked `RemoteBrowser`. Assertions:
 
@@ -156,7 +156,7 @@ Drives `PageStateAdapter.toPageState(Browser, long, String)` and `toPageState(UR
 
 ### 4.2 `BrowserTest.getTitle_delegatesToDriver` — add to existing test
 
-`LookseeCore/looksee-browser/src/test/java/...` (or wherever `Browser` unit tests live; add one if the suite is empty). Verifies local-mode `getTitle()` returns `driver.getTitle()`.
+`WebAuditCore/webaudit-browser/src/test/java/...` (or wherever `Browser` unit tests live; add one if the suite is empty). Verifies local-mode `getTitle()` returns `driver.getTitle()`.
 
 ### 4.3 `RemoteBrowserElementOpsTest.getTitle_parsesFromSource` — add to existing test
 
@@ -183,35 +183,35 @@ void getTitle_parsesFromSourceViaJsoup() {
 
 Same pattern as phase 3 / 3b / 4a.1 version bumps:
 
-- `mvn versions:set -DnewVersion=0.7.1 -DgenerateBackupPoms=false -DprocessAllModules=true` from LookseeCore root.
-- Manually update `<looksee.version>0.7.0</looksee.version>` in the root pom's `<properties>`.
-- Update `LOOKSEE_CORE_VERSION` at repo root to `0.7.1`.
-- Bump all 13 consumer service poms (seven `<core.version>`, two `<looksee-core.version>`, four inline `<version>`) to 0.7.1.
+- `mvn versions:set -DnewVersion=0.7.1 -DgenerateBackupPoms=false -DprocessAllModules=true` from WebAuditCore root.
+- Manually update `<WebAudit.version>0.7.0</WebAudit.version>` in the root pom's `<properties>`.
+- Update `WEBAUDIT_CORE_VERSION` at repo root to `0.7.1`.
+- Bump all 13 consumer service poms (seven `<core.version>`, two `<webaudit-core.version>`, four inline `<version>`) to 0.7.1.
 - CHANGELOG entry under `## [0.7.1]`:
   - Added: `Browser.getTitle()` with local default + RemoteBrowser override via Jsoup-from-source.
   - Changed: PageStateAdapter + BrowserUtils no longer reach through `browser.getDriver()`. Remote-mode consumers can now call these paths without hitting `UnsupportedOperationException`.
   - Deferred (phase 3d): enumerated in §14 below.
 
-**Commit:** `chore: bump LookseeCore to 0.7.1 + CHANGELOG + consumer pins`
+**Commit:** `chore: bump WebAuditCore to 0.7.1 + CHANGELOG + consumer pins`
 
 ## Step 6 — Verification
 
 1. **Clean build:**
    ```bash
-   cd LookseeCore && mvn -q clean verify
+   cd WebAuditCore && mvn -q clean verify
    ```
-   Expect: `BUILD SUCCESS`, all 11 modules green. Test counts: looksee-core ≥ 158 (was 155 in 0.7.0; +3 for the new remote-mode adapter + getTitle tests), looksee-browsing-client unchanged at 31.
+   Expect: `BUILD SUCCESS`, all 11 modules green. Test counts: webaudit-core ≥ 158 (was 155 in 0.7.0; +3 for the new remote-mode adapter + getTitle tests), webaudit-browsing-client unchanged at 31.
 
 2. **Scope-preservation check:**
    ```bash
-   git diff --stat main..HEAD -- LookseeCore/looksee-browser/
+   git diff --stat main..HEAD -- WebAuditCore/webaudit-browser/
    # Expect: only Browser.java (one new getTitle method) + pom.xml parent-version bump.
    ```
 
 3. **Post-3c sweep sanity:**
    ```bash
-   grep -n "browser\.getDriver()" LookseeCore/looksee-core/src/main/java/com/looksee/services/browser/PageStateAdapter.java
-   grep -n "browser\.getDriver()" LookseeCore/looksee-core/src/main/java/com/looksee/utils/BrowserUtils.java
+   grep -n "browser\.getDriver()" WebAuditCore/webaudit-core/src/main/java/com/webaudit/services/browser/PageStateAdapter.java
+   grep -n "browser\.getDriver()" WebAuditCore/webaudit-core/src/main/java/com/webaudit/utils/BrowserUtils.java
    ```
    Expect: empty for both. If anything remains, either migrate it in the same PR or document the reason inline.
 
@@ -245,7 +245,7 @@ PR body links to this doc + phase-3b-element-handle-ops.md §14.9. Explicit note
 3. **Phase 3d inherit list.** Everything in phase-3b §14.9 that's **not** in this phase:
    - `BrowserService` line 454 — `browser.getDriver().getCurrentUrl()` inside `enrichElementStates`. Trivially migrates to `browser.getCurrentUrl()` — could ship with 3c if time permits; left out to keep this phase scoped to the PageBuilder-blocker subset.
    - `BrowserService` lines 1953, 3291, 3292, 3401 — form extraction + element-state build via `driver.findElement(s)`. Needs either a new `Browser.findElements(WebElement parent, String xpath)` method + server endpoint, or a full rewrite of those paths to use the existing `RemoteWebElement` surface. Neither is small.
-   - `com.looksee.browsing.table.Table` lines 44, 51, 52 — `element.findElements(By.xpath(...))` on a passed-in WebElement. Same constraint as above.
+   - `com.webaudit.browsing.table.Table` lines 44, 51, 52 — `element.findElements(By.xpath(...))` on a passed-in WebElement. Same constraint as above.
    - `RemoteWebElement` unsupported methods (13 total) — listed verbatim in phase-3b §14.2. Consumer census today has zero callers; ship on demand.
 
 4. **When phase 3d triggers.** Either (a) a consumer call path exercises a `Browser` method that still reaches `getDriver()`, or (b) a phase-4 cutover surfaces a bug that traces back to a §14.9 reach-through. Until one of those happens, 3d stays unscheduled.

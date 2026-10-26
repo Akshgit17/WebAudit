@@ -1,10 +1,10 @@
-# Audit Manager
+﻿# Audit Manager
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/e2376d355755402aaa5bf7c533750851)](https://www.codacy.com?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=deepthought42/AuditManager&amp;utm_campaign=Badge_Grade)
 
 ## Overview
 
-The **Audit Manager** is a Spring Boot microservice that orchestrates web page audits as part of the Looksee platform. It receives page-built notifications via Google Cloud Pub/Sub, determines whether a page is eligible for auditing, creates audit records in Neo4j, and publishes page-audit messages for downstream microservices to consume.
+The **Audit Manager** is a Spring Boot microservice that orchestrates web page audits as part of the WebAudit platform. It receives page-built notifications via Google Cloud Pub/Sub, determines whether a page is eligible for auditing, creates audit records in Neo4j, and publishes page-audit messages for downstream microservices to consume.
 
 ## What It Does
 
@@ -38,7 +38,7 @@ The system supports the following audit categories:
 | Alt Text | Validates image accessibility with proper alt text |
 | Reading Complexity | Analyzes content readability and complexity |
 | Paragraphing | Evaluates content structure and paragraph organization |
-| Image Copyright | Checks for proper image licensing and attribution |
+
 | Image Policy | Ensures images comply with organizational policies |
 
 ## Architecture
@@ -71,7 +71,7 @@ REST controller (`POST /`) that:
 
 #### PubSubConfig
 
-Spring `@Configuration` class that manually defines the LookseeCore beans
+Spring `@Configuration` class that manually defines the WebAudit Core beans
 (`AuditRecordService`, `PageStateService`, `PubSubPageAuditPublisherImpl`)
 excluded from auto-configuration. Each bean uses `@ConditionalOnMissingBean`
 so test overrides take precedence.
@@ -136,12 +136,12 @@ Configured in `application.yml`:
 
 ### Local Development
 
-#### 1. Install the LookseeCore JAR
+#### 1. Install the WebAudit Core JAR
 
 ```bash
 mvn install:install-file \
   -Dfile=libs/core-0.3.1.jar \
-  -DgroupId=com.looksee \
+  -DgroupId=com.webaudit \
   -DartifactId=core \
   -Dversion=0.3.1 \
   -Dpackaging=jar
@@ -236,10 +236,7 @@ Unit tests cover:
 | Destination | Level |
 |-------------|-------|
 | Console (`CONSOLE` appender) | WARN |
-| File (`look-see.log`) | WARN |
+| File (`webaudit.log`) | WARN |
 
 Application-level log output uses SLF4J with structured messages (key=value pairs).
 
-## License
-
-This project is licensed under the Apache License 2.0 -- see the [LICENSE](LICENSE) file for details.

@@ -1,4 +1,4 @@
-####################################
+﻿####################################
 # Test page audit and journey paths
 ###################################
 {
@@ -20,13 +20,13 @@
 					"id": 4282,
 					"key": "pagestated38aedf77f42f9e6e2ece668149864371a54d575fdccfc071df5588285098a39",
 					"createdAt": [2023, 1, 27, 19, 54, 32, 705431000],
-					"url": "look-see.com",
-					"urlAfterLoading": "https://www.look-see.com/",
+					"url": "webaudit.io",
+					"urlAfterLoading": "https://www.webaudit.io/",
 					"loginRequired": false,
 					"secured": true,
-					"viewportScreenshotUrl": "https://storage.googleapis.com/download/storage/v1/b/look-see-data/o/wwwlook-seecom4ccd678063f35942fd34aae1b9943770bb9b363bbb8b2c1b27d4e68907983b22chrome.png?generation=1672242719317972&alt=media",
-					"fullPageScreenshotUrlOnload": "https://storage.googleapis.com/download/storage/v1/b/look-see-data/o/wwwlook-seecomb92ced067cacbc43744730de3e29454c8a25a265e8c0ff2d2c4d0799265fe5b5chrome.png?generation=1672242903906723&alt=media",
-					"fullPageScreenshotUrlComposite": "https://storage.googleapis.com/download/storage/v1/b/look-see-data/o/wwwlook-seecomb92ced067cacbc43744730de3e29454c8a25a265e8c0ff2d2c4d0799265fe5b5chrome.png?generation=1672242903906723&alt=media",
+					"viewportScreenshotUrl": "https://storage.googleapis.com/download/storage/v1/b/WebAudit-data/o/wwwWebAuditcom4ccd678063f35942fd34aae1b9943770bb9b363bbb8b2c1b27d4e68907983b22chrome.png?generation=1672242719317972&alt=media",
+					"fullPageScreenshotUrlOnload": "https://storage.googleapis.com/download/storage/v1/b/WebAudit-data/o/wwwWebAuditcomb92ced067cacbc43744730de3e29454c8a25a265e8c0ff2d2c4d0799265fe5b5chrome.png?generation=1672242903906723&alt=media",
+					"fullPageScreenshotUrlComposite": "https://storage.googleapis.com/download/storage/v1/b/WebAudit-data/o/wwwWebAuditcomb92ced067cacbc43744730de3e29454c8a25a265e8c0ff2d2c4d0799265fe5b5chrome.png?generation=1672242903906723&alt=media",
 					"browser": "CHROME",
 					"landable": false,
 					"scrollXOffset": 0,
@@ -35,12 +35,12 @@
 					"viewportHeight": 1019,
 					"fullPageWidth": 1339,
 					"fullPageHeight": 5670,
-					"pageName": "look-see.com",
-					"title": "Automated UX audits | Look-see",
+					"pageName": "webaudit.io",
+					"title": "Automated UX audits | WebAudit",
 					"scriptUrls": ["https://www.google-analytics.com/analytics.js", "https://cdn.unstack.com/static/js/highlight.min.js", "https://cdn.unstack.com/static/js/spark.min.js?v=155", "https://cdn.heapanalytics.com/js/heap-218875530.js", "https://cdn.unstack.com/static/js/plugins.min.js?v=155", "https://www.googletagmanager.com/gtag/js?id=UA-175167526-1", "https://cdn.unstack.com/static/js/aos.v2.min.js"],
-					"stylesheetUrls": ["https://cdn.spark.app/media/looksee/icon/red.png", "https://cdn.unstack.com/static/css/plugins/plugins.css?v=155", "https://cdn.unstack.com/static/css/highlight.min.css", "https://fonts.googleapis.com/css?family=Catamaran:400,700|Roboto+Slab:400,700|Open Sans:300,400,500,700|Muli:300,400,500,700&display=block", "https://cdn.unstack.com/static/css/main.css?v=155", "https://fonts.gstatic.com", "https://www.look-see.com/", "https://cdn.unstack.com/static/css/aos.v2.min.css", "https://cdn.spark.app/media/page/css/f13c279a7d43d3d917d3d1358da54c5b.css"],
-					"metadata": ["<meta name=\"twitter:title\" content=\"Automated UX audits | Look-see\">", "<meta name=\"description\" content=\"Look-see performs automated UX audits and helps you understand where to make improvements\">", "<meta name=\"twitter:description\" content=\"Look-see performs automated UX audits and helps you understand where to make improvements\">", "<meta property=\"og:url\" content=\"https://www.look-see.com/\">", "<meta property=\"og:image\" content=\"https://cdn.spark.app/media/looksee/image/demo_notebook.png\">", "<meta property=\"og:type\" content=\"website\">", "<meta name=\"twitter:image\" content=\"https://cdn.spark.app/media/looksee/image/demo_notebook.png\">", "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1.0\">", "<meta property=\"og:description\" content=\"Look-see performs automated UX audits and helps you understand where to make improvements\">", "<meta property=\"og:title\" content=\"Automated UX audits | Look-see\">", "<meta name=\"twitter:card\" content=\"summary_large_image\">", "<meta name=\"keywords\" content=\"Look-see, UX, user experience, user experiences, UX audit, website, webpage, webpage evaluation, webpage audit, website audit, information architecture, aesthetics, visual design, content, written content, blog, readability\">"],
-					"faviconUrl": ["https://cdn.spark.app/media/looksee/icon/red.png"],
+					"stylesheetUrls": ["https://cdn.spark.app/media/WEBAUDIT/icon/red.png", "https://cdn.unstack.com/static/css/plugins/plugins.css?v=155", "https://cdn.unstack.com/static/css/highlight.min.css", "https://fonts.googleapis.com/css?family=Catamaran:400,700|Roboto+Slab:400,700|Open Sans:300,400,500,700|Muli:300,400,500,700&display=block", "https://cdn.unstack.com/static/css/main.css?v=155", "https://fonts.gstatic.com", "https://www.webaudit.io/", "https://cdn.unstack.com/static/css/aos.v2.min.css", "https://cdn.spark.app/media/page/css/f13c279a7d43d3d917d3d1358da54c5b.css"],
+					"metadata": ["<meta name=\"twitter:title\" content=\"Automated UX audits | WebAudit\">", "<meta name=\"description\" content=\"WebAudit performs automated UX audits and helps you understand where to make improvements\">", "<meta name=\"twitter:description\" content=\"WebAudit performs automated UX audits and helps you understand where to make improvements\">", "<meta property=\"og:url\" content=\"https://www.webaudit.io/\">", "<meta property=\"og:image\" content=\"https://cdn.spark.app/media/WEBAUDIT/image/demo_notebook.png\">", "<meta property=\"og:type\" content=\"website\">", "<meta name=\"twitter:image\" content=\"https://cdn.spark.app/media/WEBAUDIT/image/demo_notebook.png\">", "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1.0\">", "<meta property=\"og:description\" content=\"WebAudit performs automated UX audits and helps you understand where to make improvements\">", "<meta property=\"og:title\" content=\"Automated UX audits | WebAudit\">", "<meta name=\"twitter:card\" content=\"summary_large_image\">", "<meta name=\"keywords\" content=\"WebAudit, UX, user experience, user experiences, UX audit, website, webpage, webpage evaluation, webpage audit, website audit, information architecture, aesthetics, visual design, content, written content, blog, readability\">"],
+					"faviconUrl": ["https://cdn.spark.app/media/WEBAUDIT/icon/red.png"],
 					"keywords": [],
 					"httpStatus": 200
 				},

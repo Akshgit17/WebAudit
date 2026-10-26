@@ -1,8 +1,8 @@
-# Crawler API
+﻿# Crawler API
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/e2376d355755402aaa5bf7c533750851)](https://www.codacy.com?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=deepthought42/CrawlerApi&amp;utm_campaign=Badge_Grade)
 
-The primary user-facing REST API for the Look-see accessibility audit platform. It handles authentication, account management, domain configuration, audit orchestration, report generation, and integrations with third-party services.
+The primary user-facing REST API for the WebAudit accessibility audit platform. It handles authentication, account management, domain configuration, audit orchestration, report generation, and integrations with third-party services.
 
 ## Overview
 
@@ -20,7 +20,7 @@ The Crawler API is the entry point for all client interactions with the platform
 ## Architecture
 
 ```
-  [Look-see-UI / Extensions]
+  [WebAudit-UI / Extensions]
            |
            | HTTP/REST (Auth0 JWT)
            v
@@ -229,10 +229,10 @@ Supported integration types: Product Board, Jira, Slack, GitHub, GitLab, Figma, 
 
 ## Build & Run
 
-### 1. Build LookseeCore (required dependency)
+### 1. Build WebAudit Core (required dependency)
 
 ```bash
-cd ../LookseeCore
+cd ../WebAuditCore
 mvn clean install -DskipTests
 cd ../CrawlerAPI
 ```
@@ -254,8 +254,8 @@ The `-ea` flag enables Java assertions used for Design by Contract checks.
 ## Docker
 
 ```bash
-docker build -t deepthought42/looksee-api:latest .
-docker run -p 9080:9080 -p 80:80 deepthought42/looksee-api:latest
+docker build -t deepthought42/WebAudit-api:latest .
+docker run -p 9080:9080 -p 80:80 deepthought42/WebAudit-api:latest
 ```
 
 The multi-stage Dockerfile uses Maven 3.9.6 + Eclipse Temurin 21 for building and Temurin 21 JRE for runtime. The container starts with `-Xms800M` minimum heap.
@@ -263,8 +263,8 @@ The multi-stage Dockerfile uses Maven 3.9.6 + Eclipse Temurin 21 for building an
 ### Deploy to Docker Hub
 
 ```bash
-docker build -t deepthought42/looksee-api:<version> .
-docker push deepthought42/looksee-api:<version>
+docker build -t deepthought42/WebAudit-api:<version> .
+docker push deepthought42/WebAudit-api:<version>
 ```
 
 ## Testing
@@ -316,13 +316,10 @@ openssl pkcs12 -export -inkey private.key -in certificate.crt -out api_key.p12
 
 ## Deployment (GCP Cloud Run)
 
-The service is deployed via Terraform as a Cloud Run service. See `LookseeIaC/GCP/modules.tf` for the full deployment configuration.
+The service is deployed via Terraform as a Cloud Run service. See `WebAuditIaC/GCP/modules.tf` for the full deployment configuration.
 
 ```bash
 docker build --no-cache -t gcr.io/<PROJECT_ID>/crawler-api:<version> .
 docker push gcr.io/<PROJECT_ID>/crawler-api:<version>
 ```
 
-## License
-
-This project is licensed under the terms specified in the [LICENSE](LICENSE) file.

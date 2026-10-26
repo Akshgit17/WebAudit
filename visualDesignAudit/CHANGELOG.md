@@ -1,4 +1,4 @@
-## [1.0.5](https://github.com/deepthought42/visualDesignAudit/compare/v1.0.4...v1.0.5) (2026-03-29)
+﻿## [1.0.5](https://github.com/deepthought42/visualDesignAudit/compare/v1.0.4...v1.0.5) (2026-03-29)
 
 
 ### Bug Fixes
@@ -21,7 +21,7 @@
 * updated ci pipelines to prevent release before merge to master ([902ece9](https://github.com/deepthought42/visualDesignAudit/commit/902ece90a409f3af6e9196eb3b954196fa8801da))
 * updated ci pipelines to prevent release before merge to master ([425f389](https://github.com/deepthought42/visualDesignAudit/commit/425f3892dc6987c16244257f9664029bbedde264))
 * updated jdk version to 21 ([9dbbeda](https://github.com/deepthought42/visualDesignAudit/commit/9dbbedaf51f3e0ecc367a8564eef2dd4ce2095fb))
-* upgrade core to 0.3.20 and bring image copyright and policy audits into visual auditor ([fb4c837](https://github.com/deepthought42/visualDesignAudit/commit/fb4c837f6c8b55ff4b79a3eda6840f7e7c738b0d))
+
 
 ## [1.0.3](https://github.com/deepthought42/visualDesignAudit/compare/v1.0.2...v1.0.3) (2025-04-28)
 

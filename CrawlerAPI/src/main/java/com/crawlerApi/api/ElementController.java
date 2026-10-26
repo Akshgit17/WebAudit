@@ -22,17 +22,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.crawlerApi.security.SecurityConfig;
-import com.looksee.exceptions.ExistingRuleException;
-import com.looksee.exceptions.MissingSubscriptionException;
-import com.looksee.exceptions.RuleValueRequiredException;
-import com.looksee.exceptions.UnknownAccountException;
-import com.looksee.models.Account;
-import com.looksee.models.ElementState;
-import com.looksee.models.rules.Rule;
-import com.looksee.models.rules.RuleType;
-import com.looksee.services.AccountService;
-import com.looksee.services.ElementStateService;
-import com.looksee.services.RuleService;
+import com.webaudit.exceptions.ExistingRuleException;
+import com.webaudit.exceptions.MissingSubscriptionException;
+import com.webaudit.exceptions.RuleValueRequiredException;
+import com.webaudit.exceptions.UnknownAccountException;
+import com.webaudit.models.Account;
+import com.webaudit.models.ElementState;
+import com.webaudit.models.rules.Rule;
+import com.webaudit.models.rules.RuleType;
+import com.webaudit.services.AccountService;
+import com.webaudit.services.ElementStateService;
+import com.webaudit.services.RuleService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

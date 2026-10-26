@@ -22,6 +22,7 @@ import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -29,9 +30,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.crawlerApi.config.Auth0Config;
 import com.crawlerApi.service.Auth0Service;
-import com.looksee.models.Account;
+import com.webaudit.models.Account;
 
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 @PropertySource("classpath:auth0.properties")
 @Component
 public class SecurityConfig {
