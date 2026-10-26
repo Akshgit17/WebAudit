@@ -115,69 +115,69 @@ WebAudit is organized as a modular microservices monorepo:
 
 ```mermaid
 flowchart TD
-    UI([WebAudit UI / React 18 + Vite])
-    EXT([Chrome Extension / VS Code])
+    UI(["WebAudit UI (React 18 + Vite)"])
+    EXT(["Chrome Extension / VS Code"])
 
     subgraph Ingestion["Ingestion Layer"]
-        API[CrawlerAPI<br/>Java 21 / Spring Boot 3]
-        PB[PageBuilder<br/>Selenium Headless Chrome]
-        EE[element-enrichment<br/>Metadata Enrichment]
+        API["CrawlerAPI<br/>Java 21 / Spring Boot 3"]
+        PB["PageBuilder<br/>Selenium Headless Chrome"]
+        EE["element-enrichment<br/>Metadata Enrichment"]
     end
 
     subgraph Orchestration["Orchestration Layer"]
-        AM[AuditManager<br/>Lifecycle Controller]
+        AM["AuditManager<br/>Lifecycle Controller"]
     end
 
     subgraph Workers["Audit Worker Services"]
-        CA["contentAudit<br/>Alt Text · Readability"]
-        VD["visualDesignAudit<br/>Color Contrast · Typography"]
-        IA["informationArchitectureAudit<br/>Headings · Forms · Landmarks"]
+        CA["contentAudit<br/>Alt Text & Readability"]
+        VD["visualDesignAudit<br/>Color Contrast & Typography"]
+        IA["informationArchitectureAudit<br/>Headings, Forms & Landmarks"]
     end
 
     subgraph Journey["Journey Pipeline"]
-        JX[journeyExpander<br/>Element Discovery]
-        JE[journeyExecutor<br/>Browser Flow Execution]
-        JC[journey-map-cleanup<br/>State Maintenance]
-        DL[journeyErrors<br/>Dead-Letter Handler]
+        JX["journeyExpander<br/>Element Discovery"]
+        JE["journeyExecutor<br/>Browser Flow Execution"]
+        JC["journey-map-cleanup<br/>State Maintenance"]
+        DL["journeyErrors<br/>Dead-Letter Handler"]
     end
 
     subgraph Storage["Persistence & Messaging"]
-        NEO[(Neo4j Graph Database 5.x)]
-        PS[[Google Cloud Pub/Sub]]
+        NEO[("Neo4j Graph Database 5.x")]
+        PS[("Google Cloud Pub/Sub")]
     end
 
     subgraph RealTime["Real-Time Broadcasting"]
-        AS[audit-service<br/>Progress Aggregator]
-        BC[front-end-broadcaster<br/>WebSocket Pusher]
+        AS["audit-service<br/>Progress Aggregator"]
+        BC["webaudit-front-end-broadcaster<br/>WebSocket Pusher"]
     end
 
-    UI -->|REST API| API
-    EXT -->|REST API| API
-    API -->|url-topic| PB
-    PB -->|Cypher / SDN| NEO
-    PB -->|page-created-topic| AM
-    PB -->|page-created-topic| BC
-    PB -->|journey-verified-topic| JX
+    UI -->|"REST API"| API
+    EXT -->|"REST API"| API
+    API -->|"url-topic"| PB
+    PB -->|"Cypher / SDN"| NEO
+    PB -->|"page-created-topic"| AM
+    PB -->|"page-created-topic"| BC
+    PB -->|"journey-verified-topic"| JX
 
-    AM -->|page-audit-topic| CA
-    AM -->|page-audit-topic| VD
-    AM -->|page-audit-topic| IA
+    AM -->|"page-audit-topic"| CA
+    AM -->|"page-audit-topic"| VD
+    AM -->|"page-audit-topic"| IA
 
-    CA -->|Cypher / SDN| NEO
-    VD -->|Cypher / SDN| NEO
-    IA -->|Cypher / SDN| NEO
+    CA -->|"Cypher / SDN"| NEO
+    VD -->|"Cypher / SDN"| NEO
+    IA -->|"Cypher / SDN"| NEO
 
-    CA -->|audit-update-topic| AS
-    VD -->|audit-update-topic| AS
-    IA -->|audit-update-topic| AS
+    CA -->|"audit-update-topic"| AS
+    VD -->|"audit-update-topic"| AS
+    IA -->|"audit-update-topic"| AS
 
-    JX -->|journey-candidate-topic| JE
-    JE -->|journey-verified-topic| JX
-    JE -->|Cypher / SDN| NEO
-    JE -->|audit-error-topic| DL
+    JX -->|"journey-candidate-topic"| JE
+    JE -->|"journey-verified-topic"| JX
+    JE -->|"Cypher / SDN"| NEO
+    JE -->|"audit-error-topic"| DL
 
-    AS -->|WebSocket / Pusher| UI
-    BC -->|WebSocket / Pusher| UI
+    AS -->|"WebSocket / Pusher"| UI
+    BC -->|"WebSocket / Pusher"| UI
 ```
 
 ---
